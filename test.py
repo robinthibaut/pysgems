@@ -78,7 +78,7 @@ data_nodes = get_nodes()
 
 def cleanup():
     """
-    Removes no-data rows and compute the mean of data points sharing the same cell.
+    Removes no-data rows from data frame and compute the mean of data points sharing the same cell.
     :return: Filtered list of each attribute
     """
     unique_nodes = list(set(data_nodes))
@@ -86,6 +86,7 @@ def cleanup():
     fn = []
     for h in columns[2:]:
         fixed_nodes = np.array([[data_nodes[dn], dataframe[h][dn]] for dn in range(len(data_nodes))])
+        # Deletes points where val == nodata
         hard_data = np.delete(fixed_nodes, np.where(fixed_nodes[:, 1] == nodata), axis=0)
         # If data points share the same cell, compute their mean and assign the value to the cell
         for n in unique_nodes:
@@ -226,3 +227,5 @@ bat.write(' '.join(['sgems', 'statistical_simulation.script']))
 bat.close()
 
 subprocess.call([batch])  # Opens the BAT file
+
+

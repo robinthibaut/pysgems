@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 
 def datread(file=None, start=0, end=-1):
@@ -66,6 +67,7 @@ def my_node(xy, rows, columns, xo, yo):
     :param yo: y origin
     :return:
     """
+    start = time.time()
     rn = np.array(xy)
     blocks = blocks_from_rc(rows, columns, xo, yo)
     vmin = np.inf
@@ -76,6 +78,10 @@ def my_node(xy, rows, columns, xo, yo):
         if vmin > dc:
             vmin = dc
             cell = b[0]
+
+    end = time.time()
+
+    # print('computed 1 cell in {}s'.format((end-start)))
 
     return cell
 
