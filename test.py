@@ -53,8 +53,7 @@ def compute_nodes():
     """
     along_r = np.ones(ncol) * dx  # Size of each cell along y-dimension - rows
     along_c = np.ones(nrow) * dy  # Size of each cell along x-dimension - columns
-    centers = toolbox.centroids_from_rc(along_c, along_r, xo, yo)
-    nodes = np.array([toolbox.my_node(c, centers) for c in xy])
+    nodes = np.array([toolbox.my_node(c, along_c, along_r, xo, yo) for c in xy])
     np.save(jp(data_dir, 'nodes'), nodes)  # Save to nodes to avoid recomputing each time
 
     return nodes

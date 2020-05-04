@@ -1,6 +1,4 @@
 import numpy as np
-from scipy.spatial import distance_matrix
-
 
 def datread(file=None, start=0, end=-1):
     """Reads space separated dat file"""
@@ -22,7 +20,7 @@ def joinlist(j, mylist):
     return gp
 
 
-def centroids_from_rc(rows, columns, xo, yo):
+def blocks_from_rc(rows, columns, xo, yo):
 
     nrow = len(rows)
     ncol = len(columns)
@@ -31,32 +29,23 @@ def centroids_from_rc(rows, columns, xo, yo):
     r_sum = np.cumsum(delr) + yo
     c_sum = np.cumsum(delc) + xo
 
-    # centers = []
-    # for c in range(nrow):
-    #     for n in range(ncol):
-    #         b = [[c_sum[n] - delc[n], r_sum[c] - delr[c]],
-    #              [c_sum[n] - delc[n], r_sum[c]],
-    #              [c_sum[n], r_sum[c]],
-    #              [c_sum[n], r_sum[c] - delr[c]]]
-    #         centers.append(np.mean(b, axis=0))
-    # return np.array(centers)
-
     for c in range(nrow):
         for n in range(ncol):
             b = [[c_sum[n] - delc[n], r_sum[c] - delr[c]],
                  [c_sum[n] - delc[n], r_sum[c]],
                  [c_sum[n], r_sum[c]],
                  [c_sum[n], r_sum[c] - delr[c]]]
-            yield ((c+1)*(n+1)), np.mean(b, axis=0)
+            yield ((c+1)*(n+1)), b
 
 
 def my_node(xy, rows, columns, xo, yo):
 
     rn = np.array([xy])
-    centers = centroids_from_rc(rows, columns, xo, yo)
+    blocks = blocks_from_rc(rows, columns, xo, yo)
     vmin = np.inf
-    cell = 0
-    for c in centers:
+    cell = None
+    for b in blocks:
+        c = np.mean(b, axis=0)
         dc = np.linalg.norm(rn - c[1])  # Euclidean distance
         if vmin > dc:
             vmin = dc
