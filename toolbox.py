@@ -22,7 +22,14 @@ def joinlist(j, mylist):
 
 
 def blocks_from_rc(rows, columns, xo, yo):
+    """
 
+    :param rows: array of x-widths along a row
+    :param columns: array of y-widths along a column
+    :param xo:
+    :param yo:
+    :return: generator of (cell node number, block vertices coordinates, block center)
+    """
     nrow = len(rows)
     ncol = len(columns)
     delr = rows
@@ -31,10 +38,13 @@ def blocks_from_rc(rows, columns, xo, yo):
     c_sum = np.cumsum(delc) + xo
 
     def get_node(i, j):
-
-        node = int(i*ncol + j)
-
-        return node
+        """
+        Get node index to fixed hard data
+        :param i: row number
+        :param j: column number
+        :return: node number
+        """
+        return int(i*ncol + j)
 
     for c in range(nrow):
         for n in range(ncol):
@@ -46,7 +56,16 @@ def blocks_from_rc(rows, columns, xo, yo):
 
 
 def my_node(xy, rows, columns, xo, yo):
-
+    """
+    Given a point coordinate xy [x, y], computes its node number by computing the euclidean distance of each cell
+    center.
+    :param xy:
+    :param rows: array of x-widths along a row
+    :param columns: array of y-widths along a column
+    :param xo: x origin
+    :param yo: y origin
+    :return:
+    """
     rn = np.array(xy)
     blocks = blocks_from_rc(rows, columns, xo, yo)
     vmin = np.inf

@@ -74,34 +74,36 @@ def get_nodes():
 
 
 data_nodes = get_nodes()
-unique_nodes = list(set(data_nodes))
-nodata = -999
-
-fn = []
-for h in columns[2:]:
-    fixed_nodes = np.array([[data_nodes[i], dataframe[h][i]] for i in range(len(data_nodes))])
-    hard_data = np.delete(fixed_nodes, np.where(fixed_nodes[:, 1] == nodata), axis=0)
-    for n in unique_nodes:  # If data points share the same cell, compute their mean and assign the value to the cell
-        where = np.where(hard_data[:, 0] == n)[0]
-        if len(where) > 1:  # If more than 1 point per cell
-            mean = np.mean(hard_data[where, 1])
-            hard_data[where, 1] = mean
-
-    fn.append(hard_data.tolist())
 
 
+def cleanup():
+    """
+    Removes no-data rows and compute the mean of data points sharing the same cell.
+    :return: Filtered list of each attribute
+    """
+    unique_nodes = list(set(data_nodes))
+    nodata = -999
+    fn = []
+    for h in columns[2:]:
+        fixed_nodes = np.array([[data_nodes[dn], dataframe[h][dn]] for dn in range(len(data_nodes))])
+        hard_data = np.delete(fixed_nodes, np.where(fixed_nodes[:, 1] == nodata), axis=0)
+        # If data points share the same cell, compute their mean and assign the value to the cell
+        for n in unique_nodes:
+            where = np.where(hard_data[:, 0] == n)[0]
+            if len(where) > 1:  # If more than 1 point per cell
+                mean = np.mean(hard_data[where, 1])
+                hard_data[where, 1] = mean
 
-# fn = []
-# for h in columns[2:]:
-#     fixed_nodes = np.array([[data_nodes[i], dataframe[h][i]] for i in range(len(data_nodes))])
-#     fixed_nodes_up = np.delete(fixed_nodes, np.where(fixed_nodes[:, 1] == nodata), axis=0).tolist()
-#     fn.append(fixed_nodes_up)
+        fn.append(hard_data.tolist())
+
+    return fn
 
 
-# Save gigantic node list to load it into sgems later
+hard = cleanup()
+# Save node list to load it into sgems later
 node_file = jp(data_dir, 'fnodes.txt')
 with open(jp(data_dir, node_file), 'w') as nd:
-    nd.write(repr(fn))
+    nd.write(repr(hard))
 
 sgrid = [ncol, nrow, nlay,
          dx, dy, dz,
