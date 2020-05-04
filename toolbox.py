@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def datread(file=None, start=0, end=-1):
     """Reads space separated dat file"""
     with open(file, 'r') as fr:
@@ -35,21 +36,21 @@ def blocks_from_rc(rows, columns, xo, yo):
                  [c_sum[n] - delc[n], r_sum[c]],
                  [c_sum[n], r_sum[c]],
                  [c_sum[n], r_sum[c] - delr[c]]]
-            yield ((c+1)*(n+1)), b
+            yield ((c+1)*(n+1)), np.array(b)
 
 
 def my_node(xy, rows, columns, xo, yo):
 
-    rn = np.array([xy])
+    rn = np.array(xy)
     blocks = blocks_from_rc(rows, columns, xo, yo)
     vmin = np.inf
     cell = None
     for b in blocks:
-        c = np.mean(b, axis=0)
-        dc = np.linalg.norm(rn - c[1])  # Euclidean distance
+        c = np.mean(b[1], axis=0)
+        dc = np.linalg.norm(rn - c)  # Euclidean distance
         if vmin > dc:
             vmin = dc
-            cell = c[0]
+            cell = b[0]-1
 
     return cell
 
