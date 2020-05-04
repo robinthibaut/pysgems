@@ -32,7 +32,7 @@ def blocks_from_rc(rows, columns, xo, yo):
 
     def get_node(i, j):
 
-        node = int((i * nrow*ncol) + (j * ncol))
+        node = int(i*ncol + j)
 
         return node
 
@@ -56,7 +56,7 @@ def my_node(xy, rows, columns, xo, yo):
         dc = np.linalg.norm(rn - c)  # Euclidean distance
         if vmin > dc:
             vmin = dc
-            cell = b[0]-1
+            cell = b[0]
 
     return cell
 

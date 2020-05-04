@@ -84,8 +84,8 @@ for h in columns[2:]:
     for n in unique_nodes:  # If data points share the same cell, compute their mean and assign the value to the cell
         where = np.where(hard_data[:, 0] == n)[0]
         if len(where) > 1:  # If more than 1 point per cell
-            mean = np.mean(hard_data[where])
-            hard_data[where] = mean
+            mean = np.mean(hard_data[where, 1])
+            hard_data[where, 1] = mean
 
     fn.append(hard_data.tolist())
 
