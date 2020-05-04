@@ -30,13 +30,19 @@ def blocks_from_rc(rows, columns, xo, yo):
     r_sum = np.cumsum(delr) + yo
     c_sum = np.cumsum(delc) + xo
 
+    def get_node(i, j):
+
+        node = int((i * nrow*ncol) + (j * ncol))
+
+        return node
+
     for c in range(nrow):
         for n in range(ncol):
             b = [[c_sum[n] - delc[n], r_sum[c] - delr[c]],
                  [c_sum[n] - delc[n], r_sum[c]],
                  [c_sum[n], r_sum[c]],
                  [c_sum[n], r_sum[c] - delr[c]]]
-            yield ((c+1)*(n+1)), np.array(b)
+            yield get_node(c, n), np.array(b), np.mean(b, axis=0)
 
 
 def my_node(xy, rows, columns, xo, yo):
@@ -46,7 +52,7 @@ def my_node(xy, rows, columns, xo, yo):
     vmin = np.inf
     cell = None
     for b in blocks:
-        c = np.mean(b[1], axis=0)
+        c = b[2]
         dc = np.linalg.norm(rn - c)  # Euclidean distance
         if vmin > dc:
             vmin = dc

@@ -22,27 +22,34 @@ data = toolbox.datread(file_name, start=16)
 dataframe = pd.DataFrame(data=data, columns=columns)
 
 
-# %% Plot points coordinates
-
-def plot_coordinates():
-    plt.plot(dataframe.x, dataframe.y, 'ko')
-    plt.show()
-
-
-plot_coordinates()
 # %%  Define grid geometry
 
 xy = np.vstack((dataframe.x, dataframe.y)).T  # X, Y coordinates
 
-x_lim, y_lim = np.round(np.max(xy, axis=0))  # X max, Y max
-xo, yo = np.round(np.min(xy, axis=0))  # X min, Y min
-zo = 0
-dx = 250  # Block x-dimension
-dy = 250  # Block y-dimension
+dx = 2000  # Block x-dimension
+dy = 2000  # Block y-dimension
 dz = 0  # Block z-dimension
+x_lim, y_lim = np.round(np.max(xy, axis=0)) + np.array([dx, dy])*4  # X max, Y max
+xo, yo = np.round(np.min(xy, axis=0)) - np.array([dx, dy])*4  # X min, Y min
+zo = 0
 nrow = int((y_lim - yo) // dy)  # Number of rows
 ncol = int((x_lim - xo) // dx)  # Number of columns
 nlay = 1  # Number of layers
+along_r = np.ones(ncol) * dx  # Size of each cell along y-dimension - rows
+along_c = np.ones(nrow) * dy  # Size of each cell along x-dimension - columns
+
+# %% Plot points coordinates
+
+
+def plot_coordinates():
+    plt.plot(dataframe.x, dataframe.y, 'ko')
+    plt.xticks(np.cumsum(along_r)+xo-dx, labels=[])
+    plt.yticks(np.cumsum(along_c)+yo-dy, labels=[])
+    plt.grid('blue')
+    plt.show()
+
+
+plot_coordinates()
 
 
 def compute_nodes():
@@ -51,8 +58,6 @@ def compute_nodes():
     It is necessary to know the node number to assign the hard data property to the sgems grid
     :return: nodes number
     """
-    along_r = np.ones(ncol) * dx  # Size of each cell along y-dimension - rows
-    along_c = np.ones(nrow) * dy  # Size of each cell along x-dimension - columns
     nodes = np.array([toolbox.my_node(c, along_c, along_r, xo, yo) for c in xy])
     np.save(jp(data_dir, 'nodes'), nodes)  # Save to nodes to avoid recomputing each time
 
@@ -69,13 +74,28 @@ def get_nodes():
 
 
 data_nodes = get_nodes()
+unique_nodes = list(set(data_nodes))
 nodata = -999
 
 fn = []
 for h in columns[2:]:
     fixed_nodes = np.array([[data_nodes[i], dataframe[h][i]] for i in range(len(data_nodes))])
-    fixed_nodes_up = np.delete(fixed_nodes, np.where(fixed_nodes[:, 1] == -999), axis=0).tolist()
-    fn.append(fixed_nodes_up)
+    hard_data = np.delete(fixed_nodes, np.where(fixed_nodes[:, 1] == nodata), axis=0)
+    for n in unique_nodes:  # If data points share the same cell, compute their mean and assign the value to the cell
+        where = np.where(hard_data[:, 0] == n)[0]
+        if len(where) > 1:  # If more than 1 point per cell
+            mean = np.mean(hard_data[where])
+            hard_data[where] = mean
+
+    fn.append(hard_data.tolist())
+
+
+
+# fn = []
+# for h in columns[2:]:
+#     fixed_nodes = np.array([[data_nodes[i], dataframe[h][i]] for i in range(len(data_nodes))])
+#     fixed_nodes_up = np.delete(fixed_nodes, np.where(fixed_nodes[:, 1] == nodata), axis=0).tolist()
+#     fn.append(fixed_nodes_up)
 
 
 # Save gigantic node list to load it into sgems later
