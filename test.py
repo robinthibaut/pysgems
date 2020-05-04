@@ -55,8 +55,8 @@ plot_coordinates()
 def compute_nodes():
     """
     Determines node location for each data point.
-    It is necessary to know the node number to assign the hard data property to the sgems grid
     :return: nodes number
+    It is necessary to know the node number to assign the hard data property to the sgems grid
     """
     nodes = np.array([toolbox.my_node(c, along_c, along_r, xo, yo) for c in xy])
     np.save(jp(data_dir, 'nodes'), nodes)  # Save to nodes to avoid recomputing each time
@@ -122,8 +122,7 @@ range_min = 40000
 
 params = [[res_dir.replace('\\', '//'), 'OPFOLDER'],
           ['test', 'NAME'],
-          ['test', 'OUTLIST'],
-          ['test', 'OUTPUT'],
+          ['cokriging_test', 'OUTPUT'],
           [grid, 'GRID'],
           [segp, 'SEARCHELLIPSOID'],
           [range_max, 'RMAX'],
@@ -135,12 +134,12 @@ params = [[res_dir.replace('\\', '//'), 'OPFOLDER'],
 template = """\
 import sgems as statistical_simulation\n\
 import os
-import time
 
 os.chdir("OPFOLDER")
 statistical_simulation.execute('DeleteObjects NAME')\n\
 statistical_simulation.execute('DeleteObjects hd')\n\
 statistical_simulation.execute('DeleteObjects finished')\n\
+#\n\
 statistical_simulation.execute('NewCartesianGrid  NAME::GRID')\n\
 #\n\
 properties = ['ca', 'mg', 'nh4', 'cl', 'hco3', 'so4', 'no3', 'no2', 'f', 'i', 'fetot', 'po4']\n\
@@ -158,9 +157,6 @@ for p in range(len(properties)):\n\
 #\n\
 #\n\
 #\n\
-
-start = time.time()\n\
-
 statistical_simulation.execute('RunGeostatAlgorithm  cokriging::/GeostatParamUtils/XML::<parameters>  <algorithm name="cokriging" />     \
 <Primary_Harddata_Grid value="hd" region=""  />     \
 <Primary_Variable  value="f"  />     \
@@ -190,17 +186,13 @@ statistical_simulation.execute('RunGeostatAlgorithm  cokriging::/GeostatParamUti
 <MM2_Variogram_C22  nugget="0" structures_count="1"  >    <structure_1  contribution="0"  type="Spherical"   >      \
 <ranges max="0"  medium="0"  min="0"   />      <angles x="0"  y="0"  z="0"   />    \
 </structure_1>  </MM2_Variogram_C22>    \
-<Grid_Name value="test" region=""  />     \
-<Property_Name  value="Cokriging" />     \
+<Grid_Name value="NAME" region=""  />     \
+<Property_Name  value="OUTPUT" />     \
 <Kriging_Type  value="Simple Kriging (SK)"  />     \
 <SK_Means  value="-0.11269 2.28098206" />     \
 <Cokriging_Type  value="Full Cokriging"  />   </parameters> ')\n\
 
-statistical_simulation.execute('SaveGeostatGrid  test::OUTPUT.grid::gslib::0::Cokriging')\n\
-
-end = time.time()\n\
-
-print((end-start)//60)
+statistical_simulation.execute('SaveGeostatGrid  test::OUTPUT.grid::gslib::0::OUTPUT')\n\
 
 """
 
