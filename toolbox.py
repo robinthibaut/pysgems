@@ -47,18 +47,20 @@ def centroids_from_rc(rows, columns, xo, yo):
                  [c_sum[n] - delc[n], r_sum[c]],
                  [c_sum[n], r_sum[c]],
                  [c_sum[n], r_sum[c] - delr[c]]]
-            yield np.mean(b, axis=0)
+            yield ((c+1)*(n+1)), np.mean(b, axis=0)
 
 
-def my_node(xy, centers):
-    """
-    :param centers:
-    :param xy: [x, y]
-    :return:
-    """
+def my_node(xy, rows, columns, xo, yo):
+
     rn = np.array([xy])
-    dm = distance_matrix(rn, centers).flatten()
+    centers = centroids_from_rc(rows, columns, xo, yo)
+    vmin = np.inf
+    cell = 0
+    for c in centers:
+        dc = np.linalg.norm(rn - c[1])  # Euclidean distance
+        if vmin > dc:
+            vmin = dc
+            cell = c[0]
 
-    cell = np.where(dm == np.amin(dm))
-    return cell[0][0]
+    return cell
 
