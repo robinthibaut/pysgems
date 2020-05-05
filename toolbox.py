@@ -106,15 +106,16 @@ def my_node(xy, rows, columns, xo, yo):
 
 class Sgems:
 
-    def __init__(self, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None):
+    def __init__(self, file_name, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None):
+
         # Directories
         self.cwd = os.getcwd()
         self.data_dir = jp(self.cwd, 'dataset')
         self.res_dir = jp(self.cwd, 'results')
-        self.file_name = jp(self.data_dir, 'Dataset_Log_WithoutOutlier_WithoutDouble(LowerThan30m)_Without-4.txt')
+        self.file_name = file_name
 
         # Data
-        self.dataframe, self.columns = self.loader()
+        self.dataframe, self.project_name, self.columns = self.loader()
         self.xy = np.vstack((self.dataframe[:, 0], self.dataframe[:, 1])).T  # X, Y coordinates
 
         # Grid geometry
@@ -125,18 +126,24 @@ class Sgems:
         self.xo, self.yo, self.x_lim, self.y_lim, self.nrow, self.ncol, self.nlay, self.along_r, self.along_c \
             = self.grid(dx, dy, xo, yo, x_lim, y_lim)
 
-    # Load dataset
+        self.plot_coordinates()
+
+    # Load sgems dataset
     def loader(self):
-        head = datread(self.file_name, start=2, end=16)
+        project_info = datread(self.file_name, end=2)
+        project_name = project_info[0][0].lower()
+        n_features = int(project_info[1][0])
+        head = datread(self.file_name, start=2, end=2+n_features)
         columns_name = [h[0].lower() for h in head]
-        data = datread(self.file_name, start=16)
-        return data, columns_name
+        data = datread(self.file_name, start=2+n_features)
+        return data, project_name, columns_name
 
     def load_dataframe(self):
-        self.dataframe, self.columns = self.loader()
+        self.dataframe, self.project_name, self.columns = self.loader()
         self.xy = np.vstack((self.dataframe[:, 0], self.dataframe[:, 0])).T  # X, Y coordinates
 
     def grid(self, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None):
+
         if x_lim is None and y_lim is None:
             x_lim, y_lim = np.round(np.max(self.xy, axis=0)) + np.array([dx, dy]) * 4  # X max, Y max
         if xo is None and yo is None:
