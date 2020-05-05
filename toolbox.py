@@ -1,5 +1,6 @@
 import numpy as np
 import time
+from shapely.geometry import Point, Polygon
 
 
 def datread(file=None, start=0, end=-1):
@@ -67,21 +68,23 @@ def my_node(xy, rows, columns, xo, yo):
     :param yo: y origin
     :return:
     """
-    start = time.time()
+
     rn = np.array(xy)
     blocks = blocks_from_rc(rows, columns, xo, yo)
-    vmin = np.inf
-    cell = None
+    # vmin = np.inf
+    # cell = None
+    # for b in blocks:
+    #     c = b[2]
+    #     dc = np.linalg.norm(rn - c)  # Euclidean distance
+    #     if vmin > dc:
+    #         vmin = dc
+    #         cell = b[0]
     for b in blocks:
-        c = b[2]
-        dc = np.linalg.norm(rn - c)  # Euclidean distance
-        if vmin > dc:
-            vmin = dc
+        poly = Polygon(b[1])
+        p = Point(rn)
+        if p.within(poly):
             cell = b[0]
+            return cell
 
-    end = time.time()
-
-    # print('computed 1 cell in {}s'.format((end-start)))
-
-    return cell
+    # return cell
 

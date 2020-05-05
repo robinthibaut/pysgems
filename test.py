@@ -37,7 +37,9 @@ ncol = int((x_lim - xo) // dx)  # Number of columns
 nlay = 1  # Number of layers
 along_r = np.ones(ncol) * dx  # Size of each cell along y-dimension - rows
 along_c = np.ones(nrow) * dy  # Size of each cell along x-dimension - columns
-
+# TODO: eliminate points outside bounding box
+# TODO: delete nodes files if different discretization
+# TODO: dirmakers
 # %% Plot points coordinates
 
 
