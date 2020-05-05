@@ -9,29 +9,28 @@ import matplotlib.pyplot as plt
 
 import toolbox
 
-# Directories
-cwd = os.getcwd()
-data_dir = jp(cwd, 'dataset')
-res_dir = jp(cwd, 'results')
-algo_dir = jp(cwd, 'algorithms')
 
-f_name = jp(data_dir, 'Dataset_Log_WithoutOutlier_WithoutDouble(LowerThan30m)_Without-4.txt')
-
+f_name = 'Dataset_Log_WithoutOutlier_WithoutDouble(LowerThan30m)_Without-4.txt'
 sgems = toolbox.Sgems(file_name=f_name, dx=5000, dy=5000)
 sgems.plot_coordinates()
 sgems.export_node_idx()
-sgems.xml_reader('cokriging')
+algo_name = sgems.xml_reader('cokriging')
 sgems.show_tree()
 
 sgrid = [sgems.ncol, sgems.nrow, sgems.nlay,
          sgems.dx, sgems.dy, sgems.dz,
          sgems.xo, sgems.yo, 0]  # Grid information
-
 grid = toolbox.joinlist('::', sgrid)
+
+with open(jp(sgems.algo_dir, 'cokriging.xml')) as alx:
+    algo_xml = alx.read().strip('\n')
 
 params = [[sgems.res_dir.replace('\\', '//'), 'RES_DIR'],
           [grid, 'GRID'],
           [sgems.project_name, 'PROJECT_NAME'],
+          [str(sgems.columns[2:]), 'FEATURES_LIST'],
+          [algo_name, 'ALGORITHM_NAME'],
+          [algo_xml, 'ALGORITHM_XML'],
           [sgems.node_value_file.replace('\\', '//'), 'NODES_VALUES_FILE']]
 
 with open('simusgems_template.py') as sst:

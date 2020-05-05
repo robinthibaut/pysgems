@@ -42,11 +42,11 @@ def joinlist(j, mylist):
 
 def blocks_from_rc(rows, columns, xo, yo):
     """
-
+    Yields blocks defining grid cells
     :param rows: array of x-widths along a row
     :param columns: array of y-widths along a column
-    :param xo:
-    :param yo:
+    :param xo: x origin
+    :param yo: y origin
     :return: generator of (cell node number, block vertices coordinates, block center)
     """
     nrow = len(rows)
@@ -74,12 +74,11 @@ def blocks_from_rc(rows, columns, xo, yo):
             yield get_node(c, n), np.array(b), np.mean(b, axis=0)
 
 
-# @clockwork
 def my_node(xy, rows, columns, xo, yo):
     """
     Given a point coordinate xy [x, y], computes its node number by computing the euclidean distance of each cell
     center.
-    :param xy:
+    :param xy:  x, y coordinate of data point
     :param rows: array of x-widths along a row
     :param columns: array of y-widths along a column
     :param xo: x origin
@@ -113,9 +112,9 @@ class Sgems:
         self.cwd = os.getcwd()
         self.data_dir = jp(self.cwd, 'dataset')
         self.res_dir = jp(self.cwd, 'results', uuid.uuid1().hex)
-        self.algo_dir = jp(self.cwd, 'algorithms')
         os.makedirs(self.res_dir)
-        self.file_name = file_name
+        self.algo_dir = jp(self.cwd, 'algorithms')
+        self.file_name = jp(self.data_dir, file_name)
         self.node_file = jp(self.data_dir, 'nodes.npy')
         self.node_value_file = jp(self.data_dir, 'fnodes.txt')
         self.dis_file = jp(self.data_dir, 'dis.info')
@@ -246,7 +245,6 @@ class Sgems:
         """
         Export the list of shape (n features, m nodes, 2) containing the node of each point data with the corresponding
         value, for each feature
-        :return:
         """
         if not os.path.isfile(self.node_value_file):
             hard = self.cleanup()
@@ -258,16 +256,15 @@ class Sgems:
         """
         Reads and parse XML file. It assumes the algorithm XML file is located in the algo_dir folder.
         :param algo_name: Name of the algorithm, without any extension, e.g. 'kriging', 'cokriging'...
-        :return:
         """
         self.tree = ET.parse(jp(self.algo_dir, '{}.xml'.format(algo_name)))
         self.root = self.tree.getroot()
         name = self.root.find('algorithm').attrib['name']
+        return name
 
     def show_tree(self):
         """
         Displays the structure of the XML file, in order to get the path of updatable variables
-        :return:
         """
         for element in self.root:
             print(element.tag)
@@ -289,7 +286,6 @@ class Sgems:
         Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
         :param path:
         :param new_attribute:
-        :return:
         """
         self.root.find(path).attrib = new_attribute
         self.tree.write(jp(self.res_dir, 'output.xml'))
