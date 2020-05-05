@@ -29,6 +29,7 @@ params = [[sgems.res_dir.replace('\\', '//'), 'RES_DIR'],
           [grid, 'GRID'],
           [sgems.project_name, 'PROJECT_NAME'],
           [str(sgems.columns[2:]), 'FEATURES_LIST'],
+          ['results', 'FEATURE_OUTPUT'],
           [algo_name, 'ALGORITHM_NAME'],
           [algo_xml, 'ALGORITHM_XML'],
           [sgems.node_value_file.replace('\\', '//'), 'NODES_VALUES_FILE']]

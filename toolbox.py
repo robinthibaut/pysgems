@@ -141,9 +141,9 @@ class Sgems:
         project_info = datread(self.file_name, end=2)  # Name, n features
         project_name = project_info[0][0].lower()
         n_features = int(project_info[1][0])
-        head = datread(self.file_name, start=2, end=2+n_features)  # Name of features
+        head = datread(self.file_name, start=2, end=2 + n_features)  # Name of features
         columns_name = [h[0].lower() for h in head]
-        data = datread(self.file_name, start=2+n_features)  # Raw data
+        data = datread(self.file_name, start=2 + n_features)  # Raw data
         return data, project_name, columns_name
 
     def load_dataframe(self):
@@ -187,7 +187,7 @@ class Sgems:
         else:
             np.savetxt(self.dis_file, npar)
 
-        return xo, yo,  x_lim, y_lim, nrow, ncol, nlay, along_r, along_c
+        return xo, yo, x_lim, y_lim, nrow, ncol, nlay, along_r, along_c
 
     def plot_coordinates(self):
         plt.plot(self.dataframe[:, 0], self.dataframe[:, 1], 'ko')
@@ -259,8 +259,6 @@ class Sgems:
         """
         self.tree = ET.parse(jp(self.algo_dir, '{}.xml'.format(algo_name)))
         self.root = self.tree.getroot()
-        name = self.root.find('algorithm').attrib['name']
-        return name
 
     def show_tree(self):
         """
@@ -289,3 +287,46 @@ class Sgems:
         """
         self.root.find(path).attrib = new_attribute
         self.tree.write(jp(self.res_dir, 'output.xml'))
+
+    def write_command(self):
+
+        name = self.root.find('algorithm').attrib['name']
+
+        sgrid = [self.ncol, self.nrow, self.nlay,
+                 self.dx, self.dy, self.dz,
+                 self.xo, self.yo, 0]  # Grid information
+        grid = joinlist('::', sgrid)
+
+        replace = [['Primary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
+                   ['Secondary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
+                   ['Grid_Name', {'value': name, 'region': ''}],
+                   ['Property_Name', {'value': name}],
+                   ['Hard_Data', {'grid': self.project_name, 'property': "hard"}]]
+
+        for r in replace:
+            try:
+                self.xml_update(r[0], r[1])
+            except AttributeError:
+                pass
+
+        with open(jp(self.res_dir, 'output.xml')) as alx:
+            algo_xml = alx.read().strip('\n')
+
+        params = [[self.res_dir.replace('\\', '//'), 'RES_DIR'],
+                  [grid, 'GRID'],
+                  [self.project_name, 'PROJECT_NAME'],
+                  [str(self.columns[2:]), 'FEATURES_LIST'],
+                  ['results', 'FEATURE_OUTPUT'],
+                  [name, 'ALGORITHM_NAME'],
+                  [name, 'PROPERTY_NAME'],
+                  [algo_xml, 'ALGORITHM_XML'],
+                  [self.node_value_file.replace('\\', '//'), 'NODES_VALUES_FILE']]
+
+        with open('simusgems_template.py') as sst:
+            template = sst.read()
+
+        for i in range(len(params)):  # Replaces the parameters
+            template = template.replace(params[i][1], params[i][0])
+
+        with open(jp(self.res_dir, 'simusgems.py'), 'w') as sstw:
+            sstw.write(template)
