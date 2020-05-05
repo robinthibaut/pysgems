@@ -1,5 +1,12 @@
 import numpy as np
 import time
+import os
+from os.path import join as jp
+import subprocess
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
 
 def clockwork(func):
@@ -81,7 +88,7 @@ def my_node(xy, rows, columns, xo, yo):
 
     rn = np.array(xy)
 
-    dmin = np.min([rows.min(), columns.min()])/2
+    dmin = np.min([rows.min(), columns.min()]) / 2
     blocks = blocks_from_rc(rows, columns, xo, yo)
     vmin = np.inf
     cell = None
@@ -95,3 +102,57 @@ def my_node(xy, rows, columns, xo, yo):
             cell = b[0]
 
     return cell
+
+
+class Sgems:
+
+    def __init__(self, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None):
+        # Directories
+        self.cwd = os.getcwd()
+        self.data_dir = jp(self.cwd, 'dataset')
+        self.res_dir = jp(self.cwd, 'results')
+        self.file_name = jp(self.data_dir, 'Dataset_Log_WithoutOutlier_WithoutDouble(LowerThan30m)_Without-4.txt')
+
+        # Data
+        self.dataframe, self.columns = self.loader()
+        self.xy = np.vstack((self.dataframe[:, 0], self.dataframe[:, 1])).T  # X, Y coordinates
+
+        # Grid geometry
+        self.dx = dx  # Block x-dimension
+        self.dy = dy  # Block y-dimension
+        self.dz = 0  # Block z-dimension
+
+        self.xo, self.yo, self.x_lim, self.y_lim, self.nrow, self.ncol, self.nlay, self.along_r, self.along_c \
+            = self.grid(dx, dy, xo, yo, x_lim, y_lim)
+
+    # Load dataset
+    def loader(self):
+        head = datread(self.file_name, start=2, end=16)
+        columns_name = [h[0].lower() for h in head]
+        data = datread(self.file_name, start=16)
+        return data, columns_name
+
+    def load_dataframe(self):
+        self.dataframe, self.columns = self.loader()
+        self.xy = np.vstack((self.dataframe[:, 0], self.dataframe[:, 0])).T  # X, Y coordinates
+
+    def grid(self, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None):
+        if x_lim is None and y_lim is None:
+            x_lim, y_lim = np.round(np.max(self.xy, axis=0)) + np.array([dx, dy]) * 4  # X max, Y max
+        if xo is None and yo is None:
+            xo, yo = np.round(np.min(self.xy, axis=0)) - np.array([dx, dy]) * 4  # X min, Y min
+
+        nrow = int((y_lim - yo) // dy)  # Number of rows
+        ncol = int((x_lim - xo) // dx)  # Number of columns
+        nlay = 1  # Number of layers
+        along_r = np.ones(ncol) * dx  # Size of each cell along y-dimension - rows
+        along_c = np.ones(nrow) * dy  # Size of each cell along x-dimension - columns
+
+        return xo, yo,  x_lim, y_lim, nrow, ncol, nlay, along_r, along_c
+
+    def plot_coordinates(self):
+        plt.plot(self.dataframe[:, 0], self.dataframe[:, 1], 'ko')
+        plt.xticks(np.cumsum(self.along_r) + self.xo - self.dx, labels=[])
+        plt.yticks(np.cumsum(self.along_c) + self.yo - self.dy, labels=[])
+        plt.grid('blue')
+        plt.show()
