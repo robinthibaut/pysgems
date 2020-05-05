@@ -86,7 +86,8 @@ def cleanup():
     unique_nodes = list(set(data_nodes))
     nodata = -999
     fn = []
-    for h in columns[2:]:
+    for h in columns[2:]:  # For each feature
+        # fixed nodes = [[node i, value i]....]
         fixed_nodes = np.array([[data_nodes[dn], dataframe[h][dn]] for dn in range(len(data_nodes))])
         # Deletes points where val == nodata
         hard_data = np.delete(fixed_nodes, np.where(fixed_nodes[:, 1] == nodata), axis=0)

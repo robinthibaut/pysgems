@@ -1,6 +1,15 @@
 import numpy as np
 import time
-from shapely.geometry import Point, Polygon
+
+
+def clockwork(func):
+    def wrapper(*args, **kwargs):
+        startTime = time.time()
+        func(*args, **kwargs)
+        endTime = time.time()
+        print("time: ", endTime - startTime, " seconds")
+
+    return wrapper
 
 
 def datread(file=None, start=0, end=-1):
@@ -46,7 +55,7 @@ def blocks_from_rc(rows, columns, xo, yo):
         :param j: column number
         :return: node number
         """
-        return int(i*ncol + j)
+        return int(i * ncol + j)
 
     for c in range(nrow):
         for n in range(ncol):
@@ -57,6 +66,7 @@ def blocks_from_rc(rows, columns, xo, yo):
             yield get_node(c, n), np.array(b), np.mean(b, axis=0)
 
 
+@clockwork
 def my_node(xy, rows, columns, xo, yo):
     """
     Given a point coordinate xy [x, y], computes its node number by computing the euclidean distance of each cell
@@ -70,21 +80,18 @@ def my_node(xy, rows, columns, xo, yo):
     """
 
     rn = np.array(xy)
+
+    dmin = np.min([rows.min(), columns.min()])/2
     blocks = blocks_from_rc(rows, columns, xo, yo)
-    # vmin = np.inf
-    # cell = None
-    # for b in blocks:
-    #     c = b[2]
-    #     dc = np.linalg.norm(rn - c)  # Euclidean distance
-    #     if vmin > dc:
-    #         vmin = dc
-    #         cell = b[0]
+    vmin = np.inf
+    cell = None
     for b in blocks:
-        poly = Polygon(b[1])
-        p = Point(rn)
-        if p.within(poly):
+        c = b[2]
+        dc = np.linalg.norm(rn - c)  # Euclidean distance
+        if dc <= dmin:  # If point is inside cell
+            return b[0]
+        elif dc < vmin:
+            vmin = dc
             cell = b[0]
-            return cell
 
-    # return cell
-
+    return cell
