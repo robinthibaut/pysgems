@@ -2,6 +2,8 @@ import numpy as np
 import time
 import os
 from os.path import join as jp
+import shutil
+import uuid
 import subprocess
 
 import numpy as np
@@ -111,7 +113,8 @@ class Sgems:
         # Directories
         self.cwd = os.getcwd()
         self.data_dir = jp(self.cwd, 'dataset')
-        self.res_dir = jp(self.cwd, 'results')
+        self.res_dir = jp(self.cwd, 'results', uuid.uuid1().hex)
+        os.makedirs(self.res_dir)
         self.file_name = file_name
         self.node_file = jp(self.data_dir, 'nodes.npy')
         self.node_value_file = jp(self.data_dir, 'fnodes.txt')
@@ -224,3 +227,4 @@ class Sgems:
             hard = self.cleanup()
             with open(jp(self.data_dir, self.node_value_file), 'w') as nd:
                 nd.write(repr(hard))
+            shutil.copyfile(self.node_value_file, self.node_value_file.replace(self.data_dir, self.res_dir))
