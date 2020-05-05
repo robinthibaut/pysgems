@@ -8,6 +8,8 @@ import subprocess
 import xml.etree.ElementTree as ET
 import pandas as pd
 import matplotlib.pyplot as plt
+from shapely.geometry import Point
+from shapely.geometry.polygon import Polygon
 
 
 def clockwork(func):
@@ -74,36 +76,6 @@ def blocks_from_rc(rows, columns, xo, yo):
             yield get_node(c, n), np.array(b), np.mean(b, axis=0)
 
 
-def my_node(xy, rows, columns, xo, yo):
-    """
-    Given a point coordinate xy [x, y], computes its node number by computing the euclidean distance of each cell
-    center.
-    :param xy:  x, y coordinate of data point
-    :param rows: array of x-widths along a row
-    :param columns: array of y-widths along a column
-    :param xo: x origin
-    :param yo: y origin
-    :return:
-    """
-
-    rn = np.array(xy)
-
-    dmin = np.min([rows.min(), columns.min()]) / 2
-    blocks = blocks_from_rc(rows, columns, xo, yo)
-    vmin = np.inf
-    cell = None
-    for b in blocks:
-        c = b[2]
-        dc = np.linalg.norm(rn - c)  # Euclidean distance
-        if dc <= dmin:  # If point is inside cell
-            return b[0]
-        if dc < vmin:
-            vmin = dc
-            cell = b[0]
-
-    return cell
-
-
 class Sgems:
 
     def __init__(self, file_name, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None):
@@ -130,6 +102,10 @@ class Sgems:
         self.dz = 0  # Block z-dimension
         self.xo, self.yo, self.x_lim, self.y_lim, self.nrow, self.ncol, self.nlay, self.along_r, self.along_c \
             = self.grid(dx, dy, xo, yo, x_lim, y_lim)
+        self.bounding_box = Polygon([[self.xo, self.yo],
+                                     [self.x_lim, self.yo],
+                                     [self.x_lim, self.y_lim],
+                                     [self.xo, self.y_lim]])
 
         # Algorithm
         self.tree = None
@@ -196,13 +172,47 @@ class Sgems:
         plt.grid('blue')
         plt.show()
 
+    def my_node(self, xy, rows, columns):
+        """
+        Given a point coordinate xy [x, y], computes its node number by computing the euclidean distance of each cell
+        center.
+        :param xy:  x, y coordinate of data point
+        :param rows: array of x-widths along a row
+        :param columns: array of y-widths along a column
+        :return:
+        """
+
+        rn = np.array(xy)
+        # first check if point is within the grid
+        p = Point(rn)
+
+        if p.within(self.bounding_box):
+            dmin = np.min([rows.min(), columns.min()]) / 2
+            blocks = blocks_from_rc(rows, columns, self.xo, self.yo)
+            vmin = np.inf
+            cell = None
+            for b in blocks:
+                c = b[2]
+                dc = np.linalg.norm(rn - c)  # Euclidean distance
+                if dc <= dmin:  # If point is inside cell
+                    return b[0]
+                if dc < vmin:
+                    vmin = dc
+                    cell = b[0]
+
+            return cell
+        else:
+            return -999
+
     def compute_nodes(self):
         """
         Determines node location for each data point.
         :return: nodes number
         It is necessary to know the node number to assign the hard data property to the sgems grid
         """
-        nodes = np.array([my_node(c, self.along_c, self.along_r, self.xo, self.yo) for c in self.xy])
+        nodes = np.array([my_node(c, self.along_c, self.along_r,
+                                  self.xo, self.yo, self.x_lim, self.y_lim) for c in self.xy])
+
         np.save(self.node_file, nodes)  # Save to nodes to avoid recomputing each time
 
         return nodes
@@ -228,7 +238,7 @@ class Sgems:
             # fixed nodes = [[node i, value i]....]
             fixed_nodes = np.array([[data_nodes[dn], self.dataframe[:, h][dn]] for dn in range(len(data_nodes))])
             # Deletes points where val == nodata
-            hard_data = np.delete(fixed_nodes, np.where(fixed_nodes[:, 1] == self.nodata), axis=0)
+            hard_data = np.delete(fixed_nodes, np.where(fixed_nodes == self.nodata)[0], axis=0)
             # If data points share the same cell, compute their mean and assign the value to the cell
             for n in unique_nodes:
                 where = np.where(hard_data[:, 0] == n)[0]
@@ -289,6 +299,9 @@ class Sgems:
         self.tree.write(jp(self.res_dir, 'output.xml'))
 
     def write_command(self):
+        """
+        Write python script that sgems will run
+        """
 
         name = self.root.find('algorithm').attrib['name']
 
@@ -299,7 +312,7 @@ class Sgems:
 
         replace = [['Primary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
                    ['Secondary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
-                   ['Grid_Name', {'value': name, 'region': ''}],
+                   ['Grid_Name', {'value': 'computation_grid', 'region': ''}],
                    ['Property_Name', {'value': name}],
                    ['Hard_Data', {'grid': self.project_name, 'property': "hard"}]]
 
@@ -330,3 +343,31 @@ class Sgems:
 
         with open(jp(self.res_dir, 'simusgems.py'), 'w') as sstw:
             sstw.write(template)
+
+    def script_file(self):
+        # Create script file
+        run_script = jp(self.res_dir, 'sgems.script')
+        rscpt = open(run_script, 'w')
+        rscpt.write(' '.join(['RunScript', jp(self.res_dir, 'simusgems.py')]))
+        rscpt.close()
+
+    def bat_file(self):
+
+        if not os.path.isfile(jp(self.res_dir, 'sgems.script')):
+            self.script_file()
+
+        batch = jp(self.res_dir, 'RunSgems.bat')
+        bat = open(batch, 'w')
+        bat.write(' '.join(['cd', self.res_dir, '\n']))
+        bat.write(' '.join(['sgems', 'statistical_simulation.script']))
+        bat.close()
+
+    def run(self):
+
+        batch = jp(self.res_dir, 'RunSgems.bat')
+        if not os.path.isfile(batch):
+            self.bat_file()
+
+        subprocess.call([batch])  # Opens the BAT file
+
+
