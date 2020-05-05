@@ -113,20 +113,19 @@ class Sgems:
         self.data_dir = jp(self.cwd, 'dataset')
         self.res_dir = jp(self.cwd, 'results')
         self.file_name = file_name
+        self.node_file = jp(self.data_dir, 'fnodes.txt')
 
         # Data
         self.dataframe, self.project_name, self.columns = self.loader()
         self.xy = np.vstack((self.dataframe[:, 0], self.dataframe[:, 1])).T  # X, Y coordinates
+        self.nodata = -999
 
         # Grid geometry
         self.dx = dx  # Block x-dimension
         self.dy = dy  # Block y-dimension
         self.dz = 0  # Block z-dimension
-
         self.xo, self.yo, self.x_lim, self.y_lim, self.nrow, self.ncol, self.nlay, self.along_r, self.along_c \
             = self.grid(dx, dy, xo, yo, x_lim, y_lim)
-
-        self.plot_coordinates()
 
     # Load sgems dataset
     def loader(self):
@@ -163,3 +162,54 @@ class Sgems:
         plt.yticks(np.cumsum(self.along_c) + self.yo - self.dy, labels=[])
         plt.grid('blue')
         plt.show()
+
+    def compute_nodes(self):
+        """
+        Determines node location for each data point.
+        :return: nodes number
+        It is necessary to know the node number to assign the hard data property to the sgems grid
+        """
+        nodes = np.array([my_node(c, self.along_c, self.along_r, self.xo, self.yo) for c in self.xy])
+        np.save(jp(self.data_dir, 'nodes'), nodes)  # Save to nodes to avoid recomputing each time
+
+        return nodes
+
+    def get_nodes(self):
+        try:
+            d_nodes = np.load(jp(self.data_dir, 'nodes.npy'))
+        except FileNotFoundError:
+            d_nodes = self.compute_nodes()
+
+        return d_nodes
+
+    def cleanup(self):
+        """
+        Removes no-data rows from data frame and compute the mean of data points sharing the same cell.
+        :return: Filtered list of each attribute
+        """
+        data_nodes = self.get_nodes()
+        unique_nodes = list(set(data_nodes))
+
+        fn = []
+        for h in self.columns[2:]:  # For each feature
+            # fixed nodes = [[node i, value i]....]
+            fixed_nodes = np.array([[data_nodes[dn], self.dataframe[h][dn]] for dn in range(len(data_nodes))])
+            # Deletes points where val == nodata
+            hard_data = np.delete(fixed_nodes, np.where(fixed_nodes[:, 1] == self.nodata), axis=0)
+            # If data points share the same cell, compute their mean and assign the value to the cell
+            for n in unique_nodes:
+                where = np.where(hard_data[:, 0] == n)[0]
+                if len(where) > 1:  # If more than 1 point per cell
+                    mean = np.mean(hard_data[where, 1])
+                    hard_data[where, 1] = mean
+
+            fn.append(hard_data.tolist())
+
+        return fn
+
+    # Save node list to load it into sgems later
+    def export_node_idx(self):
+        if not os.path.isfile(self.node_file):
+            hard = self.cleanup()
+            with open(jp(self.data_dir, self.node_file), 'w') as nd:
+                nd.write(repr(hard))
