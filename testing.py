@@ -1,6 +1,7 @@
 import os
 from os.path import join as jp
 import subprocess
+import xml.etree.ElementTree as ET
 
 import numpy as np
 import pandas as pd
@@ -17,6 +18,7 @@ f_name = jp(data_dir, 'Dataset_Log_WithoutOutlier_WithoutDouble(LowerThan30m)_Wi
 sgems = toolbox.Sgems(file_name=f_name, dx=5000, dy=5000)
 sgems.plot_coordinates()
 sgems.export_node_idx()
+
 
 sgrid = [sgems.ncol, sgems.nrow, sgems.nlay,
          sgems.dx, sgems.dy, sgems.dz,

@@ -11,19 +11,20 @@ res_dir = jp(cwd, 'results')
 tree = ET.parse(jp(res_dir, 'algorithm.xml'))
 root = tree.getroot()
 
-for child in root.iter():
-    print(child.tag)
-    print(child.attrib)
-    # for t in child:
-    #     print(t.tag)
-    #     print(t.attrib)
+name = root.find('algorithm').attrib['name']
 
-features = root.findall('algorithm')
-attribs = [['name', '']]
-for f in features:
-    for a in attribs:
-        f.attrib[a[0]] = a[1]
-    print('Updated')
-    print(f.attrib)
+for element in root:
+    print(element.tag)
+    print(element.attrib)
+    elems = list(element)
+    while len(elems) > 0:
+        c_list = [element.tag]
+        for e in elems:
+            c_list.append(e.tag)
+            print('//'.join(c_list))
+            print(e.attrib)
+            elems = list(e)
+            c_list.pop(-1)
+
 
 tree.write(jp(res_dir, 'output.xml'))
