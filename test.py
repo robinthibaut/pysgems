@@ -13,17 +13,19 @@ cwd = os.getcwd()
 data_dir = jp(cwd, 'dataset')
 res_dir = jp(cwd, 'results')
 
-# Load dataset
-file_name = jp(data_dir, 'Dataset_Log_WithoutOutlier_WithoutDouble(LowerThan30m)_Without-4.txt')
-head = toolbox.datread(file_name, start=2, end=16)
-columns = [h[0].lower() for h in head]
-data = toolbox.datread(file_name, start=16)
 
-dataframe = pd.DataFrame(data=data, columns=columns)
+# Load dataset
+def load_dataset():
+    f_name = jp(data_dir, 'Dataset_Log_WithoutOutlier_WithoutDouble(LowerThan30m)_Without-4.txt')
+    head = toolbox.datread(f_name, start=2, end=16)
+    columns_names = [h[0].lower() for h in head]
+    data = toolbox.datread(f_name, start=16)
+    return pd.DataFrame(data=data, columns=columns_names)
 
 
 # %%  Define grid geometry
-
+dataframe = load_dataset()
+columns = dataframe.columns.to_numpy()
 xy = np.vstack((dataframe.x, dataframe.y)).T  # X, Y coordinates
 
 dx = 1000  # Block x-dimension
@@ -75,14 +77,12 @@ def get_nodes():
     return d_nodes
 
 
-data_nodes = get_nodes()
-
-
 def cleanup():
     """
     Removes no-data rows from data frame and compute the mean of data points sharing the same cell.
     :return: Filtered list of each attribute
     """
+    data_nodes = get_nodes()
     unique_nodes = list(set(data_nodes))
     nodata = -999
     fn = []
@@ -103,11 +103,15 @@ def cleanup():
     return fn
 
 
-hard = cleanup()
 # Save node list to load it into sgems later
-node_file = jp(data_dir, 'fnodes.txt')
-with open(jp(data_dir, node_file), 'w') as nd:
-    nd.write(repr(hard))
+def export_node_idx():
+    hard = cleanup()
+    node_file = jp(data_dir, 'fnodes.txt')
+    with open(jp(data_dir, node_file), 'w') as nd:
+        nd.write(repr(hard))
+
+
+export_node_idx()
 
 sgrid = [ncol, nrow, nlay,
          dx, dy, dz,
