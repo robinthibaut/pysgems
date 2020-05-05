@@ -224,7 +224,7 @@ class Sgems:
         unique_nodes = list(set(data_nodes))
 
         fn = []
-        for h in range(2, len(self.columns[2:])):  # For each feature
+        for h in range(2, len(self.columns)):  # For each feature
             # fixed nodes = [[node i, value i]....]
             fixed_nodes = np.array([[data_nodes[dn], self.dataframe[:, h][dn]] for dn in range(len(data_nodes))])
             # Deletes points where val == nodata

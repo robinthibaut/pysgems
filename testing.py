@@ -16,6 +16,7 @@ sgems.plot_coordinates()
 sgems.export_node_idx()
 algo_name = sgems.xml_reader('cokriging')
 sgems.show_tree()
+sgems.write_command()
 
 sgrid = [sgems.ncol, sgems.nrow, sgems.nlay,
          sgems.dx, sgems.dy, sgems.dz,
