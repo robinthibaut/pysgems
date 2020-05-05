@@ -172,13 +172,11 @@ class Sgems:
         plt.grid('blue')
         plt.show()
 
-    def my_node(self, xy, rows, columns):
+    def my_node(self, xy):
         """
         Given a point coordinate xy [x, y], computes its node number by computing the euclidean distance of each cell
         center.
         :param xy:  x, y coordinate of data point
-        :param rows: array of x-widths along a row
-        :param columns: array of y-widths along a column
         :return:
         """
 
@@ -187,8 +185,8 @@ class Sgems:
         p = Point(rn)
 
         if p.within(self.bounding_box):
-            dmin = np.min([rows.min(), columns.min()]) / 2
-            blocks = blocks_from_rc(rows, columns, self.xo, self.yo)
+            dmin = np.min([self.along_c.min(), self.along_r.min()]) / 2
+            blocks = blocks_from_rc(self.along_c, self.along_r, self.xo, self.yo)
             vmin = np.inf
             cell = None
             for b in blocks:
@@ -210,8 +208,7 @@ class Sgems:
         :return: nodes number
         It is necessary to know the node number to assign the hard data property to the sgems grid
         """
-        nodes = np.array([my_node(c, self.along_c, self.along_r,
-                                  self.xo, self.yo, self.x_lim, self.y_lim) for c in self.xy])
+        nodes = np.array([self.my_node(c) for c in self.xy])
 
         np.save(self.node_file, nodes)  # Save to nodes to avoid recomputing each time
 
@@ -359,7 +356,7 @@ class Sgems:
         batch = jp(self.res_dir, 'RunSgems.bat')
         bat = open(batch, 'w')
         bat.write(' '.join(['cd', self.res_dir, '\n']))
-        bat.write(' '.join(['sgems', 'statistical_simulation.script']))
+        bat.write(' '.join(['sgems', 'sgems.script']))
         bat.close()
 
     def run(self):

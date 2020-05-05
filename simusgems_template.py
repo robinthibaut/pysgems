@@ -6,7 +6,7 @@ sgems.execute('DeleteObjects ALGORITHM_NAME')
 sgems.execute('DeleteObjects PROJECT_NAME')
 sgems.execute('DeleteObjects finished')
 
-sgems.execute('NewCartesianGrid  ALGORITHM_NAME::GRID')
+sgems.execute('NewCartesianGrid  computation_grid::GRID')
 
 properties = FEATURES_LIST
 nodata = -9966699
@@ -24,5 +24,5 @@ for p in range(len(properties)):
     
 sgems.execute('RunGeostatAlgorithm  ALGORITHM_NAME::/GeostatParamUtils/XML::ALGORITHM_XML')
 
-sgems.execute('SaveGeostatGrid  ALGORITHM_NAME::FEATURE_OUTPUT.grid::gslib::0::PROPERTY_NAME')
+sgems.execute('SaveGeostatGrid  computation_grid::FEATURE_OUTPUT.grid::gslib::0::PROPERTY_NAME')
 
