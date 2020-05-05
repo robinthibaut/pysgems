@@ -5,8 +5,7 @@ from os.path import join as jp
 import shutil
 import uuid
 import subprocess
-
-import numpy as np
+import xml.etree.ElementTree as ET
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -114,6 +113,7 @@ class Sgems:
         self.cwd = os.getcwd()
         self.data_dir = jp(self.cwd, 'dataset')
         self.res_dir = jp(self.cwd, 'results', uuid.uuid1().hex)
+        self.algo_dir = jp(self.cwd, 'algorithms')
         os.makedirs(self.res_dir)
         self.file_name = file_name
         self.node_file = jp(self.data_dir, 'nodes.npy')
@@ -132,21 +132,40 @@ class Sgems:
         self.xo, self.yo, self.x_lim, self.y_lim, self.nrow, self.ncol, self.nlay, self.along_r, self.along_c \
             = self.grid(dx, dy, xo, yo, x_lim, y_lim)
 
+        # Algorithm
+        self.tree = None
+        self.root = None
+
     # Load sgems dataset
     def loader(self):
-        project_info = datread(self.file_name, end=2)
+        """Parse sgems dataset"""
+        project_info = datread(self.file_name, end=2)  # Name, n features
         project_name = project_info[0][0].lower()
         n_features = int(project_info[1][0])
-        head = datread(self.file_name, start=2, end=2+n_features)
+        head = datread(self.file_name, start=2, end=2+n_features)  # Name of features
         columns_name = [h[0].lower() for h in head]
-        data = datread(self.file_name, start=2+n_features)
+        data = datread(self.file_name, start=2+n_features)  # Raw data
         return data, project_name, columns_name
 
     def load_dataframe(self):
+        """Loads sgems data set"""
         self.dataframe, self.project_name, self.columns = self.loader()
         self.xy = np.vstack((self.dataframe[:, 0], self.dataframe[:, 1])).T  # X, Y coordinates
 
     def grid(self, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None):
+        """
+        Constructs the grid geometry. The user can not control directly the number of rows and columns
+        but instead inputs the cell size in x and y dimensions.
+        xo, yo, x_lim, y_lim, defining the bounding box of the grid, are None by default, and are computed
+        based on the data points distribution.
+        :param dx:
+        :param dy:
+        :param xo:
+        :param yo:
+        :param x_lim:
+        :param y_lim:
+        :return:
+        """
 
         if x_lim is None and y_lim is None:
             x_lim, y_lim = np.round(np.max(self.xy, axis=0)) + np.array([dx, dy]) * 4  # X max, Y max
@@ -165,6 +184,7 @@ class Sgems:
             # If different, recompute data points node by deleting previous node file
             if not np.array_equal(pdis, npar):
                 os.remove(self.node_file)
+                os.remove(self.node_value_file)
         else:
             np.savetxt(self.dis_file, npar)
 
@@ -223,8 +243,53 @@ class Sgems:
 
     # Save node list to load it into sgems later
     def export_node_idx(self):
+        """
+        Export the list of shape (n features, m nodes, 2) containing the node of each point data with the corresponding
+        value, for each feature
+        :return:
+        """
         if not os.path.isfile(self.node_value_file):
             hard = self.cleanup()
             with open(jp(self.data_dir, self.node_value_file), 'w') as nd:
                 nd.write(repr(hard))
             shutil.copyfile(self.node_value_file, self.node_value_file.replace(self.data_dir, self.res_dir))
+
+    def xml_reader(self, algo_name):
+        """
+        Reads and parse XML file. It assumes the algorithm XML file is located in the algo_dir folder.
+        :param algo_name: Name of the algorithm, without any extension, e.g. 'kriging', 'cokriging'...
+        :return:
+        """
+        self.tree = ET.parse(jp(self.algo_dir, '{}.xml'.format(algo_name)))
+        self.root = self.tree.getroot()
+        name = self.root.find('algorithm').attrib['name']
+
+    def show_tree(self):
+        """
+        Displays the structure of the XML file, in order to get the path of updatable variables
+        :return:
+        """
+        for element in self.root:
+            print(element.tag)
+            print(element.attrib)
+            elems = list(element)
+            c_list = [element.tag]
+            while len(elems) > 0:
+                elems = list(element)
+                for e in elems:
+                    c_list.append(e.tag)
+                    print('//'.join(c_list))
+                    print(e.attrib)
+                    element = list(e)
+                    if len(element) == 0:
+                        c_list.pop(-1)
+
+    def xml_update(self, path, new_attribute):
+        """
+        Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
+        :param path:
+        :param new_attribute:
+        :return:
+        """
+        self.root.find(path).attrib = new_attribute
+        self.tree.write(jp(self.res_dir, 'output.xml'))
