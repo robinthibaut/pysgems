@@ -26,8 +26,8 @@ dataframe = pd.DataFrame(data=data, columns=columns)
 
 xy = np.vstack((dataframe.x, dataframe.y)).T  # X, Y coordinates
 
-dx = 2000  # Block x-dimension
-dy = 2000  # Block y-dimension
+dx = 1000  # Block x-dimension
+dy = 1000  # Block y-dimension
 dz = 0  # Block z-dimension
 x_lim, y_lim = np.round(np.max(xy, axis=0)) + np.array([dx, dy])*4  # X max, Y max
 xo, yo = np.round(np.min(xy, axis=0)) - np.array([dx, dy])*4  # X min, Y min

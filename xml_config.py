@@ -11,9 +11,12 @@ res_dir = jp(cwd, 'results')
 tree = ET.parse(jp(res_dir, 'algorithm.xml'))
 root = tree.getroot()
 
-for child in root:
+for child in root.iter():
     print(child.tag)
     print(child.attrib)
+    # for t in child:
+    #     print(t.tag)
+    #     print(t.attrib)
 
 features = root.findall('algorithm')
 attribs = [['name', '']]
