@@ -73,7 +73,7 @@ def blocks_from_rc(rows, columns, xo, yo):
             yield get_node(c, n), np.array(b), np.mean(b, axis=0)
 
 
-@clockwork
+# @clockwork
 def my_node(xy, rows, columns, xo, yo):
     """
     Given a point coordinate xy [x, y], computes its node number by computing the euclidean distance of each cell
@@ -97,7 +97,7 @@ def my_node(xy, rows, columns, xo, yo):
         dc = np.linalg.norm(rn - c)  # Euclidean distance
         if dc <= dmin:  # If point is inside cell
             return b[0]
-        elif dc < vmin:
+        if dc < vmin:
             vmin = dc
             cell = b[0]
 
@@ -141,7 +141,7 @@ class Sgems:
 
     def load_dataframe(self):
         self.dataframe, self.project_name, self.columns = self.loader()
-        self.xy = np.vstack((self.dataframe[:, 0], self.dataframe[:, 0])).T  # X, Y coordinates
+        self.xy = np.vstack((self.dataframe[:, 0], self.dataframe[:, 1])).T  # X, Y coordinates
 
     def grid(self, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None):
 
@@ -202,9 +202,9 @@ class Sgems:
         unique_nodes = list(set(data_nodes))
 
         fn = []
-        for h in self.columns[2:]:  # For each feature
+        for h in range(2, len(self.columns[2:])):  # For each feature
             # fixed nodes = [[node i, value i]....]
-            fixed_nodes = np.array([[data_nodes[dn], self.dataframe[h][dn]] for dn in range(len(data_nodes))])
+            fixed_nodes = np.array([[data_nodes[dn], self.dataframe[:, h][dn]] for dn in range(len(data_nodes))])
             # Deletes points where val == nodata
             hard_data = np.delete(fixed_nodes, np.where(fixed_nodes[:, 1] == self.nodata), axis=0)
             # If data points share the same cell, compute their mean and assign the value to the cell
