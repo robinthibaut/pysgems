@@ -113,7 +113,9 @@ class Sgems:
         self.data_dir = jp(self.cwd, 'dataset')
         self.res_dir = jp(self.cwd, 'results')
         self.file_name = file_name
-        self.node_file = jp(self.data_dir, 'fnodes.txt')
+        self.node_file = jp(self.data_dir, 'nodes.npy')
+        self.node_value_file = jp(self.data_dir, 'fnodes.txt')
+        self.dis_file = jp(self.data_dir, 'dis.info')
 
         # Data
         self.dataframe, self.project_name, self.columns = self.loader()
@@ -154,6 +156,15 @@ class Sgems:
         along_r = np.ones(ncol) * dx  # Size of each cell along y-dimension - rows
         along_c = np.ones(nrow) * dy  # Size of each cell along x-dimension - columns
 
+        npar = np.array([dx, dy, xo, yo, x_lim, y_lim, nrow, ncol, nlay])
+        if os.path.isfile(self.dis_file):  # Check previous grid info
+            pdis = np.loadtxt(self.dis_file)
+            # If different, recompute data points node by deleting previous node file
+            if not np.array_equal(pdis, npar):
+                os.remove(self.node_file)
+        else:
+            np.savetxt(self.dis_file, npar)
+
         return xo, yo,  x_lim, y_lim, nrow, ncol, nlay, along_r, along_c
 
     def plot_coordinates(self):
@@ -170,13 +181,13 @@ class Sgems:
         It is necessary to know the node number to assign the hard data property to the sgems grid
         """
         nodes = np.array([my_node(c, self.along_c, self.along_r, self.xo, self.yo) for c in self.xy])
-        np.save(jp(self.data_dir, 'nodes'), nodes)  # Save to nodes to avoid recomputing each time
+        np.save(self.node_file, nodes)  # Save to nodes to avoid recomputing each time
 
         return nodes
 
     def get_nodes(self):
         try:
-            d_nodes = np.load(jp(self.data_dir, 'nodes.npy'))
+            d_nodes = np.load(self.node_file)
         except FileNotFoundError:
             d_nodes = self.compute_nodes()
 
@@ -209,7 +220,7 @@ class Sgems:
 
     # Save node list to load it into sgems later
     def export_node_idx(self):
-        if not os.path.isfile(self.node_file):
+        if not os.path.isfile(self.node_value_file):
             hard = self.cleanup()
-            with open(jp(self.data_dir, self.node_file), 'w') as nd:
+            with open(jp(self.data_dir, self.node_value_file), 'w') as nd:
                 nd.write(repr(hard))
