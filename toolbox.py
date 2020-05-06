@@ -111,6 +111,11 @@ class Sgems:
         # Algorithm
         self.tree = None
         self.root = None
+        self.op_file = jp(self.res_dir, 'output.xml')
+        try:
+            os.remove(self.op_file)
+        except FileNotFoundError:
+            pass
 
     # Load sgems dataset
     def loader(self):
@@ -279,6 +284,20 @@ class Sgems:
         self.tree = ET.parse(jp(self.algo_dir, '{}.xml'.format(algo_name)))
         self.root = self.tree.getroot()
 
+        name = self.root.find('algorithm').attrib['name']
+
+        replace = [['Primary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
+                   ['Secondary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
+                   ['Grid_Name', {'value': 'computation_grid', 'region': ''}],
+                   ['Property_Name', {'value': name}],
+                   ['Hard_Data', {'grid': self.project_name, 'property': "hard"}]]
+
+        for r in replace:
+            try:
+                self.xml_update(r[0], r[1])
+            except AttributeError:
+                pass
+
     def show_tree(self):
         """
         Displays the structure of the XML file, in order to get the path of updatable variables
@@ -308,41 +327,21 @@ class Sgems:
         :param new_attribute:
         """
         self.root.find(path).attrib = new_attribute
-        self.tree.write(jp(self.res_dir, 'output.xml'))
+        self.tree.write(self.op_file)
 
     def write_command(self):
         """
         Write python script that sgems will run
         """
 
-        op_file = jp(self.res_dir, 'output.xml')
-
         run_algo_flag = ''
-        if not os.path.isfile(op_file):
-            try:
-                name = self.root.find('algorithm').attrib['name']
-
-                replace = [['Primary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
-                           ['Secondary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
-                           ['Grid_Name', {'value': 'computation_grid', 'region': ''}],
-                           ['Property_Name', {'value': name}],
-                           ['Hard_Data', {'grid': self.project_name, 'property': "hard"}]]
-
-                for r in replace:
-                    try:
-                        self.xml_update(r[0], r[1])
-                    except AttributeError:
-                        pass
-
-                with open(op_file) as alx:
-                    algo_xml = alx.read().strip('\n')
-            except AttributeError:
-                name = 'None'
-                algo_xml = 'None'
-                run_algo_flag = '#'  # If no algorithm loaded, then just loads the data
-        else:
-            with open(op_file) as alx:
+        try:
+            with open(self.op_file) as alx:
                 algo_xml = alx.read().strip('\n')
+        except FileNotFoundError:
+            name = 'None'
+            algo_xml = 'None'
+            run_algo_flag = '#'  # If no algorithm loaded, then just loads the data
 
         sgrid = [self.ncol, self.nrow, self.nlay,
                  self.dx, self.dy, self.dz,
