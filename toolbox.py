@@ -6,7 +6,6 @@ import shutil
 import uuid
 import subprocess
 import xml.etree.ElementTree as ET
-import pandas as pd
 import matplotlib.pyplot as plt
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
@@ -78,14 +77,14 @@ def blocks_from_rc(rows, columns, xo, yo):
 
 class Sgems:
 
-    def __init__(self, file_name, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None):
+    def __init__(self, data_dir, file_name, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None):
 
         # Directories
         self.cwd = os.getcwd()
-        self.data_dir = jp(self.cwd, 'dataset')
-        self.res_dir = jp(self.cwd, 'results', uuid.uuid1().hex)
+        self.res_dir = jp(self.cwd, 'results', '_'.join([self.project_name, uuid.uuid1().hex]))
         os.makedirs(self.res_dir)
         self.algo_dir = jp(self.cwd, 'algorithms')
+        self.data_dir = data_dir
         self.file_name = jp(self.data_dir, file_name)
         self.node_file = jp(self.data_dir, 'nodes.npy')
         self.node_value_file = jp(self.data_dir, 'fnodes.txt')
@@ -111,9 +110,9 @@ class Sgems:
         self.tree = None
         self.root = None
 
-    # Load sgems dataset
+    # Load sgems datasets
     def loader(self):
-        """Parse sgems dataset"""
+        """Parse sgems datasets"""
         project_info = datread(self.file_name, end=2)  # Name, n features
         project_name = project_info[0][0].lower()
         n_features = int(project_info[1][0])

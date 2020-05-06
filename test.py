@@ -10,11 +10,11 @@ import toolbox
 
 # Directories
 cwd = os.getcwd()
-data_dir = jp(cwd, 'dataset')
+data_dir = jp(cwd, 'datasets')
 res_dir = jp(cwd, 'results')
 
 
-# Load dataset
+# Load datasets
 def load_dataset():
     f_name = jp(data_dir, 'Dataset_Log_WithoutOutlier_WithoutDouble(LowerThan30m)_Without-4.txt')
     head = toolbox.datread(f_name, start=2, end=16)
