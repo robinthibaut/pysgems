@@ -2,7 +2,7 @@ import sgems
 import os
 
 os.chdir("RES_DIR")
-sgems.execute('DeleteObjects ALGORITHM_NAME')
+sgems.execute('DeleteObjects computation_grid')
 sgems.execute('DeleteObjects PROJECT_NAME')
 sgems.execute('DeleteObjects finished')
 
@@ -22,5 +22,5 @@ for p in range(len(properties)):
         hard_data[int(n[0])] = n[1]
     sgems.set_property('PROJECT_NAME', properties[p], hard_data)
     
-sgems.execute('RunGeostatAlgorithm  ALGORITHM_NAME::/GeostatParamUtils/XML::ALGORITHM_XML')
-sgems.execute('SaveGeostatGrid  computation_grid::FEATURE_OUTPUT.grid::gslib::0::PROPERTY_NAME')
+#sgems.execute('RunGeostatAlgorithm  ALGORITHM_NAME::/GeostatParamUtils/XML::ALGORITHM_XML')
+#sgems.execute('SaveGeostatGrid  computation_grid::FEATURE_OUTPUT.grid::gslib::0::PROPERTY_NAME')
