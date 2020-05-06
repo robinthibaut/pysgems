@@ -9,7 +9,7 @@ data_dir = join_path(cwd, 'datasets', 'test')
 # Define file name
 f_name = 'sgems_dataset.dat'
 # Initialize problem
-sgems = toolbox.Sgems(data_dir=data_dir, file_name=f_name, dx=5, dy=5)
+sgems = toolbox.Sgems(data_dir=data_dir, file_name=f_name, dx=1, dy=1)
 # Compute data points node and export file
 sgems.export_node_idx()
 # Display point coordinates and grid

@@ -336,9 +336,11 @@ class Sgems:
 
         run_algo_flag = ''
         try:
+            name = self.root.find('algorithm').attrib['name']
             with open(self.op_file) as alx:
                 algo_xml = alx.read().strip('\n')
-        except FileNotFoundError:
+
+        except AttributeError or FileNotFoundError:
             name = 'None'
             algo_xml = 'None'
             run_algo_flag = '#'  # If no algorithm loaded, then just loads the data
