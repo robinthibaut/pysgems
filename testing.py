@@ -5,11 +5,11 @@ import toolbox
 # Define working directory
 cwd = os.getcwd()
 # Define datasets directory
-data_dir = join_path(cwd, 'datasets', 'benin')
+data_dir = join_path(cwd, 'datasets', 'test')
 # Define file name
-f_name = 'Dataset_Log_WithoutOutlier_WithoutDouble(LowerThan30m)_Without-4.txt'
+f_name = 'sgems_dataset.dat'
 # Initialize problem
-sgems = toolbox.Sgems(data_dir=data_dir, file_name=f_name, dx=1000, dy=1000)
+sgems = toolbox.Sgems(data_dir=data_dir, file_name=f_name, dx=2, dy=2)
 # Display point coordinates and grid
 sgems.plot_coordinates()
 # Compute data points node and export file

@@ -23,6 +23,4 @@ for p in range(len(properties)):
     sgems.set_property('PROJECT_NAME', properties[p], hard_data)
     
 sgems.execute('RunGeostatAlgorithm  ALGORITHM_NAME::/GeostatParamUtils/XML::ALGORITHM_XML')
-
 sgems.execute('SaveGeostatGrid  computation_grid::FEATURE_OUTPUT.grid::gslib::0::PROPERTY_NAME')
-

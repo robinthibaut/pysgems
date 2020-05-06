@@ -81,8 +81,6 @@ class Sgems:
 
         # Directories
         self.cwd = os.getcwd()
-        self.res_dir = jp(self.cwd, 'results', '_'.join([self.project_name, uuid.uuid1().hex]))
-        os.makedirs(self.res_dir)
         self.algo_dir = jp(self.cwd, 'algorithms')
         self.data_dir = data_dir
         self.file_name = jp(self.data_dir, file_name)
@@ -94,6 +92,10 @@ class Sgems:
         self.dataframe, self.project_name, self.columns = self.loader()
         self.xy = np.vstack((self.dataframe[:, 0], self.dataframe[:, 1])).T  # X, Y coordinates
         self.nodata = -999
+
+        # Generate result directory
+        self.res_dir = jp(self.cwd, 'results', '_'.join([self.project_name, uuid.uuid1().hex]))
+        os.makedirs(self.res_dir)
 
         # Grid geometry
         self.dx = dx  # Block x-dimension
@@ -110,19 +112,21 @@ class Sgems:
         self.tree = None
         self.root = None
 
-    # Load sgems datasets
+    # Load sgems dataset
     def loader(self):
-        """Parse sgems datasets"""
+        """Parse sgems dataset"""
         project_info = datread(self.file_name, end=2)  # Name, n features
-        project_name = project_info[0][0].lower()
-        n_features = int(project_info[1][0])
+        project_name = project_info[0][0].lower()  # Project name
+        n_features = int(project_info[1][0])  # Number of features len([x, y, f1, f2... fn])
         head = datread(self.file_name, start=2, end=2 + n_features)  # Name of features
         columns_name = [h[0].lower() for h in head]
         data = datread(self.file_name, start=2 + n_features)  # Raw data
+
         return data, project_name, columns_name
 
     def load_dataframe(self):
         """Loads sgems data set"""
+        # At this time, considers only 2D dataset
         self.dataframe, self.project_name, self.columns = self.loader()
         self.xy = np.vstack((self.dataframe[:, 0], self.dataframe[:, 1])).T  # X, Y coordinates
 
@@ -153,12 +157,17 @@ class Sgems:
         along_c = np.ones(nrow) * dy  # Size of each cell along x-dimension - columns
 
         npar = np.array([dx, dy, xo, yo, x_lim, y_lim, nrow, ncol, nlay])
+
         if os.path.isfile(self.dis_file):  # Check previous grid info
             pdis = np.loadtxt(self.dis_file)
             # If different, recompute data points node by deleting previous node file
             if not np.array_equal(pdis, npar):
-                os.remove(self.node_file)
-                os.remove(self.node_value_file)
+                print('New grid found')
+                try:
+                    os.remove(self.node_file)
+                    os.remove(self.node_value_file)
+                except FileNotFoundError:
+                    pass
         else:
             np.savetxt(self.dis_file, npar)
 
@@ -204,8 +213,8 @@ class Sgems:
     def compute_nodes(self):
         """
         Determines node location for each data point.
+        It is necessary to know the node number to assign the hard data property to the sgems grid.
         :return: nodes number
-        It is necessary to know the node number to assign the hard data property to the sgems grid
         """
         nodes = np.array([self.my_node(c) for c in self.xy])
 
@@ -254,7 +263,7 @@ class Sgems:
         """
         if not os.path.isfile(self.node_value_file):
             hard = self.cleanup()
-            with open(jp(self.data_dir, self.node_value_file), 'w') as nd:
+            with open(self.node_value_file, 'w') as nd:
                 nd.write(repr(hard))
             shutil.copyfile(self.node_value_file, self.node_value_file.replace(self.data_dir, self.res_dir))
 
@@ -270,20 +279,23 @@ class Sgems:
         """
         Displays the structure of the XML file, in order to get the path of updatable variables
         """
-        for element in self.root:
-            print(element.tag)
-            print(element.attrib)
-            elems = list(element)
-            c_list = [element.tag]
-            while len(elems) > 0:
+        try:
+            for element in self.root:
+                print(element.tag)
+                print(element.attrib)
                 elems = list(element)
-                for e in elems:
-                    c_list.append(e.tag)
-                    print('//'.join(c_list))
-                    print(e.attrib)
-                    element = list(e)
-                    if len(element) == 0:
-                        c_list.pop(-1)
+                c_list = [element.tag]
+                while len(elems) > 0:
+                    elems = list(element)
+                    for e in elems:
+                        c_list.append(e.tag)
+                        print('//'.join(c_list))
+                        print(e.attrib)
+                        element = list(e)
+                        if len(element) == 0:
+                            c_list.pop(-1)
+        except:
+            print('No loaded XML file')
 
     def xml_update(self, path, new_attribute):
         """
@@ -299,29 +311,36 @@ class Sgems:
         Write python script that sgems will run
         """
 
-        name = self.root.find('algorithm').attrib['name']
+        run_algo_flag = ''
+        try:
+            name = self.root.find('algorithm').attrib['name']
+
+            replace = [['Primary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
+                       ['Secondary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
+                       ['Grid_Name', {'value': 'computation_grid', 'region': ''}],
+                       ['Property_Name', {'value': name}],
+                       ['Hard_Data', {'grid': self.project_name, 'property': "hard"}]]
+
+            for r in replace:
+                try:
+                    self.xml_update(r[0], r[1])
+                except AttributeError:
+                    pass
+
+            with open(jp(self.res_dir, 'output.xml')) as alx:
+                algo_xml = alx.read().strip('\n')
+        except AttributeError:
+            name = 'None'
+            algo_xml = 'None'
+            run_algo_flag = '#'  # If no algorithm loaded, then just loads the data
 
         sgrid = [self.ncol, self.nrow, self.nlay,
                  self.dx, self.dy, self.dz,
                  self.xo, self.yo, 0]  # Grid information
         grid = joinlist('::', sgrid)
 
-        replace = [['Primary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
-                   ['Secondary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
-                   ['Grid_Name', {'value': 'computation_grid', 'region': ''}],
-                   ['Property_Name', {'value': name}],
-                   ['Hard_Data', {'grid': self.project_name, 'property': "hard"}]]
-
-        for r in replace:
-            try:
-                self.xml_update(r[0], r[1])
-            except AttributeError:
-                pass
-
-        with open(jp(self.res_dir, 'output.xml')) as alx:
-            algo_xml = alx.read().strip('\n')
-
-        params = [[self.res_dir.replace('\\', '//'), 'RES_DIR'],
+        params = [[run_algo_flag, '#'],
+                  [self.res_dir.replace('\\', '//'), 'RES_DIR'],
                   [grid, 'GRID'],
                   [self.project_name, 'PROJECT_NAME'],
                   [str(self.columns[2:]), 'FEATURES_LIST'],
