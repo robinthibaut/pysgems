@@ -171,37 +171,36 @@ def write_point_set(file_name, sub_dataframe, nodata=-999):
 
 class Sgems:
 
-    def __init__(self, data_dir, file_name, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None):
+    def __init__(self, data_dir='', file_name='', dx=None, dy=None, xo=None, yo=None, x_lim=None, y_lim=None):
 
         # Directories
         self.cwd = os.getcwd()
         self.algo_dir = jp(self.cwd, 'algorithms')
         self.data_dir = data_dir
-        self.file_name = jp(self.data_dir, file_name)
         self.node_file = jp(self.data_dir, 'nodes.npy')
         self.node_value_file = jp(self.data_dir, 'fnodes.txt')
         self.dis_file = jp(self.data_dir, 'dis.info')
-
+        self.res_dir = None  # res dir initiated when modifying xml file
+        self.file_name = file_name
         # Data
-        self.raw_data, self.project_name, self.columns = self.loader()
-        self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)
-        self.xy = np.vstack((self.raw_data[:, 0], self.raw_data[:, 1])).T  # X, Y coordinates
+        if file_name:
+            self.file_path = jp(self.data_dir, file_name)
+            self.raw_data, self.project_name, self.columns = self.loader()
+            self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)
+            self.xy = np.vstack((self.raw_data[:, 0], self.raw_data[:, 1])).T  # X, Y coordinates
         self.nodata = -999
 
-        # # Generate result directory
-        # self.res_dir = jp(self.cwd, 'results', '_'.join([self.project_name, uuid.uuid1().hex]))
-        # os.makedirs(self.res_dir)
-
         # Grid geometry
-        self.dx = dx  # Block x-dimension
-        self.dy = dy  # Block y-dimension
-        self.dz = 0  # Block z-dimension
-        self.xo, self.yo, self.x_lim, self.y_lim, self.nrow, self.ncol, self.nlay, self.along_r, self.along_c \
-            = self.grid(dx, dy, xo, yo, x_lim, y_lim)
-        self.bounding_box = Polygon([[self.xo, self.yo],
-                                     [self.x_lim, self.yo],
-                                     [self.x_lim, self.y_lim],
-                                     [self.xo, self.y_lim]])
+        if dx and dy:
+            self.dx = dx  # Block x-dimension
+            self.dy = dy  # Block y-dimension
+            self.dz = 0  # Block z-dimension
+            self.xo, self.yo, self.zo, self.x_lim, self.y_lim, self.nrow, self.ncol, self.nlay, self.along_r, self.along_c \
+                = self.grid(dx, dy, xo, yo, x_lim, y_lim)
+            self.bounding_box = Polygon([[self.xo, self.yo],
+                                         [self.x_lim, self.yo],
+                                         [self.x_lim, self.y_lim],
+                                         [self.xo, self.y_lim]])
 
         # Algorithm
         self.tree = None
@@ -215,12 +214,13 @@ class Sgems:
     # Load sgems dataset
     def loader(self):
         """Parse sgems dataset"""
-        project_info = datread(self.file_name, end=2)  # Name, n features
+        self.file_path = jp(self.data_dir, self.file_name)
+        project_info = datread(self.file_path, end=2)  # Name, n features
         project_name = project_info[0][0]  # Project name
         n_features = int(project_info[1][0])  # Number of features len([x, y, f1, f2... fn])
-        head = datread(self.file_name, start=2, end=2 + n_features)  # Name of features
+        head = datread(self.file_path, start=2, end=2 + n_features)  # Name of features
         columns_name = [h[0] for h in head]
-        data = datread(self.file_name, start=2 + n_features)  # Raw data
+        data = datread(self.file_path, start=2 + n_features)  # Raw data
 
         return data, project_name, columns_name
 
@@ -229,6 +229,7 @@ class Sgems:
         # At this time, considers only 2D dataset
         self.raw_data, self.project_name, self.columns = self.loader()
         self.xy = np.vstack((self.raw_data[:, 0], self.raw_data[:, 1])).T  # X, Y coordinates
+        self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)
 
     def grid(self, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None, nodes=0):
         """
@@ -244,11 +245,13 @@ class Sgems:
         :param y_lim:
         :param nodes: flag for node computation
         """
-
+        # TODO: modify to implement 3D grids
         if x_lim is None and y_lim is None:
             x_lim, y_lim = np.round(np.max(self.xy, axis=0)) + np.array([dx, dy]) * 4  # X max, Y max
         if xo is None and yo is None:
             xo, yo = np.round(np.min(self.xy, axis=0)) - np.array([dx, dy]) * 4  # X min, Y min
+
+        zo = 0
 
         nrow = int((y_lim - yo) // dy)  # Number of rows
         ncol = int((x_lim - xo) // dx)  # Number of columns
@@ -275,7 +278,7 @@ class Sgems:
             else:
                 np.savetxt(self.dis_file, npar)
 
-        return xo, yo, x_lim, y_lim, nrow, ncol, nlay, along_r, along_c
+        return xo, yo, zo, x_lim, y_lim, nrow, ncol, nlay, along_r, along_c
 
     def plot_coordinates(self):
         plt.plot(self.raw_data[:, 0], self.raw_data[:, 1], 'ko')
@@ -382,11 +385,13 @@ class Sgems:
 
         name = self.root.find('algorithm').attrib['name']
 
-        replace = [['Primary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
-                   ['Secondary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
-                   ['Grid_Name', {'value': 'computation_grid', 'region': ''}],
-                   ['Property_Name', {'value': name}],
-                   ['Hard_Data', {'grid': self.project_name, 'property': "hard"}]]
+        # replace = [['Primary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
+        #            ['Secondary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
+        #            ['Grid_Name', {'value': 'computation_grid', 'region': ''}],
+        #            ['Property_Name', {'value': name}],
+        #            ['Hard_Data', {'grid': self.project_name, 'property': "hard"}]]
+
+        replace = [['Grid_Name', {'value': 'computation_grid', 'region': ''}]]
 
         for r in replace:
             try:
@@ -447,7 +452,7 @@ class Sgems:
 
         sgrid = [self.ncol, self.nrow, self.nlay,
                  self.dx, self.dy, self.dz,
-                 self.xo, self.yo, 0]  # Grid information
+                 self.xo, self.yo, self.zo]  # Grid information
         grid = joinlist('::', sgrid)
 
         params = [[run_algo_flag, '#'],
@@ -459,6 +464,7 @@ class Sgems:
                   [name, 'ALGORITHM_NAME'],
                   [name, 'PROPERTY_NAME'],
                   [algo_xml, 'ALGORITHM_XML'],
+                  [['ag.sgems', 'as.sgems'], 'OBJECT_FILES'],
                   [self.node_value_file.replace('\\', '//'), 'NODES_VALUES_FILE']]
 
         with open('simusgems_template.py') as sst:

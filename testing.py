@@ -11,9 +11,12 @@ data_dir = join_path(cwd, 'datasets', 'test')
 # Define file name
 f_name = 'sgems_dataset.dat'
 # Initialize problem
-sgems = toolbox.Sgems(data_dir=data_dir, file_name=f_name, dx=5, dy=5)
-# Compute data points node and export file
-sgems.export_node_idx()
+sgems = toolbox.Sgems()
+sgems.data_dir = data_dir
+sgems.file_path = f_name
+sgems.load_dataframe()
+sgems.dx = 5
+sgems.dy = 5
 # Display point coordinates and grid
 sgems.plot_coordinates()
 # Load your algorithm xml file in the 'algorithms' folder
