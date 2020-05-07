@@ -83,6 +83,32 @@ def write_point_set(file_name, sub_dataframe):
     Function to write sgems binary point set files.
     No values data still need to be filtered before.
 
+    The Simulacre_input_filter class is a filter that can read the default file
+    format of GsTLAppli. The format is a binary format, with big endian byte
+    order. Following are a description of the file formats for the pointset and
+    the cartesian grid objects. All file formats begin with magic number
+    0xB211175D, a string indicating the type of object stored in the file, the
+    name of the object, and a version number (Q_INT32). The rest is specific
+    to the object stored:
+
+     - point-set:
+        a Q_UINT32 indicating the number of points in the object.
+        a Q_UINT32 indicating the number of properties in the object
+        strings containing the names of the properties
+        the x,y,z coordinates of each point, as floats
+        all the property values, one property at a time, in the order specified
+        by the strings of names, as floats. For each property there are as many
+        values as points in the point-set.
+
+     - cartesian grid:
+        3 Q_UINT32 indicating the number of cells in the x,y,z directions
+        3 floats for the dimensions of a single cell
+        3 floats for the origin of the grid
+        a Q_UINT32 indicating the number of properties
+        all the property values, one property at a time, in the order specified
+        by the strings of names, as floats. For each property, there are nx*ny*nz
+        values (nx,ny,nz are the number of cells in the x,y,z directions).
+
     :param file_name:
     :param sub_dataframe: Sub-frame of the feature to be exported [x, y, feature value]
     :return:
@@ -96,6 +122,8 @@ def write_point_set(file_name, sub_dataframe):
 
     pp = sub_dataframe.columns[-1]  # Get name of the property
 
+    grid_name = '{}_grid'.format(pp)
+
     with open(file_name, 'wb') as wb:
         wb.write(struct.pack('i', int(1.561792946e+9)))  # Magic number
         wb.write(struct.pack('>i', 10))  # Length of 'Point_set' + 1
@@ -107,10 +135,10 @@ def write_point_set(file_name, sub_dataframe):
         wb.write(struct.pack('>b', 0))  # Signed character 0 after str
 
     with open(file_name, 'ab') as wb:
-        wb.write(struct.pack('>i', len('grid')+1))  # Length of 'grid' + 1
+        wb.write(struct.pack('>i', len(grid_name)+1))  # Length of 'grid' + 1
 
     with open(file_name, 'a') as wb:
-        wb.write('grid')  # Name of the grid on which points are saved
+        wb.write(grid_name)  # Name of the grid on which points are saved
 
     with open(file_name, 'ab') as wb:
         wb.write(struct.pack('>b', 0))  # Signed character 0 after str
@@ -158,9 +186,9 @@ class Sgems:
         self.xy = np.vstack((self.raw_data[:, 0], self.raw_data[:, 1])).T  # X, Y coordinates
         self.nodata = -999
 
-        # Generate result directory
-        self.res_dir = jp(self.cwd, 'results', '_'.join([self.project_name, uuid.uuid1().hex]))
-        os.makedirs(self.res_dir)
+        # # Generate result directory
+        # self.res_dir = jp(self.cwd, 'results', '_'.join([self.project_name, uuid.uuid1().hex]))
+        # os.makedirs(self.res_dir)
 
         # Grid geometry
         self.dx = dx  # Block x-dimension
@@ -176,7 +204,7 @@ class Sgems:
         # Algorithm
         self.tree = None
         self.root = None
-        self.op_file = jp(self.res_dir, 'output.xml')
+        self.op_file = jp(self.algo_dir, 'temp_output.xml')
         try:
             os.remove(self.op_file)
         except FileNotFoundError:
@@ -200,7 +228,7 @@ class Sgems:
         self.raw_data, self.project_name, self.columns = self.loader()
         self.xy = np.vstack((self.raw_data[:, 0], self.raw_data[:, 1])).T  # X, Y coordinates
 
-    def grid(self, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None):
+    def grid(self, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None, nodes=0):
         """
         Constructs the grid geometry. The user can not control directly the number of rows and columns
         but instead inputs the cell size in x and y dimensions.
@@ -212,6 +240,7 @@ class Sgems:
         :param yo:
         :param x_lim:
         :param y_lim:
+        :param nodes: flag for node computation
         """
 
         if x_lim is None and y_lim is None:
@@ -225,24 +254,24 @@ class Sgems:
         along_r = np.ones(ncol) * dx  # Size of each cell along y-dimension - rows
         along_c = np.ones(nrow) * dy  # Size of each cell along x-dimension - columns
 
-        npar = np.array([dx, dy, xo, yo, x_lim, y_lim, nrow, ncol, nlay])
-
-        if os.path.isfile(self.dis_file):  # Check previous grid info
-            pdis = np.loadtxt(self.dis_file)
-            # If different, recompute data points node by deleting previous node file
-            if not np.array_equal(pdis, npar):
-                print('New grid found')
-                try:
-                    os.remove(self.node_file)
-                    os.remove(self.node_value_file)
-                except FileNotFoundError:
-                    pass
-                finally:
-                    np.savetxt(self.dis_file, npar)
+        if nodes:
+            npar = np.array([dx, dy, xo, yo, x_lim, y_lim, nrow, ncol, nlay])
+            if os.path.isfile(self.dis_file):  # Check previous grid info
+                pdis = np.loadtxt(self.dis_file)
+                # If different, recompute data points node by deleting previous node file
+                if not np.array_equal(pdis, npar):
+                    print('New grid found')
+                    try:
+                        os.remove(self.node_file)
+                        os.remove(self.node_value_file)
+                    except FileNotFoundError:
+                        pass
+                    finally:
+                        np.savetxt(self.dis_file, npar)
+                else:
+                    print('Using previous grid')
             else:
-                print('Using previous grid')
-        else:
-            np.savetxt(self.dis_file, npar)
+                np.savetxt(self.dis_file, npar)
 
         return xo, yo, x_lim, y_lim, nrow, ncol, nlay, along_r, along_c
 
@@ -282,7 +311,7 @@ class Sgems:
             print('found 1 node in {} s'.format(time.time() - start))
             return cell
         else:
-            return -999
+            return self.nodata
 
     def compute_nodes(self):
         """
@@ -399,6 +428,10 @@ class Sgems:
         Write python script that sgems will run
         """
 
+        # Generate result directory
+        self.res_dir = jp(self.cwd, 'results', '_'.join([self.project_name, uuid.uuid1().hex]))
+        os.makedirs(self.res_dir)
+
         run_algo_flag = ''
         try:
             name = self.root.find('algorithm').attrib['name']
@@ -459,6 +492,7 @@ class Sgems:
         if not os.path.isfile(batch):
             self.bat_file()
         start = time.time()
+
         subprocess.call([batch])  # Opens the BAT file
         print('ran algorithm in {} s'.format(time.time()-start))
 
