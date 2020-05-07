@@ -126,6 +126,10 @@ def write_point_set(file_name, sub_dataframe, nodata=-999):
 
     grid_name = '{}_grid'.format(pp)
 
+    ext = '.sgems'
+    if ext not in file_name:
+        file_name += ext
+
     with open(file_name, 'wb') as wb:
         wb.write(struct.pack('i', int(1.561792946e+9)))  # Magic number
         wb.write(struct.pack('>i', 10))  # Length of 'Point_set' + 1
@@ -431,9 +435,7 @@ class Sgems:
         self.res_dir = jp(self.cwd, 'results', '_'.join([self.project_name, name, uuid.uuid1().hex]))
         os.makedirs(self.res_dir)
 
-        replace = [['Primary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
-                   ['Secondary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
-                   ['Grid_Name', {'value': 'computation_grid', 'region': ''}],
+        replace = [['Grid_Name', {'value': 'computation_grid', 'region': ''}],
                    ['Property_Name', {'value': name}]]
 
         for r in replace:
@@ -464,6 +466,39 @@ class Sgems:
         except TypeError:
             print('No loaded XML file')
 
+    def get_objects(self):
+
+        try:
+            for element in self.root:
+                print(element.tag)
+                print(element.attrib)
+                elems = list(element)
+                c_list = [element.tag]
+
+                trv = list(element.attrib.values())
+                trk = list(element.attrib.keys())
+
+                for i in range(len(trv)):
+                    if trv[i] in self.columns:
+                        if trv[i] not in self.object_file_names:
+                            self.object_file_names.append(trv[i])
+                            if trk[i] == 'grid':  # ensure default grid name
+                                element.attrib['grid'] = '{}_grid'.format(trv[i])
+                            if trk[i] == 'value':  # ensure default grid name
+                                element.attrib['value'] = '{}_grid'.format(trv[i])
+
+                while len(elems) > 0:
+                    elems = list(element)
+                    for e in elems:
+                        c_list.append(e.tag)
+                        print('//'.join(c_list))
+                        print(e.attrib)
+                        element = list(e)
+                        if len(element) == 0:
+                            c_list.pop(-1)
+        except TypeError:
+            print('No loaded XML file')
+
     def xml_update(self, path, new_attribute, show=1):
         """
         Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
@@ -475,7 +510,7 @@ class Sgems:
         if 'property' in new_attribute:  # If one property point set needs to be used
             pp = new_attribute['property']  # Name property
             subframe = self.dataframe[['x', 'y', pp]]  # Extract x, y, values
-            ps_name = jp(self.res_dir, '{}.sgems'.format(pp))  # Path of binary file
+            ps_name = jp(self.res_dir, pp)  # Path of binary file
             write_point_set(ps_name, subframe)  # Write binary file
             feature = os.path.basename(ps_name)  # If object not already in list
             if feature not in self.object_file_names:
