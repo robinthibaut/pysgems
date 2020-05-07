@@ -196,7 +196,7 @@ class Sgems:
         :param xy:  x, y coordinate of data point
         :return:
         """
-
+        start = time.time()
         rn = np.array(xy)
         # first check if point is within the grid
         p = Point(rn)
@@ -210,11 +210,12 @@ class Sgems:
                 c = b[2]
                 dc = np.linalg.norm(rn - c)  # Euclidean distance
                 if dc <= dmin:  # If point is inside cell
+                    print('found 1 node in {} s'.format(time.time()-start))
                     return b[0]
                 if dc < vmin:
                     vmin = dc
                     cell = b[0]
-
+            print('found 1 node in {} s'.format(time.time() - start))
             return cell
         else:
             return -999
@@ -393,7 +394,7 @@ class Sgems:
         batch = jp(self.res_dir, 'RunSgems.bat')
         if not os.path.isfile(batch):
             self.bat_file()
-
+        start = time.time()
         subprocess.call([batch])  # Opens the BAT file
-
+        print('ran algorithm in {} s'.format(time.time()-start))
 
