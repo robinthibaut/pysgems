@@ -78,10 +78,9 @@ def blocks_from_rc(rows, columns, xo, yo):
             yield get_node(c, n), np.array(b), np.mean(b, axis=0)
 
 
-def write_point_set(file_name, sub_dataframe):
+def write_point_set(file_name, sub_dataframe, nodata=-999):
     """
     Function to write sgems binary point set files.
-    No values data still need to be filtered before.
 
     The Simulacre_input_filter class is a filter that can read the default file
     format of GsTLAppli. The format is a binary format, with big endian byte
@@ -113,6 +112,9 @@ def write_point_set(file_name, sub_dataframe):
     :param sub_dataframe: Sub-frame of the feature to be exported [x, y, feature value]
     :return:
     """
+
+    # First, rows with no data occurence are popped
+    sub_dataframe = sub_dataframe[(sub_dataframe != nodata).all(axis=1)]
 
     xyz = np.vstack(
         (sub_dataframe['x'],
