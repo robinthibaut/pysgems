@@ -7,7 +7,7 @@ sgems.execute('DeleteObjects PROJECT_NAME')
 sgems.execute('DeleteObjects finished')
 
 for file in OBJECT_FILES:
-    sgems.execute('LoadObjectFromFile  file::All')
+    sgems.execute('LoadObjectFromFile  {}::All'.format(file))
 
 sgems.execute('NewCartesianGrid  computation_grid::GRID')
 
