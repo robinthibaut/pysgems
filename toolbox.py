@@ -544,6 +544,7 @@ class Sgems:
         """
 
         # First creates necessary binary files
+        self.get_objects()
         for pp in self.object_file_names:
             subframe = self.dataframe[['x', 'y', pp]]  # Extract x, y, values
             ps_name = jp(self.res_dir, pp)  # Path of binary file
@@ -566,6 +567,8 @@ class Sgems:
                  self.xo, self.yo, self.zo]  # Grid information
         grid = joinlist('::', sgrid)  # Grid in sgems format
 
+        sgems_files = [sf + '.sgems' for sf in self.object_file_names]
+
         # The list below is the list of flags that will be replaced in the sgems python script
         params = [[run_algo_flag, '#'],
                   [self.res_dir.replace('\\', '//'), 'RES_DIR'],  # for sgems convention...
@@ -576,7 +579,7 @@ class Sgems:
                   [name, 'ALGORITHM_NAME'],
                   [name, 'PROPERTY_NAME'],
                   [algo_xml, 'ALGORITHM_XML'],
-                  [str(self.object_file_names), 'OBJECT_FILES'],
+                  [str(sgems_files), 'OBJECT_FILES'],
                   [self.node_value_file.replace('\\', '//'), 'NODES_VALUES_FILE']]
 
         with open('simusgems_template.py') as sst:  # Update template
