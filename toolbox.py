@@ -438,6 +438,12 @@ class Sgems:
         replace = [['Grid_Name', {'value': 'computation_grid', 'region': ''}],
                    ['Property_Name', {'value': name}]]
 
+        replace = [['Primary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
+                   ['Secondary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
+                   ['Grid_Name', {'value': 'computation_grid', 'region': ''}],
+                   ['Property_Name', {'value': name}],
+                   ['Hard_Data', {'grid': self.project_name, 'property': "hard"}]]
+
         for r in replace:
             try:
                 self.xml_update(r[0], r[1])
@@ -470,23 +476,36 @@ class Sgems:
         """Ensures binary file of point set are properly generated"""
 
         try:
+            elist = []
             for element in self.root:
                 print(element.tag)
                 print(element.attrib)
                 elems = list(element)
                 c_list = [element.tag]
 
+                elist.append(element)
                 trv = list(element.attrib.values())
                 trk = list(element.attrib.keys())
 
                 for i in range(len(trv)):
-                    if trv[i] in self.columns:
+                    if trv[i] in self.columns and 'Variable' or 'Hard_Data' in element.tag:
                         if trv[i] not in self.object_file_names:
                             self.object_file_names.append(trv[i])
-                            if trk[i] == 'grid':  # ensure default grid name
-                                element.attrib['grid'] = '{}_grid'.format(trv[i])
-                            if trk[i] == 'value':  # ensure default grid name
-                                element.attrib['value'] = '{}_grid'.format(trv[i])
+                            try:
+                                if trk[i-1] == 'grid':  # ensure default grid name
+                                    element.attrib['grid'] = '{}_grid'.format(trv[i])
+                                if trk[i-1] == 'value' and trk[i] == 'property':  # ensure default grid name
+                                    element.attrib['value'] = '{}_grid'.format(trv[i])
+                            except IndexError:
+                                pass
+
+                            try:
+                                if 'Grid' in elist[-1].tag:
+                                    elist[-1].attrib['grid'] = '{}_grid'.format(trv[i])
+                            except AttributeError:
+                                elist[-1].attrib['value'] = '{}_grid'.format(trv[i])
+                            except IndexError:
+                                pass
 
                 while len(elems) > 0:
                     elems = list(element)
