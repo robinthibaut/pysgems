@@ -1,7 +1,5 @@
 import os
 from os.path import join as join_path
-import struct
-import numpy as np
 import toolbox
 
 # Define working directory

@@ -465,11 +465,12 @@ class Sgems:
         except TypeError:
             print('No loaded XML file')
 
-    def xml_update(self, path, new_attribute):
+    def xml_update(self, path, new_attribute, show=1):
         """
         Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
         :param path:
         :param new_attribute:
+        :param show: wheter to display updated xml or not
         """
         self.root.find(path).attrib = new_attribute
         self.tree.write(self.op_file)
@@ -482,6 +483,8 @@ class Sgems:
             feature = os.path.basename(ps_name)  # If object not already in list
             if feature not in self.object_file_names:
                 self.object_file_names.append(feature)
+        if show:
+            self.show_tree()
 
     def write_command(self):
         """
@@ -515,7 +518,7 @@ class Sgems:
                   [name, 'ALGORITHM_NAME'],
                   [name, 'PROPERTY_NAME'],
                   [algo_xml, 'ALGORITHM_XML'],
-                  [self.object_file_names, 'OBJECT_FILES'],
+                  [str(self.object_file_names), 'OBJECT_FILES'],
                   [self.node_value_file.replace('\\', '//'), 'NODES_VALUES_FILE']]
 
         with open('simusgems_template.py') as sst:  # Update template
