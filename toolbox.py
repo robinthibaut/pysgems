@@ -294,6 +294,8 @@ class Sgems:
                     print('Using previous grid')
             else:
                 np.savetxt(self.dis_file, npar)
+        else:
+            self.node_value_file = 'nothing'
 
         self.bounding_box = Polygon([[self.xo, self.yo],
                                      [self.x_lim, self.yo],
@@ -472,8 +474,6 @@ class Sgems:
         :param new_attribute:
         :param show: wheter to display updated xml or not
         """
-        self.root.find(path).attrib = new_attribute
-        self.tree.write(self.op_file)
 
         if 'property' in new_attribute:  # If one property point set needs to be used
             pp = new_attribute['property']  # Name property
@@ -483,6 +483,12 @@ class Sgems:
             feature = os.path.basename(ps_name)  # If object not already in list
             if feature not in self.object_file_names:
                 self.object_file_names.append(feature)
+            if 'grid' in new_attribute:  # ensure default grid name
+                new_attribute['grid'] = '{}_grid'.format(pp)
+
+        self.root.find(path).attrib = new_attribute
+        self.tree.write(self.op_file)
+
         if show:
             self.show_tree()
 
