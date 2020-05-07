@@ -19,7 +19,6 @@ algo_name = sgems.xml_reader('kriging')
 sgems.show_tree()
 # Modify xml below:
 sgems.xml_update('Hard_Data', {'grid': 'grid_ag', 'region': '', 'property': 'ag'})
-sgems.xml_update('Grid_Name', {'value': 'sgems', 'region': ''})
 # Write python script
 sgems.write_command()
 # Run sgems

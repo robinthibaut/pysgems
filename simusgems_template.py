@@ -16,7 +16,7 @@ try:
         fn = eval(nf.read())
 
     properties = FEATURES_LIST
-    nodata = -9966699  # SGEMS default no data value
+    nodata = -9966699
     sgems.execute('NewCartesianGrid  hard_data::GRID')
     nrow, ncol = list(map(int, 'GRID'.split('::')[:2]))
 
