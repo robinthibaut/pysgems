@@ -474,24 +474,25 @@ class Sgems:
         self.root.find(path).attrib = new_attribute
         self.tree.write(self.op_file)
 
-        if 'property' in new_attribute:
-            pp = new_attribute['property']
-            subframe = self.dataframe[['x', 'y', pp]]
-            ps_name = jp(self.res_dir, '{}.sgems'.format(pp))
-            write_point_set(ps_name, subframe)
-            with os.path.basename(ps_name) as feature:
-                if feature not in self.object_file_names:
-                    self.object_file_names.append(feature)
+        if 'property' in new_attribute:  # If one property point set needs to be used
+            pp = new_attribute['property']  # Name property
+            subframe = self.dataframe[['x', 'y', pp]]  # Extract x, y, values
+            ps_name = jp(self.res_dir, '{}.sgems'.format(pp))  # Path of binary file
+            write_point_set(ps_name, subframe)  # Write binary file
+            feature = os.path.basename(ps_name)  # If object not already in list
+            if feature not in self.object_file_names:
+                self.object_file_names.append(feature)
 
     def write_command(self):
         """
         Write python script that sgems will run
         """
 
-        run_algo_flag = ''
+        run_algo_flag = ''  # This empty str will replace the # in front of the commands meant to execute sgems
+        # within its python environment
         try:
-            name = self.root.find('algorithm').attrib['name']
-            with open(self.op_file) as alx:
+            name = self.root.find('algorithm').attrib['name']  # Algorithm name
+            with open(self.op_file) as alx:  # Remove unwanted \n
                 algo_xml = alx.read().strip('\n')
 
         except AttributeError or FileNotFoundError:
@@ -502,26 +503,27 @@ class Sgems:
         sgrid = [self.ncol, self.nrow, self.nlay,
                  self.dx, self.dy, self.dz,
                  self.xo, self.yo, self.zo]  # Grid information
-        grid = joinlist('::', sgrid)
+        grid = joinlist('::', sgrid)  # Grid in sgems format
 
+        # The list below is the list of flags that will be replaced in the sgems python script
         params = [[run_algo_flag, '#'],
-                  [self.res_dir.replace('\\', '//'), 'RES_DIR'],
+                  [self.res_dir.replace('\\', '//'), 'RES_DIR'],  # for sgems convention...
                   [grid, 'GRID'],
                   [self.project_name, 'PROJECT_NAME'],
                   [str(self.columns[2:]), 'FEATURES_LIST'],
-                  ['results', 'FEATURE_OUTPUT'],
+                  ['results', 'FEATURE_OUTPUT'],  # results.grid = output file
                   [name, 'ALGORITHM_NAME'],
                   [name, 'PROPERTY_NAME'],
                   [algo_xml, 'ALGORITHM_XML'],
                   [self.object_file_names, 'OBJECT_FILES'],
                   [self.node_value_file.replace('\\', '//'), 'NODES_VALUES_FILE']]
 
-        with open('simusgems_template.py') as sst:
+        with open('simusgems_template.py') as sst:  # Update template
             template = sst.read()
         for i in range(len(params)):  # Replaces the parameters
             template = template.replace(params[i][1], params[i][0])
 
-        with open(jp(self.res_dir, 'simusgems.py'), 'w') as sstw:
+        with open(jp(self.res_dir, 'simusgems.py'), 'w') as sstw:  # Write sgems python file
             sstw.write(template)
 
     def script_file(self):

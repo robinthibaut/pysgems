@@ -23,13 +23,7 @@ sgems.show_tree()
 sgems.xml_update('Hard_Data', {'grid': 'grid_ag', 'region': '', 'property': 'ag'})
 sgems.xml_update('Grid_Name', {'value': 'sgems', 'region': ''})
 # Write python script
-# sgems.write_command()
+sgems.write_command()
 # Run sgems
 # sgems.run()
 
-
-subframe1 = sgems.dataframe[['x', 'y', 'ag']]
-subframe2 = sgems.dataframe[['x', 'y', 'As']]
-
-toolbox.write_point_set('ag.sgems', subframe1)
-toolbox.write_point_set('as.sgems', subframe2)
