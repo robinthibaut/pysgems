@@ -467,6 +467,7 @@ class Sgems:
             print('No loaded XML file')
 
     def get_objects(self):
+        """Ensures binary file of point set are properly generated"""
 
         try:
             for element in self.root:
@@ -493,6 +494,19 @@ class Sgems:
                         c_list.append(e.tag)
                         print('//'.join(c_list))
                         print(e.attrib)
+
+                        trv = list(e.attrib.values())
+                        trk = list(e.attrib.keys())
+
+                        for i in range(len(trv)):
+                            if trv[i] in self.columns:
+                                if trv[i] not in self.object_file_names:
+                                    self.object_file_names.append(trv[i])
+                                    if trk[i] == 'grid':  # ensure default grid name
+                                        e.attrib['grid'] = '{}_grid'.format(trv[i])
+                                    if trk[i] == 'value':  # ensure default grid name
+                                        e.attrib['value'] = '{}_grid'.format(trv[i])
+
                         element = list(e)
                         if len(element) == 0:
                             c_list.pop(-1)
@@ -509,14 +523,14 @@ class Sgems:
 
         if 'property' in new_attribute:  # If one property point set needs to be used
             pp = new_attribute['property']  # Name property
-            subframe = self.dataframe[['x', 'y', pp]]  # Extract x, y, values
             ps_name = jp(self.res_dir, pp)  # Path of binary file
-            write_point_set(ps_name, subframe)  # Write binary file
             feature = os.path.basename(ps_name)  # If object not already in list
             if feature not in self.object_file_names:
                 self.object_file_names.append(feature)
             if 'grid' in new_attribute:  # ensure default grid name
                 new_attribute['grid'] = '{}_grid'.format(pp)
+            if 'value' in new_attribute:  # ensure default grid name
+                new_attribute['value'] = '{}_grid'.format(pp)
 
         self.root.find(path).attrib = new_attribute
         self.tree.write(self.op_file)
@@ -528,6 +542,12 @@ class Sgems:
         """
         Write python script that sgems will run
         """
+
+        # First creates necessary binary files
+        for pp in self.object_file_names:
+            subframe = self.dataframe[['x', 'y', pp]]  # Extract x, y, values
+            ps_name = jp(self.res_dir, pp)  # Path of binary file
+            write_point_set(ps_name, subframe)  # Write binary file
 
         run_algo_flag = ''  # This empty str will replace the # in front of the commands meant to execute sgems
         # within its python environment
