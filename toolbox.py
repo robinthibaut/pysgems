@@ -438,12 +438,6 @@ class Sgems:
         replace = [['Grid_Name', {'value': 'computation_grid', 'region': ''}],
                    ['Property_Name', {'value': name}]]
 
-        replace = [['Primary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
-                   ['Secondary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
-                   ['Grid_Name', {'value': 'computation_grid', 'region': ''}],
-                   ['Property_Name', {'value': name}],
-                   ['Hard_Data', {'grid': self.project_name, 'property': "hard"}]]
-
         for r in replace:
             try:
                 self.xml_update(r[0], r[1])
@@ -488,7 +482,8 @@ class Sgems:
                 trk = list(element.attrib.keys())
 
                 for i in range(len(trv)):
-                    if trv[i] in self.columns and 'Variable' or 'Hard_Data' in element.tag:
+                    if (trv[i] in self.columns) \
+                            and ('Variable' or 'Hard_Data' in element.tag):
                         if trv[i] not in self.object_file_names:
                             self.object_file_names.append(trv[i])
                             try:
@@ -500,10 +495,10 @@ class Sgems:
                                 pass
 
                             try:
-                                if 'Grid' in elist[-1].tag:
-                                    elist[-1].attrib['grid'] = '{}_grid'.format(trv[i])
-                            except AttributeError:
-                                elist[-1].attrib['value'] = '{}_grid'.format(trv[i])
+                                if 'Grid' in elist[-2].tag:
+                                    elist[-2].attrib['grid'] = '{}_grid'.format(trv[i])
+                            except KeyError or AttributeError:
+                                elist[-2].attrib['value'] = '{}_grid'.format(trv[i])
                             except IndexError:
                                 pass
 
@@ -542,14 +537,15 @@ class Sgems:
 
         if 'property' in new_attribute:  # If one property point set needs to be used
             pp = new_attribute['property']  # Name property
-            ps_name = jp(self.res_dir, pp)  # Path of binary file
-            feature = os.path.basename(ps_name)  # If object not already in list
-            if feature not in self.object_file_names:
-                self.object_file_names.append(feature)
-            if 'grid' in new_attribute:  # ensure default grid name
-                new_attribute['grid'] = '{}_grid'.format(pp)
-            if 'value' in new_attribute:  # ensure default grid name
-                new_attribute['value'] = '{}_grid'.format(pp)
+            if pp in self.columns:
+                ps_name = jp(self.res_dir, pp)  # Path of binary file
+                feature = os.path.basename(ps_name)  # If object not already in list
+                if feature not in self.object_file_names:
+                    self.object_file_names.append(feature)
+                if 'grid' in new_attribute:  # ensure default grid name
+                    new_attribute['grid'] = '{}_grid'.format(pp)
+                if 'value' in new_attribute:  # ensure default grid name
+                    new_attribute['value'] = '{}_grid'.format(pp)
 
         self.root.find(path).attrib = new_attribute
         self.tree.write(self.op_file)
