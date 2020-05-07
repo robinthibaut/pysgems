@@ -60,15 +60,13 @@ xy = sgems.xy
 xyz = np.c_[xy, np.zeros(len(xy))]
 
 sgems.res_dir = join_path(sgems.cwd, 'results', 'sgems_820c0fc88f7811eabc6adc5360b010ea')
-with open(join_path(sgems.res_dir, 'try.sgems'), 'rb') as rb:
-    rr = rb.read()
 
 
 def to_byte(n):
     return bytes([n]).decode()
 
 
-pp = 'ag'
+pp = 'Ag'
 
 
 def write_char(file, char):
@@ -78,61 +76,65 @@ def write_char(file, char):
     file.write(to_byte(0))  # 0
 
 
-with open('head.sgems', 'w') as wb:
-    wb.write(str(int(1.561792946e+9)))
-    [wb.write(to_byte(0)) for _ in range(3)]
+with open('head.sgems', 'wb') as wb:
+    wb.write(struct.pack('i', int(1.561792946e+9)))
+    wb.write(struct.pack('>i', 10))
 
+with open('head.sgems', 'a') as wb:
+    wb.write('Point_set')
 
-with open('intro.sgems', 'w') as wb:
-    write_char(wb, 'Point_set')
-    [wb.write(to_byte(0)) for _ in range(3)]
+with open('head.sgems', 'ab') as wb:
+    wb.write(struct.pack('>b', 0))
 
-    write_char(wb, sgems.project_name)
-    [wb.write(to_byte(0)) for _ in range(3)]
+with open('head.sgems', 'ab') as wb:
+    wb.write(struct.pack('>i', len('demo')+1))
 
-    wb.write(to_byte(int(100)))  # version
-    [wb.write(to_byte(0)) for _ in range(3)]
+with open('head.sgems', 'a') as wb:
+    wb.write('demo')
 
-    wb.write((to_byte(int(len(xyz)))))  # n data points
-    [wb.write(to_byte(0)) for _ in range(3)]
+with open('head.sgems', 'ab') as wb:
+    wb.write(struct.pack('>b', 0))
 
-    wb.write(to_byte(int(1)))  # n property
-    [wb.write(to_byte(0)) for _ in range(3)]
+with open('head.sgems', 'ab') as wb:
+    wb.write(struct.pack('>i', 100))  # version
+    wb.write(struct.pack('>i', len(xyz)))  # n data points
+    wb.write(struct.pack('>i', 1))  # n property
 
-    write_char(wb, pp)  # property name
-    [wb.write(to_byte(0)) for _ in range(3)]
+with open('head.sgems', 'ab') as wb:
+    wb.write(struct.pack('>i', len(pp)+1))
 
+with open('head.sgems', 'a') as wb:
+    wb.write(pp)  # property name
 
-with open('coord.sgems', 'wb') as wb:
+with open('head.sgems', 'ab') as wb:
+    wb.write(struct.pack('>b', 0))
+
+with open('head.sgems', 'ab') as wb:
     for c in xyz:
         ttt = struct.pack('>fff', c[0], c[1], c[2])
         wb.write(ttt)
-        # [wb.write(d.tobytes()) for d in c]
-        # [wb.write(bytes([0])) for _ in range(3)]
 
+raw_data, _, _ = sgems.loader()
 
-with open('values.sgems', 'wb') as wb:
-    for v in sgems.dataframe[:, 2]:
-        wb.write(v)
-
+with open('head.sgems', 'ab') as wb:
+    for v in raw_data[:, 2]:
+        wb.write(struct.pack('>f', v))
 
 pf = join_path(data_dir, 'demo.prj')
-with open(join_path(pf, 'coordinates.sgems'), 'rb') as cb:
-    lol = cb.read()
-
-struct.unpack('fff000i', ttt)
-
 with open(join_path(pf, 'coordinates.sgems'), 'rb') as cb:
     lol = cb.read()
 
 with open(join_path(cwd, 'coord.sgems'), 'rb') as cb:
     lol2 = cb.read()
 
-for i in range(12, len(lol)//12 - 1, 12):
-    print((i-12)/12)
-    struct.unpack('>fff000i', lol[(i-12):i])
-
 step = 12
 for i in range(len(lol)//12):
     print(i)
-    print(struct.unpack('>fff', lol[(i*step):((i+1)*12)]))
+    try:
+        print(struct.unpack('>fff', lol[(i*step):((i+1)*12)]))
+    except IndexError:
+        pass
+    try:
+        print(struct.unpack('>fff', lol2[(i*step):((i+1)*12)]))
+    except IndexError:
+        pass

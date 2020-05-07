@@ -21,14 +21,15 @@ def clockwork(func):
     return wrapper
 
 
-def datread(file=None, start=0, end=-1):
+def datread(file=None, start=0, end=None):
+    # end must be set to None and NOT -1
     """Reads space separated dat file"""
     with open(file, 'r') as fr:
-        lines = np.copy(fr.readlines())
+        lines = np.copy(fr.readlines())[start:end]
         try:
-            op = np.array([list(map(float, line.split())) for line in lines[start:end]])
+            op = np.array([list(map(float, line.split())) for line in lines])
         except ValueError:
-            op = [line.split() for line in lines[start:end]]
+            op = [line.split() for line in lines]
     return op
 
 
@@ -121,10 +122,10 @@ class Sgems:
     def loader(self):
         """Parse sgems dataset"""
         project_info = datread(self.file_name, end=2)  # Name, n features
-        project_name = project_info[0][0].lower()  # Project name
+        project_name = project_info[0][0]  # Project name
         n_features = int(project_info[1][0])  # Number of features len([x, y, f1, f2... fn])
         head = datread(self.file_name, start=2, end=2 + n_features)  # Name of features
-        columns_name = [h[0].lower() for h in head]
+        columns_name = [h[0] for h in head]
         data = datread(self.file_name, start=2 + n_features)  # Raw data
 
         return data, project_name, columns_name
