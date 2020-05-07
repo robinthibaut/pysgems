@@ -554,13 +554,11 @@ class Sgems:
         Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
         :param path:
         :param new_attribute_dict:
-        :param show: wheter to display updated xml or not
+        :param show: whether to display updated xml or not
         """
 
-        if new_attribute_dict is None:
-            new_attribute_dict = {}
+        if new_attribute_dict is not None:
 
-        else:
             if 'property' in new_attribute_dict:  # If one property point set needs to be used
                 pp = new_attribute_dict['property']  # Name property
                 if pp in self.columns:
@@ -576,8 +574,10 @@ class Sgems:
             self.root.find(path).attrib = new_attribute_dict
             self.tree.write(self.op_file)
 
-        self.root.find(path).attrib[attribute_name] = value
-        self.tree.write(self.op_file)
+        else:
+
+            self.root.find(path).attrib[attribute_name] = value
+            self.tree.write(self.op_file)
 
         if show:
             self.show_tree()
