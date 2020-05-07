@@ -431,13 +431,10 @@ class Sgems:
         self.res_dir = jp(self.cwd, 'results', '_'.join([self.project_name, name, uuid.uuid1().hex]))
         os.makedirs(self.res_dir)
 
-        # replace = [['Primary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
-        #            ['Secondary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
-        #            ['Grid_Name', {'value': 'computation_grid', 'region': ''}],
-        #            ['Property_Name', {'value': name}],
-        #            ['Hard_Data', {'grid': self.project_name, 'property': "hard"}]]
-
-        replace = [['Grid_Name', {'value': 'computation_grid', 'region': ''}]]
+        replace = [['Primary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
+                   ['Secondary_Harddata_Grid', {'value': self.project_name, 'region': ''}],
+                   ['Grid_Name', {'value': 'computation_grid', 'region': ''}],
+                   ['Property_Name', {'value': name}]]
 
         for r in replace:
             try:
