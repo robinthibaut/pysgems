@@ -1,6 +1,7 @@
 import os
 from os.path import join as join_path
 import struct
+import numpy as np
 import toolbox
 
 # Define working directory
@@ -55,70 +56,11 @@ sgems.xml_update('Grid_Name', {'value': 'sgems', 'region': ''})
 # * values (nx,ny,nz are the number of cells in the x,y,z directions).
 # */
 
-import numpy as np
-xy = sgems.xy
-xyz = np.c_[xy, np.zeros(len(xy))]
-
-sgems.res_dir = join_path(sgems.cwd, 'results', 'sgems_820c0fc88f7811eabc6adc5360b010ea')
 
 
-def to_byte(n):
-    return bytes([n]).decode()
 
 
-pp = 'Ag'
-
-
-def write_char(file, char):
-    clen = int(len(char) + 1)
-    file.write(to_byte(clen))  # len next str + 1
-    file.write(char)  # type
-    file.write(to_byte(0))  # 0
-
-
-with open('head.sgems', 'wb') as wb:
-    wb.write(struct.pack('i', int(1.561792946e+9)))
-    wb.write(struct.pack('>i', 10))
-
-with open('head.sgems', 'a') as wb:
-    wb.write('Point_set')
-
-with open('head.sgems', 'ab') as wb:
-    wb.write(struct.pack('>b', 0))
-
-with open('head.sgems', 'ab') as wb:
-    wb.write(struct.pack('>i', len('demo')+1))
-
-with open('head.sgems', 'a') as wb:
-    wb.write('demo')
-
-with open('head.sgems', 'ab') as wb:
-    wb.write(struct.pack('>b', 0))
-
-with open('head.sgems', 'ab') as wb:
-    wb.write(struct.pack('>i', 100))  # version
-    wb.write(struct.pack('>i', len(xyz)))  # n data points
-    wb.write(struct.pack('>i', 1))  # n property
-
-with open('head.sgems', 'ab') as wb:
-    wb.write(struct.pack('>i', len(pp)+1))
-
-with open('head.sgems', 'a') as wb:
-    wb.write(pp)  # property name
-
-with open('head.sgems', 'ab') as wb:
-    wb.write(struct.pack('>b', 0))
-
-with open('head.sgems', 'ab') as wb:
-    for c in xyz:
-        ttt = struct.pack('>fff', c[0], c[1], c[2])
-        wb.write(ttt)
-
-raw_data, _, _ = sgems.loader()
-
-with open('head.sgems', 'ab') as wb:
-    for v in raw_data[:, 2]:
-        wb.write(struct.pack('>f', v))
+write_point_set('test_ag.sgems', sgems.dataframe[['x', 'y', 'Ag']])
 
 pf = join_path(data_dir, 'demo.prj')
 with open(join_path(pf, 'coordinates.sgems'), 'rb') as cb:

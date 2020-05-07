@@ -9,6 +9,8 @@ import xml.etree.ElementTree as ET
 import matplotlib.pyplot as plt
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
+import pandas as pd
+import struct
 
 
 def clockwork(func):
@@ -76,6 +78,67 @@ def blocks_from_rc(rows, columns, xo, yo):
             yield get_node(c, n), np.array(b), np.mean(b, axis=0)
 
 
+def write_point_set(file_name, sub_dataframe):
+    """
+    Function to write sgems binary point set files.
+    No values data still need to be filtered before.
+
+    :param file_name:
+    :param sub_dataframe: Sub-frame of the feature to be exported [x, y, feature value]
+    :return:
+    """
+
+    xyz = np.vstack(
+        (sub_dataframe['x'],
+         sub_dataframe['y'],
+         np.zeros(len(sub_dataframe)))
+    ).T  # We need X Y Z coordinates even if working in 2D
+
+    pp = sub_dataframe.columns[-1]  # Get name of the property
+
+    with open(file_name, 'wb') as wb:
+        wb.write(struct.pack('i', int(1.561792946e+9)))  # Magic number
+        wb.write(struct.pack('>i', 10))  # Length of 'Point_set' + 1
+
+    with open(file_name, 'a') as wb:
+        wb.write('Point_set')  # Type of file
+
+    with open(file_name, 'ab') as wb:
+        wb.write(struct.pack('>b', 0))  # Signed character 0 after str
+
+    with open(file_name, 'ab') as wb:
+        wb.write(struct.pack('>i', len('grid')+1))  # Length of 'grid' + 1
+
+    with open(file_name, 'a') as wb:
+        wb.write('grid')  # Name of the grid on which points are saved
+
+    with open(file_name, 'ab') as wb:
+        wb.write(struct.pack('>b', 0))  # Signed character 0 after str
+
+    with open(file_name, 'ab') as wb:
+        wb.write(struct.pack('>i', 100))  # version number
+        wb.write(struct.pack('>i', len(xyz)))  # n data points
+        wb.write(struct.pack('>i', 1))  # n property
+
+    with open(file_name, 'ab') as wb:
+        wb.write(struct.pack('>i', len(pp)+1))  # Length of property name + 1
+
+    with open(file_name, 'a') as wb:
+        wb.write(pp)  # Property name
+
+    with open(file_name, 'ab') as wb:
+        wb.write(struct.pack('>b', 0))  # Signed character 0 after str
+
+    with open(file_name, 'ab') as wb:
+        for c in xyz:
+            ttt = struct.pack('>fff', c[0], c[1], c[2])  # Coordinates x, y, z
+            wb.write(ttt)
+
+    with open(file_name, 'ab') as wb:
+        for v in sub_dataframe[pp]:
+            wb.write(struct.pack('>f', v))  # Values
+
+
 class Sgems:
 
     def __init__(self, data_dir, file_name, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None):
@@ -90,8 +153,9 @@ class Sgems:
         self.dis_file = jp(self.data_dir, 'dis.info')
 
         # Data
-        self.dataframe, self.project_name, self.columns = self.loader()
-        self.xy = np.vstack((self.dataframe[:, 0], self.dataframe[:, 1])).T  # X, Y coordinates
+        self.raw_data, self.project_name, self.columns = self.loader()
+        self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)
+        self.xy = np.vstack((self.raw_data[:, 0], self.raw_data[:, 1])).T  # X, Y coordinates
         self.nodata = -999
 
         # Generate result directory
@@ -133,8 +197,8 @@ class Sgems:
     def load_dataframe(self):
         """Loads sgems data set"""
         # At this time, considers only 2D dataset
-        self.dataframe, self.project_name, self.columns = self.loader()
-        self.xy = np.vstack((self.dataframe[:, 0], self.dataframe[:, 1])).T  # X, Y coordinates
+        self.raw_data, self.project_name, self.columns = self.loader()
+        self.xy = np.vstack((self.raw_data[:, 0], self.raw_data[:, 1])).T  # X, Y coordinates
 
     def grid(self, dx, dy, xo=None, yo=None, x_lim=None, y_lim=None):
         """
@@ -148,7 +212,6 @@ class Sgems:
         :param yo:
         :param x_lim:
         :param y_lim:
-        :return:
         """
 
         if x_lim is None and y_lim is None:
@@ -184,7 +247,7 @@ class Sgems:
         return xo, yo, x_lim, y_lim, nrow, ncol, nlay, along_r, along_c
 
     def plot_coordinates(self):
-        plt.plot(self.dataframe[:, 0], self.dataframe[:, 1], 'ko')
+        plt.plot(self.raw_data[:, 0], self.raw_data[:, 1], 'ko')
         plt.xticks(np.cumsum(self.along_r) + self.xo - self.dx, labels=[])
         plt.yticks(np.cumsum(self.along_c) + self.yo - self.dy, labels=[])
         plt.grid('blue')
@@ -252,7 +315,7 @@ class Sgems:
         fn = []
         for h in range(2, len(self.columns)):  # For each feature
             # fixed nodes = [[node i, value i]....]
-            fixed_nodes = np.array([[data_nodes[dn], self.dataframe[:, h][dn]] for dn in range(len(data_nodes))])
+            fixed_nodes = np.array([[data_nodes[dn], self.raw_data[:, h][dn]] for dn in range(len(data_nodes))])
             # Deletes points where val == nodata
             hard_data = np.delete(fixed_nodes, np.where(fixed_nodes == self.nodata)[0], axis=0)
             # If data points share the same cell, compute their mean and assign the value to the cell
