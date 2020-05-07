@@ -472,8 +472,7 @@ class Sgems:
         try:
             elist = []
             for element in self.root:
-                print(element.tag)
-                print(element.attrib)
+
                 elems = list(element)
                 c_list = [element.tag]
 
@@ -488,17 +487,34 @@ class Sgems:
                             self.object_file_names.append(trv[i])
                             try:
                                 if trk[i-1] == 'grid':  # ensure default grid name
+                                    print(element.attrib)
                                     element.attrib['grid'] = '{}_grid'.format(trv[i])
+                                    # TODO: get back here
+                                    self.xml_update()
+                                    print('>>>')
+                                    print(element.attrib)
                                 if trk[i-1] == 'value' and trk[i] == 'property':  # ensure default grid name
+                                    print(element.attrib)
                                     element.attrib['value'] = '{}_grid'.format(trv[i])
+                                    print('>>>')
+                                    print(element.attrib)
                             except IndexError:
                                 pass
-
                             try:
                                 if 'Grid' in elist[-2].tag:
-                                    elist[-2].attrib['grid'] = '{}_grid'.format(trv[i])
-                            except KeyError or AttributeError:
-                                elist[-2].attrib['value'] = '{}_grid'.format(trv[i])
+                                    tp = list(elist[-2].attrib.keys())
+                                    if 'grid' in tp:
+                                        print('//'.join(c_list[:-2]))
+                                        print(elist[-2].attrib)
+                                        elist[-2].attrib['grid'] = '{}_grid'.format(trv[i])
+                                        print('>>>')
+                                        print(elist[-2].attrib)
+                                    if 'value' in tp:
+                                        print('//'.join(c_list[:-2]))
+                                        print(elist[-2].attrib)
+                                        elist[-2].attrib['value'] = '{}_grid'.format(trv[i])
+                                        print('>>>')
+                                        print(elist[-2].attrib)
                             except IndexError:
                                 pass
 
@@ -506,8 +522,6 @@ class Sgems:
                     elems = list(element)
                     for e in elems:
                         c_list.append(e.tag)
-                        print('//'.join(c_list))
-                        print(e.attrib)
 
                         trv = list(e.attrib.values())
                         trk = list(e.attrib.keys())
@@ -517,9 +531,17 @@ class Sgems:
                                 if trv[i] not in self.object_file_names:
                                     self.object_file_names.append(trv[i])
                                     if trk[i] == 'grid':  # ensure default grid name
+                                        print('//'.join(c_list))
+                                        print(e.attrib)
                                         e.attrib['grid'] = '{}_grid'.format(trv[i])
+                                        print('>>>')
+                                        print(e.attrib)
                                     if trk[i] == 'value':  # ensure default grid name
+                                        print('//'.join(c_list))
+                                        print(e.attrib)
                                         e.attrib['value'] = '{}_grid'.format(trv[i])
+                                        print('>>>')
+                                        print(e.attrib)
 
                         element = list(e)
                         if len(element) == 0:
@@ -527,27 +549,34 @@ class Sgems:
         except TypeError:
             print('No loaded XML file')
 
-    def xml_update(self, path, new_attribute, show=1):
+    def xml_update(self, path, attribute_name, value, new_attribute_dict=None, show=1):
         """
         Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
         :param path:
-        :param new_attribute:
+        :param new_attribute_dict:
         :param show: wheter to display updated xml or not
         """
 
-        if 'property' in new_attribute:  # If one property point set needs to be used
-            pp = new_attribute['property']  # Name property
-            if pp in self.columns:
-                ps_name = jp(self.res_dir, pp)  # Path of binary file
-                feature = os.path.basename(ps_name)  # If object not already in list
-                if feature not in self.object_file_names:
-                    self.object_file_names.append(feature)
-                if 'grid' in new_attribute:  # ensure default grid name
-                    new_attribute['grid'] = '{}_grid'.format(pp)
-                if 'value' in new_attribute:  # ensure default grid name
-                    new_attribute['value'] = '{}_grid'.format(pp)
+        if new_attribute_dict is None:
+            new_attribute_dict = {}
 
-        self.root.find(path).attrib = new_attribute
+        else:
+            if 'property' in new_attribute_dict:  # If one property point set needs to be used
+                pp = new_attribute_dict['property']  # Name property
+                if pp in self.columns:
+                    ps_name = jp(self.res_dir, pp)  # Path of binary file
+                    feature = os.path.basename(ps_name)  # If object not already in list
+                    if feature not in self.object_file_names:
+                        self.object_file_names.append(feature)
+                    if 'grid' in new_attribute_dict:  # ensure default grid name
+                        new_attribute_dict['grid'] = '{}_grid'.format(pp)
+                    if 'value' in new_attribute_dict:  # ensure default grid name
+                        new_attribute_dict['value'] = '{}_grid'.format(pp)
+
+            self.root.find(path).attrib = new_attribute_dict
+            self.tree.write(self.op_file)
+
+        self.root.find(path).attrib[attribute_name] = value
         self.tree.write(self.op_file)
 
         if show:
