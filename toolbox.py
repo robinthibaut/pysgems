@@ -187,16 +187,6 @@ class Sgems:
         self.res_dir = res_dir  # result dir initiated when modifying xml file if none given
         self.file_name = file_name  # data file name
 
-        # Data
-        if file_name:
-            self.file_path = jp(self.data_dir, file_name)
-            self.raw_data, self.project_name, self.columns = self.loader()  # load raw data
-            self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)  # build panda dataframe to
-            # easily access attributes based on their names.
-            self.xyz = np.vstack((self.raw_data[:, 0], self.raw_data[:, 1])).T  # X, Y coordinates
-        self.nodata = -999
-        self.object_file_names = []  # List containing file names of point sets that will be loaded
-
         # Grid geometry - use self.generate_grid() to update values
         self.dx = dx  # Block x-dimension
         self.dy = dy  # Block y-dimension
@@ -216,6 +206,20 @@ class Sgems:
         self.bounding_box = None
         self.generate_grid()
 
+        # Data
+        self.raw_data = None
+        self.project_name = None
+        self.columns = None
+        self.xyz = None
+        self.dataframe = None
+        if file_name:
+            self.file_path = jp(self.data_dir, file_name)
+            self.load_dataframe()
+            # self.raw_data, self.project_name, self.columns = self.loader()  # load raw data
+            # easily access attributes based on their names.
+        self.nodata = -999
+        self.object_file_names = []  # List containing file names of point sets that will be loaded
+
         # Algorithm XML
         self.tree = None
         self.root = None
@@ -229,7 +233,6 @@ class Sgems:
     # Load sgems dataset
     def loader(self):
         """Parse dataset in GSLIB format"""
-        self.file_path = jp(self.data_dir, self.file_name)
         project_info = datread(self.file_path, end=2)  # Name, n features
         project_name = project_info[0][0].lower()  # Project name (lowered)
         n_features = int(project_info[1][0])  # Number of features len([x, y, f1, f2... fn])
@@ -248,9 +251,10 @@ class Sgems:
         self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)
         try:
             self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
-        except KeyError:
+        except KeyError:  # Assumes 2D dataset
             self.dataframe.insert(2, 'z', np.zeros(self.dataframe.shape[0]))
             self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
+            self.dz = 0
 
     def generate_grid(self, xo=None, yo=None, zo=None, x_lim=None, y_lim=None, z_lim=None, nodes=0):
         """
@@ -277,20 +281,30 @@ class Sgems:
 
         if xo is None and yo is None and zo is None:
             try:
-                xo, yo, zo = np.round(np.min(self.xyz, axis=0)) - np.array([self.dx, self.dy, self.dz]) * 4  # X min, Y min
+                xo, yo, zo = np.round(np.min(self.xyz, axis=0)) - np.array([self.dx, self.dy, self.dz]) * 4
             except AttributeError:
                 xo = self.xo
                 yo = self.yo
                 zo = self.zo
 
-        nrow = int((y_lim - yo) // self.dy)  # Number of rows
-        ncol = int((x_lim - xo) // self.dx)  # Number of columns
-        nlay = int((z_lim - zo) // self.dz)  # Number of layers
+        if self.dy > 0:
+            nrow = int((y_lim - yo) // self.dy)  # Number of rows
+        else:
+            nrow = 1
+        if self.dx > 0:
+            ncol = int((x_lim - xo) // self.dx)  # Number of columns
+        else:
+            ncol = 1
+        if self.dz > 0:
+            nlay = int((z_lim - zo) // self.dz)  # Number of layers
+        else:
+            nlay = 1
+
         along_r = np.ones(ncol) * self.dx  # Size of each cell along y-dimension - rows
         along_c = np.ones(nrow) * self.dy  # Size of each cell along x-dimension - columns
         along_l = np.ones(nlay) * self.dz  # Size of each cell along x-dimension - columns
 
-        if nodes:
+        if nodes:  # TODO: separate the node computation part and adapt to 3D
             npar = np.array([self.dx, self.dy, xo, yo, x_lim, y_lim, nrow, ncol, nlay])
             if os.path.isfile(self.dis_file):  # Check previous grid info
                 pdis = np.loadtxt(self.dis_file)
