@@ -12,7 +12,7 @@ from os.path import join as jp
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from shapely.geometry import Point
+from shapely.geometry import Point, Polygon
 
 
 def datread(file=None, start=0, end=None):
@@ -231,6 +231,7 @@ class Sgems:
             self.dis_file = jp(os.path.dirname(self.file_path), 'dis.info')
 
         self.nodata = -999
+        self.hard_data_objects = []  # List of names of hard data
         self.object_file_names = []  # List containing file names of point sets that will be loaded
 
         # Algorithm XML
@@ -266,7 +267,7 @@ class Sgems:
             self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
         except KeyError:  # Assumes 2D dataset
             self.dataframe.insert(2, 'z', np.zeros(self.dataframe.shape[0]))
-            self.columns = self.dataframe.columns.values
+            self.columns = list(self.dataframe.columns.values)
             self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
             self.dz = 0
         self.generate_grid(xo=self.xo, yo=self.yo, zo=self.zo,
@@ -275,7 +276,7 @@ class Sgems:
         self.node_value_file = jp(os.path.dirname(self.file_path), 'fnodes.txt')
         self.dis_file = jp(os.path.dirname(self.file_path), 'dis.info')
 
-    def generate_grid(self, xo=None, yo=None, zo=None, x_lim=None, y_lim=None, z_lim=None, nodes=0):
+    def generate_grid(self, xo=None, yo=None, zo=None, x_lim=None, y_lim=None, z_lim=None):
         """
         Constructs the grid geometry. The user can not control directly the number of rows and columns
         but instead inputs the cell size in x and y dimensions.
@@ -321,37 +322,6 @@ class Sgems:
         along_c = np.ones(nrow) * self.dy  # Size of each cell along x-dimension - columns
         along_l = np.ones(nlay) * self.dz  # Size of each cell along x-dimension - columns
 
-        if nodes:  # TODO: separate the node computation part and adapt to 3D
-            npar = np.array([self.dx, self.dy, self.dz,
-                             xo, yo, zo,
-                             x_lim, y_lim, z_lim,
-                             nrow, ncol, nlay])
-            if os.path.isfile(self.dis_file):  # Check previous grid info
-                pdis = np.loadtxt(self.dis_file)
-                # If different, recompute data points node by deleting previous node file
-                if not np.array_equal(pdis, npar):
-                    print('New grid found')
-                    try:
-                        os.remove(self.node_file)
-                        os.remove(self.node_value_file)
-                    except FileNotFoundError:
-                        pass
-                    finally:
-                        np.savetxt(self.dis_file, npar)
-                else:
-                    print('Using previous grid')
-            else:
-                np.savetxt(self.dis_file, npar)
-            self.get_nodes()
-            self.export_node_idx()
-        else:
-            self.node_value_file = 'nothing'
-
-        # self.bounding_box = Polygon([[self.xo, self.yo],
-        #                              [self.x_lim, self.yo],
-        #                              [self.x_lim, self.y_lim],
-        #                              [self.xo, self.y_lim]])
-
         self.xo = xo
         self.yo = yo
         self.zo = zo
@@ -375,9 +345,17 @@ class Sgems:
         start = time.time()
         rn = np.array(xyz)
         # first check if point is within the grid
-        p = Point(rn)
-        # TODO: define 3D bounding box
-        if True:  # p.within(self.bounding_box):
+        p_xy = Point([rn[0], rn[1]])
+        p_xz = Point([rn[0], rn[2]])
+        poly_xy = Polygon([(self.xo, self.yo), (self.x_lim, self.yo), (self.x_lim, self.y_lim), (self.xo, self.y_lim)])
+        poly_xz = Polygon([(self.xo, self.zo), (self.x_lim, self.zo), (self.x_lim, self.z_lim), (self.xo, self.z_lim)])
+
+        if self.dz == 0:
+            crit = p_xy.within(poly_xy)
+        else:
+            crit = p_xy.within(poly_xy) and p_xz.within(poly_xz)
+
+        if crit:
             if self.dz > 0:
                 dmin = np.min([self.dx, self.dy, self.dz]) / 2
             else:
@@ -411,15 +389,37 @@ class Sgems:
 
         np.save(self.node_file, nodes)  # Save to nodes to avoid recomputing each time
 
-        return nodes
-
     def get_nodes(self):
-        try:
-            d_nodes = np.load(self.node_file)
-        except FileNotFoundError:
-            d_nodes = self.compute_nodes()
 
-        return d_nodes
+        npar = np.array([self.dx, self.dy, self.dz,
+                         self.xo, self.yo, self.zo,
+                         self.x_lim, self.y_lim, self.z_lim,
+                         self.nrow, self.ncol, self.nlay])
+
+        if os.path.isfile(self.dis_file):  # Check previous grid info
+            pdis = np.loadtxt(self.dis_file)
+            # If different, recompute data points node by deleting previous node file
+            if not np.array_equal(pdis, npar):
+                print('New grid found')
+                try:
+                    os.remove(self.node_file)
+                    os.remove(self.node_value_file)
+                except FileNotFoundError:
+                    pass
+                finally:
+                    np.savetxt(self.dis_file, npar)
+                    self.compute_nodes()
+            else:
+                print('Using previous grid')
+                try:
+                    np.load(self.node_file)
+                except FileNotFoundError:
+                    self.compute_nodes()
+        else:
+            np.savetxt(self.dis_file, npar)
+            self.compute_nodes()
+
+        self.export_node_idx()
 
     def nodes_cleanup(self, features):
         """
@@ -427,7 +427,7 @@ class Sgems:
         :param features: str or list(str) of features name to save
         :return: Filtered list of each attribute
         """
-        data_nodes = self.get_nodes()
+        data_nodes = np.load(self.node_file)
         unique_nodes = list(set(data_nodes))
 
         if not isinstance(features, list):
@@ -455,11 +455,13 @@ class Sgems:
         Export the list of shape (n features, m nodes, 2) containing the node of each point data with the corresponding
         value, for each feature
         """
+        self.hard_data_objects = self.columns[3:]
         if not os.path.isfile(self.node_value_file):
-            hard = self.nodes_cleanup(features=self.columns[3:])
+            hard = self.nodes_cleanup(features=self.hard_data_objects)
             with open(self.node_value_file, 'w') as nd:
                 nd.write(repr(hard))
-            shutil.copyfile(self.node_value_file, self.node_value_file.replace(self.data_dir, self.res_dir))
+            shutil.copyfile(self.node_value_file,
+                            self.node_value_file.replace(os.path.dirname(self.node_value_file), self.res_dir))
 
     def xml_reader(self, algo_name):
         """
@@ -691,7 +693,7 @@ class Sgems:
                   [self.res_dir.replace('\\', '//'), 'RES_DIR'],  # for sgems convention...
                   [grid, 'GRID'],
                   [self.project_name, 'PROJECT_NAME'],
-                  [str(self.columns[2:]), 'FEATURES_LIST'],
+                  [str(self.hard_data_objects), 'FEATURES_LIST'],
                   ['results', 'FEATURE_OUTPUT'],  # results.grid = output file
                   [name, 'ALGORITHM_NAME'],
                   [name, 'PROPERTY_NAME'],
