@@ -36,7 +36,7 @@ def joinlist(j, mylist):
     return gp
 
 
-def blocks_from_rc(rows, columns, layers, xo, yo, zo):
+def blocks_from_rc(rows, columns, layers, xo=0, yo=0, zo=0):
     """
     Yields blocks defining grid cells
     :param rows: array of x-widths along a row
@@ -64,24 +64,22 @@ def blocks_from_rc(rows, columns, layers, xo, yo, zo):
         :param h: layer number
         :return: node number
         """
-        # TODO: verify for 3D
         nrc = nrow*ncol
-        # return int((k * nrc) + (i * ncol) + j)
-        return int(h * nrc + (r + 1) * ncol + c) + 1
+        return int((h * nrc) + (r * ncol) + c)
 
     for k in range(nlay):
         for i in range(nrow):
             for j in range(ncol):
                 b = [
                      [c_sum[j] - delc[j], r_sum[i] - delr[i], l_sum[k] - dell[k]],
-                     [c_sum[j] - delc[j], r_sum[i]],
-                     [c_sum[j],           r_sum[i]],
-                     [c_sum[j],           r_sum[i] - delr[i]],
+                     [c_sum[j],           r_sum[i] - delr[i], l_sum[k] - dell[k]],
+                     [c_sum[j] - delc[j], r_sum[i],           l_sum[k] - dell[k]],
+                     [c_sum[j],           r_sum[i],           l_sum[k] - dell[k]],
 
-                     [c_sum[j] - delc[j], r_sum[i] - delr[i]],
-                     [c_sum[j] - delc[j], r_sum[i]],
-                     [c_sum[j],           r_sum[i]],
-                     [c_sum[j],           r_sum[i] - delr[i]]
+                     [c_sum[j] - delc[j], r_sum[i] - delr[i], l_sum[k]],
+                     [c_sum[j],           r_sum[i] - delr[i], l_sum[k]],
+                     [c_sum[j] - delc[j], r_sum[i],           l_sum[k]],
+                     [c_sum[j],           r_sum[i],           l_sum[k]]
                     ]
                 yield get_node(i, j, k), np.array(b), np.mean(b, axis=0)
 
