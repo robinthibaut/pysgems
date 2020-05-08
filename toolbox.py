@@ -440,7 +440,7 @@ class Sgems:
 
         for r in replace:
             try:
-                self.xml_update(r[0], r[1])
+                self.xml_update(path=r[0], new_attribute_dict=r[1])
             except AttributeError:
                 pass
 
@@ -490,12 +490,13 @@ class Sgems:
                                     print(element.attrib)
                                     element.attrib['grid'] = '{}_grid'.format(trv[i])
                                     # TODO: get back here
-                                    self.xml_update()
+                                    self.xml_update('//'.join(c_list), 'grid', '{}_grid'.format(trv[i]))
                                     print('>>>')
                                     print(element.attrib)
                                 if trk[i-1] == 'value' and trk[i] == 'property':  # ensure default grid name
                                     print(element.attrib)
                                     element.attrib['value'] = '{}_grid'.format(trv[i])
+                                    self.xml_update('//'.join(c_list), 'value', '{}_grid'.format(trv[i]))
                                     print('>>>')
                                     print(element.attrib)
                             except IndexError:
@@ -507,12 +508,14 @@ class Sgems:
                                         print('//'.join(c_list[:-2]))
                                         print(elist[-2].attrib)
                                         elist[-2].attrib['grid'] = '{}_grid'.format(trv[i])
+                                        self.xml_update(elist[-2].tag, 'grid', '{}_grid'.format(trv[i]))
                                         print('>>>')
                                         print(elist[-2].attrib)
                                     if 'value' in tp:
                                         print('//'.join(c_list[:-2]))
                                         print(elist[-2].attrib)
                                         elist[-2].attrib['value'] = '{}_grid'.format(trv[i])
+                                        self.xml_update(elist[-2].tag, 'value', '{}_grid'.format(trv[i]))
                                         print('>>>')
                                         print(elist[-2].attrib)
                             except IndexError:
@@ -534,12 +537,14 @@ class Sgems:
                                         print('//'.join(c_list))
                                         print(e.attrib)
                                         e.attrib['grid'] = '{}_grid'.format(trv[i])
+                                        self.xml_update('//'.join(c_list), 'grid', '{}_grid'.format(trv[i]))
                                         print('>>>')
                                         print(e.attrib)
                                     if trk[i] == 'value':  # ensure default grid name
                                         print('//'.join(c_list))
                                         print(e.attrib)
                                         e.attrib['value'] = '{}_grid'.format(trv[i])
+                                        self.xml_update('//'.join(c_list), 'value', '{}_grid'.format(trv[i]))
                                         print('>>>')
                                         print(e.attrib)
 
@@ -549,7 +554,7 @@ class Sgems:
         except TypeError:
             print('No loaded XML file')
 
-    def xml_update(self, path, attribute_name, value, new_attribute_dict=None, show=1):
+    def xml_update(self, path, attribute_name=None, value=None, new_attribute_dict=None, show=1):
         """
         Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
         :param path:
