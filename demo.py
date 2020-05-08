@@ -11,6 +11,7 @@ data_dir = join_path(cwd, 'datasets', 'benin')
 f_name = 'Dataset_Log_WithoutOutlier_WithoutDouble(LowerThan30m)_Without-4.txt'
 # Initialize problem
 sgems = toolbox.Sgems(dx=5000, dy=5000, data_dir=data_dir, file_name=f_name)
+# Generate grid
 sgems.generate_grid()
 # Display point coordinates and grid
 sgems.plot_coordinates()
@@ -29,4 +30,5 @@ sgems.make_data(['f', 'hco3'])
 sgems.write_command()
 # Run sgems
 sgems.run()
-
+# Plot 2D results
+sgems.plot_2d(save=True)

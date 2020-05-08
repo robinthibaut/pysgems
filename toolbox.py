@@ -686,3 +686,16 @@ class Sgems:
         subprocess.call([batch])  # Opens the BAT file
         print('ran algorithm in {} s'.format(time.time()-start))
 
+    def plot_2d(self, save=False):
+        matrix = datread(jp(self.res_dir, 'results.grid'), start=3)
+        matrix = np.where(matrix == -9966699, np.nan, matrix)
+        matrix = matrix.reshape((self.nrow, self.ncol))
+        extent = (self.xo, self.x_lim, self.yo, self.y_lim)
+        plt.imshow(np.flipud(matrix), cmap='coolwarm', extent=extent)
+
+        plt.colorbar()
+        if save:
+            plt.savefig(jp(self.res_dir, 'results.png'), dpi=300)
+        plt.show()
+
+
