@@ -1,16 +1,17 @@
-import numpy as np
-import time
 import os
-from os.path import join as jp
 import shutil
-import uuid
+import struct
 import subprocess
+import time
+import uuid
 import xml.etree.ElementTree as ET
+from os.path import join as jp
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
-import pandas as pd
-import struct
 
 
 def clockwork(func):
@@ -466,7 +467,7 @@ class Sgems:
         except TypeError:
             print('No loaded XML file')
 
-    def get_objects(self):
+    def auto_fill(self):
         """Ensures binary file of point set are properly generated"""
 
         try:
@@ -489,7 +490,6 @@ class Sgems:
                                 if trk[i-1] == 'grid':  # ensure default grid name
                                     print(element.attrib)
                                     element.attrib['grid'] = '{}_grid'.format(trv[i])
-                                    # TODO: get back here
                                     self.xml_update('//'.join(c_list), 'grid', '{}_grid'.format(trv[i]))
                                     print('>>>')
                                     print(element.attrib)
@@ -554,17 +554,25 @@ class Sgems:
         except TypeError:
             print('No loaded XML file')
 
-    def xml_update(self, path, attribute_name=None, value=None, new_attribute_dict=None, show=1):
+    def xml_update(self, path,
+                   attribute_name=None,
+                   value=None,
+                   new_attribute_dict=None,
+                   auto_binary=False,
+                   show=1):
         """
         Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
-        :param path:
-        :param new_attribute_dict:
+        :param path: object path
+        :param attribute_name: name of the attribute to modify
+        :param value: new value for attribute
+        :param new_attribute_dict: dictionary defining new attribute
+        :param auto_binary: experimental feature to auto generate data binary files according to needs
         :param show: whether to display updated xml or not
         """
 
         if new_attribute_dict is not None:
-
-            if 'property' in new_attribute_dict:  # If one property point set needs to be used
+            if (auto_binary is True) and ('property' in new_attribute_dict):
+                # If one property point set needs to be used
                 pp = new_attribute_dict['property']  # Name property
                 if pp in self.columns:
                     ps_name = jp(self.res_dir, pp)  # Path of binary file
@@ -587,17 +595,22 @@ class Sgems:
         if show:
             self.show_tree()
 
-    def write_command(self):
+    def make_data(self, features):
         """
-        Write python script that sgems will run
+        Gives a list of dataset to be saved in sgems binary format and saves them to the result directory
+        :param features:
         """
-
-        # First creates necessary binary files
-        self.get_objects()
-        for pp in self.object_file_names:
+        for pp in features:
             subframe = self.dataframe[['x', 'y', pp]]  # Extract x, y, values
             ps_name = jp(self.res_dir, pp)  # Path of binary file
             write_point_set(ps_name, subframe)  # Write binary file
+
+    def write_command(self, auto_update=False):
+        """Write python script that sgems will run"""
+        if auto_update:
+            # First creates necessary binary files
+            self.auto_fill()
+            self.make_data(self.object_file_names)
 
         run_algo_flag = ''  # This empty str will replace the # in front of the commands meant to execute sgems
         # within its python environment
@@ -640,14 +653,14 @@ class Sgems:
             sstw.write(template)
 
     def script_file(self):
-        # Create script file
+        """Create script file"""
         run_script = jp(self.res_dir, 'sgems.script')
         rscpt = open(run_script, 'w')
         rscpt.write(' '.join(['RunScript', jp(self.res_dir, 'simusgems.py')]))
         rscpt.close()
 
     def bat_file(self):
-
+        """Create bat file"""
         if not os.path.isfile(jp(self.res_dir, 'sgems.script')):
             self.script_file()
 
@@ -658,7 +671,7 @@ class Sgems:
         bat.close()
 
     def run(self):
-
+        """Call bat file, run sgems"""
         batch = jp(self.res_dir, 'RunSgems.bat')
         if not os.path.isfile(batch):
             self.bat_file()
