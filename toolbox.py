@@ -173,7 +173,8 @@ class Sgems:
 
     def __init__(self, data_dir='',
                  file_name='',
-                 dx=1, dy=1, dz=0,
+                 res_dir=None,
+                 dx=1, dy=1, dz=1,
                  xo=0, yo=0, zo=0,
                  x_lim=1, y_lim=1, z_lim=1):
 
@@ -184,7 +185,7 @@ class Sgems:
         self.node_file = jp(self.data_dir, 'nodes.npy')  # nodes files
         self.node_value_file = jp(self.data_dir, 'fnodes.txt')
         self.dis_file = jp(self.data_dir, 'dis.info')
-        self.res_dir = None  # result dir initiated when modifying xml file if none given
+        self.res_dir = res_dir  # result dir initiated when modifying xml file if none given
         self.file_name = file_name  # data file name
 
         # Data
@@ -235,7 +236,6 @@ class Sgems:
         head = datread(self.file_path, start=2, end=2 + n_features)  # Name of features (x, y, z, f1...)
         columns_name = [h[0].lower() for h in head]
         data = datread(self.file_path, start=2 + n_features)  # Raw data
-
         return data, project_name, columns_name
 
     def load_dataframe(self):
@@ -253,7 +253,9 @@ class Sgems:
         based on the data points distribution.
         :param xo:
         :param yo:
+        :param zo:
         :param x_lim:
+        :param y_lim:
         :param y_lim:
         :param nodes: flag for node computation
         """
@@ -419,6 +421,7 @@ class Sgems:
 
         name = self.root.find('algorithm').attrib['name']  # Algorithm name
 
+        # result directory generated according to project and algorithm name
         if self.res_dir is None:
             # Generate result directory if none is given
             self.res_dir = jp(self.cwd, 'results', '_'.join([self.project_name, name, uuid.uuid1().hex]))
@@ -702,10 +705,8 @@ class Sgems:
         matrix = matrix.reshape((self.nrow, self.ncol))
         extent = (self.xo, self.x_lim, self.yo, self.y_lim)
         plt.imshow(np.flipud(matrix), cmap='coolwarm', extent=extent)
-        plt.plot(self.raw_data[:, 0], self.raw_data[:, 1], 'ko', markersize=.2, alpha=.4)
+        plt.plot(self.raw_data[:, 0], self.raw_data[:, 1], 'k+', markersize=1, alpha=.7)
         plt.colorbar()
         if save:
-            plt.savefig(jp(self.res_dir, 'results.png'), dpi=300)
+            plt.savefig(jp(self.res_dir, 'results.png'), bbox_inches='tight', dpi=300)
         plt.show()
-
-
