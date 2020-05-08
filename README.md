@@ -1,2 +1,3 @@
 # pysgems 
-Use SGeMS (Standford Geostatistical Modeling Software) from Python
+Use SGeMS (Standford Geostatistical Modeling Software) from Python.
+In construction...
