@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from shapely.geometry import Point
-from shapely.geometry.polygon import Polygon
 
 
 def datread(file=None, start=0, end=None):
@@ -194,7 +193,7 @@ class Sgems:
             self.raw_data, self.project_name, self.columns = self.loader()  # load raw data
             self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)  # build panda dataframe to
             # easily access attributes based on their names.
-            self.xy = np.vstack((self.raw_data[:, 0], self.raw_data[:, 1])).T  # X, Y coordinates
+            self.xyz = np.vstack((self.raw_data[:, 0], self.raw_data[:, 1])).T  # X, Y coordinates
         self.nodata = -999
         self.object_file_names = []  # List containing file names of point sets that will be loaded
 
@@ -213,6 +212,7 @@ class Sgems:
         self.nlay = 1
         self.along_r = [1]
         self.along_c = [1]
+        self.along_l = [1]
         self.bounding_box = None
         self.generate_grid()
 
@@ -231,19 +231,26 @@ class Sgems:
         """Parse dataset in GSLIB format"""
         self.file_path = jp(self.data_dir, self.file_name)
         project_info = datread(self.file_path, end=2)  # Name, n features
-        project_name = project_info[0][0].lower()  # Project name
+        project_name = project_info[0][0].lower()  # Project name (lowered)
         n_features = int(project_info[1][0])  # Number of features len([x, y, f1, f2... fn])
         head = datread(self.file_path, start=2, end=2 + n_features)  # Name of features (x, y, z, f1...)
-        columns_name = [h[0].lower() for h in head]
+        columns_name = [h[0].lower() for h in head] # Column names (lowered)
         data = datread(self.file_path, start=2 + n_features)  # Raw data
         return data, project_name, columns_name
 
     def load_dataframe(self):
-        """Loads sgems data set"""
+        """
+        Loads sgems data set.
+        Assumes that x, y, z are the first three columns and are labeled as such.
+        """
         # At this time, considers only 2D dataset
         self.raw_data, self.project_name, self.columns = self.loader()
         self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)
-        self.xy = np.vstack((self.raw_data[:, 0], self.raw_data[:, 1])).T  # X, Y coordinates
+        try:
+            self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
+        except KeyError:
+            self.dataframe.insert(2, 'z', np.zeros(self.dataframe.shape[0]))
+            self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
 
     def generate_grid(self, xo=None, yo=None, zo=None, x_lim=None, y_lim=None, z_lim=None, nodes=0):
         """
@@ -256,14 +263,13 @@ class Sgems:
         :param zo:
         :param x_lim:
         :param y_lim:
-        :param y_lim:
+        :param z_lim:
         :param nodes: flag for node computation
         """
         # TODO: modify to implement 3D grids
         if x_lim is None and y_lim is None and z_lim is None:
             try:
-                x_lim, y_lim = np.round(np.max(self.xy, axis=0)) + np.array([self.dx, self.dy]) * 4  # X max, Y max
-                z_lim = self.z_lim
+                x_lim, y_lim, z_lim = np.round(np.max(self.xyz, axis=0)) + np.array([self.dx, self.dy, self.dz]) * 4
             except AttributeError:
                 x_lim = self.x_lim
                 y_lim = self.y_lim
@@ -271,8 +277,7 @@ class Sgems:
 
         if xo is None and yo is None and zo is None:
             try:
-                xo, yo = np.round(np.min(self.xy, axis=0)) - np.array([self.dx, self.dy]) * 4  # X min, Y min
-                zo = self.zo
+                xo, yo, zo = np.round(np.min(self.xyz, axis=0)) - np.array([self.dx, self.dy, self.dz]) * 4  # X min, Y min
             except AttributeError:
                 xo = self.xo
                 yo = self.yo
@@ -283,6 +288,7 @@ class Sgems:
         nlay = int((z_lim - zo) // self.dz)  # Number of layers
         along_r = np.ones(ncol) * self.dx  # Size of each cell along y-dimension - rows
         along_c = np.ones(nrow) * self.dy  # Size of each cell along x-dimension - columns
+        along_l = np.ones(nlay) * self.dz  # Size of each cell along x-dimension - columns
 
         if nodes:
             npar = np.array([self.dx, self.dy, xo, yo, x_lim, y_lim, nrow, ncol, nlay])
@@ -305,10 +311,10 @@ class Sgems:
         else:
             self.node_value_file = 'nothing'
 
-        self.bounding_box = Polygon([[self.xo, self.yo],
-                                     [self.x_lim, self.yo],
-                                     [self.x_lim, self.y_lim],
-                                     [self.xo, self.y_lim]])
+        # self.bounding_box = Polygon([[self.xo, self.yo],
+        #                              [self.x_lim, self.yo],
+        #                              [self.x_lim, self.y_lim],
+        #                              [self.xo, self.y_lim]])
 
         self.xo = xo
         self.yo = yo
@@ -321,6 +327,7 @@ class Sgems:
         self.nlay = nlay
         self.along_r = along_r
         self.along_c = along_c
+        self.along_l = along_l
 
     def my_node(self, xy):
         """
@@ -359,7 +366,7 @@ class Sgems:
         It is necessary to know the node number to assign the hard data property to the sgems grid.
         :return: nodes number
         """
-        nodes = np.array([self.my_node(c) for c in self.xy])
+        nodes = np.array([self.my_node(c) for c in self.xyz])
 
         np.save(self.node_file, nodes)  # Save to nodes to avoid recomputing each time
 
