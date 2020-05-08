@@ -8,24 +8,25 @@ cwd = os.getcwd()
 # Define datasets directory
 data_dir = join_path(cwd, 'datasets', 'demo')
 # Define file name
-f_name = 'sgems_dataset.txt'
-# Initialize problem
+f_name = 'sgems_dataset.dat'
+# Initialize problem, define dx and dy and indicate dataset path
 sgems = toolbox.Sgems(dx=2, dy=2, data_dir=data_dir, file_name=f_name)
 # Generate grid
 sgems.generate_grid()
 # Display point coordinates and grid
 sgems.plot_coordinates()
+# Which feature are available
+print(sgems.columns)
 # Load your algorithm xml file in the 'algorithms' folder
 algo_name = sgems.xml_reader('kriging')
 # Show xml structure tree
 sgems.show_tree()
 # Modify xml below:
-sgems.xml_update('Primary_Harddata_Grid', 'value', 'f_grid')
-sgems.xml_update('Primary_Variable', 'value', 'f')
-sgems.xml_update('Secondary_Harddata_Grid', 'value', 'hco3_grid')
-sgems.xml_update('Secondary_Variable', 'value', 'hco3')
+# By default, the feature grid name of feature X is called 'X_grid'.
+sgems.xml_update('Hard_Data', 'grid', 'ag_grid')
+sgems.xml_update('Hard_Data', 'property', 'ag')
 # Write datasets
-sgems.make_data(['f', 'hco3'])
+sgems.make_data('ag')
 # Write python script
 sgems.write_command()
 # Run sgems

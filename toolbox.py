@@ -323,19 +323,6 @@ class Sgems:
         self.along_r = along_r
         self.along_c = along_c
 
-    def plot_coordinates(self):
-        try:
-            plt.plot(self.raw_data[:, 0], self.raw_data[:, 1], 'ko')
-        except:
-            pass
-        try:
-            plt.xticks(np.cumsum(self.along_r) + self.xo - self.dx, labels=[])
-            plt.yticks(np.cumsum(self.along_c) + self.yo - self.dy, labels=[])
-        except:
-            pass
-
-        plt.grid('blue')
-        plt.show()
 
     def my_node(self, xy):
         """
@@ -604,6 +591,8 @@ class Sgems:
         Gives a list of dataset to be saved in sgems binary format and saves them to the result directory
         :param features:
         """
+        if not isinstance(features, list):
+            features = [features]
         for pp in features:
             subframe = self.dataframe[['x', 'y', pp]]  # Extract x, y, values
             ps_name = jp(self.res_dir, pp)  # Path of binary file
@@ -686,13 +675,27 @@ class Sgems:
         subprocess.call([batch])  # Opens the BAT file
         print('ran algorithm in {} s'.format(time.time()-start))
 
+    def plot_coordinates(self):
+        try:
+            plt.plot(self.raw_data[:, 0], self.raw_data[:, 1], 'ko')
+        except:
+            pass
+        try:
+            plt.xticks(np.cumsum(self.along_r) + self.xo - self.dx, labels=[])
+            plt.yticks(np.cumsum(self.along_c) + self.yo - self.dy, labels=[])
+        except:
+            pass
+
+        plt.grid('blue')
+        plt.show()
+
     def plot_2d(self, save=False):
         matrix = datread(jp(self.res_dir, 'results.grid'), start=3)
         matrix = np.where(matrix == -9966699, np.nan, matrix)
         matrix = matrix.reshape((self.nrow, self.ncol))
         extent = (self.xo, self.x_lim, self.yo, self.y_lim)
         plt.imshow(np.flipud(matrix), cmap='coolwarm', extent=extent)
-
+        plt.plot(self.raw_data[:, 0], self.raw_data[:, 1], 'ko', markersize=.2, alpha=.1)
         plt.colorbar()
         if save:
             plt.savefig(jp(self.res_dir, 'results.png'), dpi=300)
