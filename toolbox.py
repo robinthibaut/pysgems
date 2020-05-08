@@ -194,9 +194,6 @@ class Sgems:
         self.cwd = os.getcwd()  # Main directory
         self.algo_dir = jp(self.cwd, 'algorithms')  # algorithms directory
         self.data_dir = data_dir  # data directory
-        self.node_file = jp(self.data_dir, 'nodes.npy')  # nodes files
-        self.node_value_file = jp(self.data_dir, 'fnodes.txt')
-        self.dis_file = jp(self.data_dir, 'dis.info')
         self.res_dir = res_dir  # result dir initiated when modifying xml file if none given
         self.file_name = file_name  # data file name
 
@@ -229,8 +226,10 @@ class Sgems:
             self.load_dataframe()
             self.generate_grid(xo=self.xo, yo=self.yo, zo=self.zo,
                                x_lim=self.x_lim, y_lim=self.y_lim, z_lim=self.z_lim)
-            # self.raw_data, self.project_name, self.columns = self.loader()  # load raw data
-            # easily access attributes based on their names.
+            self.node_file = jp(os.path.dirname(self.file_path), 'nodes.npy')  # nodes files
+            self.node_value_file = jp(os.path.dirname(self.file_path), 'fnodes.txt')
+            self.dis_file = jp(os.path.dirname(self.file_path), 'dis.info')
+
         self.nodata = -999
         self.object_file_names = []  # List containing file names of point sets that will be loaded
 
@@ -267,10 +266,14 @@ class Sgems:
             self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
         except KeyError:  # Assumes 2D dataset
             self.dataframe.insert(2, 'z', np.zeros(self.dataframe.shape[0]))
+            self.columns = self.dataframe.columns.values
             self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
             self.dz = 0
         self.generate_grid(xo=self.xo, yo=self.yo, zo=self.zo,
                            x_lim=self.x_lim, y_lim=self.y_lim, z_lim=self.z_lim)
+        self.node_file = jp(os.path.dirname(self.file_path), 'nodes.npy')  # nodes files
+        self.node_value_file = jp(os.path.dirname(self.file_path), 'fnodes.txt')
+        self.dis_file = jp(os.path.dirname(self.file_path), 'dis.info')
 
     def generate_grid(self, xo=None, yo=None, zo=None, x_lim=None, y_lim=None, z_lim=None, nodes=0):
         """
@@ -319,7 +322,10 @@ class Sgems:
         along_l = np.ones(nlay) * self.dz  # Size of each cell along x-dimension - columns
 
         if nodes:  # TODO: separate the node computation part and adapt to 3D
-            npar = np.array([self.dx, self.dy, xo, yo, x_lim, y_lim, nrow, ncol, nlay])
+            npar = np.array([self.dx, self.dy, self.dz,
+                             xo, yo, zo,
+                             x_lim, y_lim, z_lim,
+                             nrow, ncol, nlay])
             if os.path.isfile(self.dis_file):  # Check previous grid info
                 pdis = np.loadtxt(self.dis_file)
                 # If different, recompute data points node by deleting previous node file
@@ -336,6 +342,8 @@ class Sgems:
                     print('Using previous grid')
             else:
                 np.savetxt(self.dis_file, npar)
+            self.get_nodes()
+            self.export_node_idx()
         else:
             self.node_value_file = 'nothing'
 
@@ -357,21 +365,26 @@ class Sgems:
         self.along_c = along_c
         self.along_l = along_l
 
-    def my_node(self, xy):
+    def my_node(self, xyz):
         """
         Given a point coordinate xy [x, y], computes its node number by computing the euclidean distance of each cell
         center.
-        :param xy:  x, y coordinate of data point
+        :param xyz:  x, y, z coordinate of data point
         :return:
         """
         start = time.time()
-        rn = np.array(xy)
+        rn = np.array(xyz)
         # first check if point is within the grid
         p = Point(rn)
+        # TODO: define 3D bounding box
+        if True:  # p.within(self.bounding_box):
+            if self.dz > 0:
+                dmin = np.min([self.dx, self.dy, self.dz]) / 2
+            else:
+                dmin = np.min([self.dx, self.dy]) / 2
 
-        if p.within(self.bounding_box):
-            dmin = np.min([self.along_c.min(), self.along_r.min()]) / 2
-            blocks = blocks_from_rc(self.along_c, self.along_r, self.xo, self.yo)
+            blocks = blocks_from_rc(self.along_c, self.along_r, self.along_l,
+                                    self.xo, self.yo, self.zo)
             vmin = np.inf
             cell = None
             for b in blocks:
@@ -408,18 +421,21 @@ class Sgems:
 
         return d_nodes
 
-    def cleanup(self):
+    def nodes_cleanup(self, features):
         """
         Removes no-data rows from data frame and compute the mean of data points sharing the same cell.
+        :param features: str or list(str) of features name to save
         :return: Filtered list of each attribute
         """
         data_nodes = self.get_nodes()
         unique_nodes = list(set(data_nodes))
 
+        if not isinstance(features, list):
+            features = [features]
         fn = []
-        for h in range(2, len(self.columns)):  # For each feature
+        for h in features:  # For each feature
             # fixed nodes = [[node i, value i]....]
-            fixed_nodes = np.array([[data_nodes[dn], self.raw_data[:, h][dn]] for dn in range(len(data_nodes))])
+            fixed_nodes = np.array([[data_nodes[dn], self.dataframe[h][dn]] for dn in range(len(data_nodes))])
             # Deletes points where val == nodata
             hard_data = np.delete(fixed_nodes, np.where(fixed_nodes == self.nodata)[0], axis=0)
             # If data points share the same cell, compute their mean and assign the value to the cell
@@ -440,7 +456,7 @@ class Sgems:
         value, for each feature
         """
         if not os.path.isfile(self.node_value_file):
-            hard = self.cleanup()
+            hard = self.nodes_cleanup(features=self.columns[3:])
             with open(self.node_value_file, 'w') as nd:
                 nd.write(repr(hard))
             shutil.copyfile(self.node_value_file, self.node_value_file.replace(self.data_dir, self.res_dir))
