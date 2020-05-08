@@ -18,7 +18,8 @@ sgems.generate_grid()
 sgems.plot_coordinates()
 # %% Which feature are available
 print(sgems.columns)
-# %% Load your algorithm xml file in the 'algorithms' folder
+# %% Load your algorithm xml file in the 'algorithms' folder. A result folder will automatically be generated at
+# this time if no such folder is already defined.
 algo_name = sgems.xml_reader('kriging')
 # %% Show xml structure tree
 sgems.show_tree()

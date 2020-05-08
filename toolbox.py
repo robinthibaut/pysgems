@@ -422,9 +422,10 @@ class Sgems:
 
         name = self.root.find('algorithm').attrib['name']
 
-        # Generate result directory
-        self.res_dir = jp(self.cwd, 'results', '_'.join([self.project_name, name, uuid.uuid1().hex]))
-        os.makedirs(self.res_dir)
+        if self.res_dir is None:
+            # Generate result directory
+            self.res_dir = jp(self.cwd, 'results', '_'.join([self.project_name, name, uuid.uuid1().hex]))
+            os.makedirs(self.res_dir)
 
         replace = [['Grid_Name', {'value': 'computation_grid', 'region': ''}],
                    ['Property_Name', {'value': name}]]

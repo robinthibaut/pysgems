@@ -1,5 +1,6 @@
-import sgems
 import os
+
+import sgems
 
 os.chdir("RES_DIR")
 sgems.execute('DeleteObjects computation_grid')
