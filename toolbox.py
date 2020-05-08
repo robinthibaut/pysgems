@@ -109,6 +109,7 @@ def write_point_set(file_name, sub_dataframe, nodata=-999):
         by the strings of names, as floats. For each property, there are nx*ny*nz
         values (nx,ny,nz are the number of cells in the x,y,z directions).
 
+    :param nodata: nodata value, rows containing this value are omitted.
     :param file_name:
     :param sub_dataframe: Sub-frame of the feature to be exported [x, y, feature value]
     :return:
@@ -120,7 +121,7 @@ def write_point_set(file_name, sub_dataframe, nodata=-999):
     xyz = np.vstack(
         (sub_dataframe['x'],
          sub_dataframe['y'],
-         np.zeros(len(sub_dataframe)))
+         np.zeros(len(sub_dataframe)))  # 0 column for z
     ).T  # We need X Y Z coordinates even if working in 2D
 
     pp = sub_dataframe.columns[-1]  # Get name of the property
@@ -176,7 +177,11 @@ def write_point_set(file_name, sub_dataframe, nodata=-999):
 
 class Sgems:
 
-    def __init__(self, data_dir='', file_name='', dx=1, dy=1, xo=0, yo=0, zo=0, x_lim=1, y_lim=1, z_lim=1):
+    def __init__(self, data_dir='',
+                 file_name='',
+                 dx=1, dy=1,
+                 xo=0, yo=0, zo=0,
+                 x_lim=1, y_lim=1, z_lim=1):
 
         # Directories
         self.cwd = os.getcwd()
@@ -217,11 +222,12 @@ class Sgems:
         # Algorithm XML
         self.tree = None
         self.root = None
-        self.op_file = jp(self.algo_dir, 'temp_output.xml')
+        self.op_file = jp(self.algo_dir, 'temp_output.xml')  # Temporary saves a modified XML
         try:
             os.remove(self.op_file)
         except FileNotFoundError:
             pass
+        self.auto_update = False  # Experimental feature to auto fill XML and saving binary files
 
     # Load sgems dataset
     def loader(self):
@@ -249,8 +255,6 @@ class Sgems:
         but instead inputs the cell size in x and y dimensions.
         xo, yo, x_lim, y_lim, defining the bounding box of the grid, are None by default, and are computed
         based on the data points distribution.
-        :param dx:
-        :param dy:
         :param xo:
         :param yo:
         :param x_lim:
@@ -558,7 +562,6 @@ class Sgems:
                    attribute_name=None,
                    value=None,
                    new_attribute_dict=None,
-                   auto_binary=False,
                    show=1):
         """
         Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
@@ -566,12 +569,11 @@ class Sgems:
         :param attribute_name: name of the attribute to modify
         :param value: new value for attribute
         :param new_attribute_dict: dictionary defining new attribute
-        :param auto_binary: experimental feature to auto generate data binary files according to needs
         :param show: whether to display updated xml or not
         """
 
         if new_attribute_dict is not None:
-            if (auto_binary is True) and ('property' in new_attribute_dict):
+            if (self.auto_update is True) and ('property' in new_attribute_dict):
                 # If one property point set needs to be used
                 pp = new_attribute_dict['property']  # Name property
                 if pp in self.columns:
@@ -605,9 +607,9 @@ class Sgems:
             ps_name = jp(self.res_dir, pp)  # Path of binary file
             write_point_set(ps_name, subframe)  # Write binary file
 
-    def write_command(self, auto_update=False):
+    def write_command(self):
         """Write python script that sgems will run"""
-        if auto_update:
+        if self.auto_update:
             # First creates necessary binary files
             self.auto_fill()
             self.make_data(self.object_file_names)
