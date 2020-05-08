@@ -58,7 +58,7 @@ def blocks_from_rc(rows, columns, layers, xo=0, yo=0, zo=0):
 
     def get_node(r, c, h):
         """
-        Get node index to fixed hard data
+        Get node index to fix hard data
         :param r: row number
         :param c: column number
         :param h: layer number
@@ -187,8 +187,8 @@ class Sgems:
                  file_name='',
                  res_dir=None,
                  dx=1, dy=1, dz=1,
-                 xo=0, yo=0, zo=0,
-                 x_lim=1, y_lim=1, z_lim=1):
+                 xo=None, yo=None, zo=None,
+                 x_lim=None, y_lim=None, z_lim=None):
 
         # Directories
         self.cwd = os.getcwd()  # Main directory
@@ -217,7 +217,8 @@ class Sgems:
         self.along_c = [1]
         self.along_l = [1]
         self.bounding_box = None
-        self.generate_grid()
+        self.generate_grid(xo=self.xo, yo=self.yo, zo=self.zo,
+                           x_lim=self.x_lim, y_lim=self.y_lim, z_lim=self.z_lim)
 
         # Data
         self.raw_data = None
@@ -283,22 +284,20 @@ class Sgems:
         :param z_lim:
         :param nodes: flag for node computation
         """
-        # TODO: modify to implement 3D grids
-        if x_lim is None and y_lim is None and z_lim is None:
-            try:
-                x_lim, y_lim, z_lim = np.round(np.max(self.xyz, axis=0)) + np.array([self.dx, self.dy, self.dz]) * 4
-            except AttributeError:
-                x_lim = self.x_lim
-                y_lim = self.y_lim
-                z_lim = self.z_lim
 
-        if xo is None and yo is None and zo is None:
-            try:
-                xo, yo, zo = np.round(np.min(self.xyz, axis=0)) - np.array([self.dx, self.dy, self.dz]) * 4
-            except AttributeError:
-                xo = self.xo
-                yo = self.yo
-                zo = self.zo
+        if x_lim is None:
+            x_lim = self.dataframe['x'].max() + self.dx * 4
+        if y_lim is None:
+            y_lim = self.dataframe['y'].max() + self.dy * 4
+        if z_lim is None:
+            z_lim = self.dataframe['z'].max() + self.dz * 4
+
+        if xo is None:
+            xo = self.dataframe['x'].min() - self.dx * 4
+        if yo is None:
+            yo = self.dataframe['y'].min() - self.dy * 4
+        if zo is None:
+            zo = self.dataframe['z'].min() - self.dz * 4
 
         if self.dy > 0:
             nrow = int((y_lim - yo) // self.dy)  # Number of rows
