@@ -14,16 +14,6 @@ from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
 
 
-def clockwork(func):
-    def wrapper(*args, **kwargs):
-        startTime = time.time()
-        func(*args, **kwargs)
-        endTime = time.time()
-        print("time: ", endTime - startTime, " seconds")
-
-    return wrapper
-
-
 def datread(file=None, start=0, end=None):
     # end must be set to None and NOT -1
     """Reads space separated dat file"""
