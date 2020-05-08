@@ -323,7 +323,6 @@ class Sgems:
         self.along_r = along_r
         self.along_c = along_c
 
-
     def my_node(self, xy):
         """
         Given a point coordinate xy [x, y], computes its node number by computing the euclidean distance of each cell
@@ -601,7 +600,10 @@ class Sgems:
                 self.object_file_names.append(pp)
 
     def write_command(self):
-        """Write python script that sgems will run"""
+        """
+        Write python script that sgems will run.
+        The sgems python script template must be located in the main folder.
+        """
         if self.auto_update:
             # First creates necessary binary files
             self.auto_fill()
@@ -639,7 +641,7 @@ class Sgems:
                   [str(sgems_files), 'OBJECT_FILES'],
                   [self.node_value_file.replace('\\', '//'), 'NODES_VALUES_FILE']]
 
-        with open('simusgems_template.py') as sst:  # Update template
+        with open('script_template.py') as sst:  # Update template
             template = sst.read()
         for i in range(len(params)):  # Replaces the parameters
             template = template.replace(params[i][1], params[i][0])
