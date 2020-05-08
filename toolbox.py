@@ -36,7 +36,7 @@ def joinlist(j, mylist):
     return gp
 
 
-def blocks_from_rc(rows, columns, xo, yo):
+def blocks_from_rc(rows, columns, layers, xo, yo, zo):
     """
     Yields blocks defining grid cells
     :param rows: array of x-widths along a row
@@ -48,27 +48,42 @@ def blocks_from_rc(rows, columns, xo, yo):
     # TODO: adapt to 3D
     nrow = len(rows)
     ncol = len(columns)
+    nlay = len(layers)
     delr = rows
     delc = columns
+    dell = layers
     r_sum = np.cumsum(delr) + yo
     c_sum = np.cumsum(delc) + xo
+    l_sum = np.cumsum(delc) + zo
 
-    def get_node(i, j):
+    def get_node(r, c, h):
         """
         Get node index to fixed hard data
-        :param i: row number
-        :param j: column number
+        :param r: row number
+        :param c: column number
+        :param h: layer number
         :return: node number
         """
-        return int((i+1) * ncol + j) + 1
+        # TODO: verify for 3D
+        nrc = nrow*ncol
+        # return int((k * nrc) + (i * ncol) + j)
+        return int(h * nrc + (r + 1) * ncol + c) + 1
 
-    for c in range(nrow):
-        for n in range(ncol):
-            b = [[c_sum[n] - delc[n], r_sum[c] - delr[c]],
-                 [c_sum[n] - delc[n], r_sum[c]],
-                 [c_sum[n], r_sum[c]],
-                 [c_sum[n], r_sum[c] - delr[c]]]
-            yield get_node(c, n), np.array(b), np.mean(b, axis=0)
+    for k in range(nlay):
+        for i in range(nrow):
+            for j in range(ncol):
+                b = [
+                     [c_sum[j] - delc[j], r_sum[i] - delr[i], l_sum[k] - dell[k]],
+                     [c_sum[j] - delc[j], r_sum[i]],
+                     [c_sum[j],           r_sum[i]],
+                     [c_sum[j],           r_sum[i] - delr[i]],
+
+                     [c_sum[j] - delc[j], r_sum[i] - delr[i]],
+                     [c_sum[j] - delc[j], r_sum[i]],
+                     [c_sum[j],           r_sum[i]],
+                     [c_sum[j],           r_sum[i] - delr[i]]
+                    ]
+                yield get_node(i, j, k), np.array(b), np.mean(b, axis=0)
 
 
 def write_point_set(file_name, sub_dataframe, nodata=-999):
