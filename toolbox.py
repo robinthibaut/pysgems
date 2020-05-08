@@ -690,7 +690,7 @@ class Sgems:
         matrix = matrix.reshape((self.nrow, self.ncol))
         extent = (self.xo, self.x_lim, self.yo, self.y_lim)
         plt.imshow(np.flipud(matrix), cmap='coolwarm', extent=extent)
-        plt.plot(self.raw_data[:, 0], self.raw_data[:, 1], 'ko', markersize=.2, alpha=.1)
+        plt.plot(self.raw_data[:, 0], self.raw_data[:, 1], 'ko', markersize=.2, alpha=.4)
         plt.colorbar()
         if save:
             plt.savefig(jp(self.res_dir, 'results.png'), dpi=300)
