@@ -46,6 +46,7 @@ def blocks_from_rc(rows, columns, xo, yo):
     :param yo: y origin
     :return: generator of (cell node number, block vertices coordinates, block center)
     """
+    # TODO: adapt to 3D
     nrow = len(rows)
     ncol = len(columns)
     delr = rows
@@ -72,6 +73,7 @@ def blocks_from_rc(rows, columns, xo, yo):
 
 
 def write_point_set(file_name, sub_dataframe, nodata=-999):
+    # TODO: build similar method to save grid files.
     """
     Function to write sgems binary point set files.
 
@@ -171,24 +173,26 @@ class Sgems:
 
     def __init__(self, data_dir='',
                  file_name='',
-                 dx=1, dy=1,
+                 dx=1, dy=1, dz=0,
                  xo=0, yo=0, zo=0,
                  x_lim=1, y_lim=1, z_lim=1):
 
         # Directories
-        self.cwd = os.getcwd()
-        self.algo_dir = jp(self.cwd, 'algorithms')
-        self.data_dir = data_dir
-        self.node_file = jp(self.data_dir, 'nodes.npy')
+        self.cwd = os.getcwd()  # Main directory
+        self.algo_dir = jp(self.cwd, 'algorithms')  # algorithms directory
+        self.data_dir = data_dir  # data directory
+        self.node_file = jp(self.data_dir, 'nodes.npy')  # nodes files
         self.node_value_file = jp(self.data_dir, 'fnodes.txt')
         self.dis_file = jp(self.data_dir, 'dis.info')
-        self.res_dir = None  # res dir initiated when modifying xml file
-        self.file_name = file_name
+        self.res_dir = None  # result dir initiated when modifying xml file if none given
+        self.file_name = file_name  # data file name
+
         # Data
         if file_name:
             self.file_path = jp(self.data_dir, file_name)
-            self.raw_data, self.project_name, self.columns = self.loader()
-            self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)
+            self.raw_data, self.project_name, self.columns = self.loader()  # load raw data
+            self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)  # build panda dataframe to
+            # easily access attributes based on their names.
             self.xy = np.vstack((self.raw_data[:, 0], self.raw_data[:, 1])).T  # X, Y coordinates
         self.nodata = -999
         self.object_file_names = []  # List containing file names of point sets that will be loaded
@@ -196,7 +200,7 @@ class Sgems:
         # Grid geometry - use self.generate_grid() to update values
         self.dx = dx  # Block x-dimension
         self.dy = dy  # Block y-dimension
-        self.dz = 0  # Block z-dimension
+        self.dz = dz  # Block z-dimension
         self.xo = xo
         self.yo = yo
         self.zo = zo
@@ -206,8 +210,8 @@ class Sgems:
         self.nrow = 1
         self.ncol = 1
         self.nlay = 1
-        self.along_r = 1
-        self.along_c = 1
+        self.along_r = [1]
+        self.along_c = [1]
         self.bounding_box = None
         self.generate_grid()
 
@@ -223,12 +227,12 @@ class Sgems:
 
     # Load sgems dataset
     def loader(self):
-        """Parse sgems dataset"""
+        """Parse dataset in GSLIB format"""
         self.file_path = jp(self.data_dir, self.file_name)
         project_info = datread(self.file_path, end=2)  # Name, n features
         project_name = project_info[0][0].lower()  # Project name
         n_features = int(project_info[1][0])  # Number of features len([x, y, f1, f2... fn])
-        head = datread(self.file_path, start=2, end=2 + n_features)  # Name of features
+        head = datread(self.file_path, start=2, end=2 + n_features)  # Name of features (x, y, z, f1...)
         columns_name = [h[0].lower() for h in head]
         data = datread(self.file_path, start=2 + n_features)  # Raw data
 
@@ -238,10 +242,10 @@ class Sgems:
         """Loads sgems data set"""
         # At this time, considers only 2D dataset
         self.raw_data, self.project_name, self.columns = self.loader()
-        self.xy = np.vstack((self.raw_data[:, 0], self.raw_data[:, 1])).T  # X, Y coordinates
         self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)
+        self.xy = np.vstack((self.raw_data[:, 0], self.raw_data[:, 1])).T  # X, Y coordinates
 
-    def generate_grid(self, xo=None, yo=None, x_lim=None, y_lim=None, nodes=0):
+    def generate_grid(self, xo=None, yo=None, zo=None, x_lim=None, y_lim=None, z_lim=None, nodes=0):
         """
         Constructs the grid geometry. The user can not control directly the number of rows and columns
         but instead inputs the cell size in x and y dimensions.
@@ -254,7 +258,7 @@ class Sgems:
         :param nodes: flag for node computation
         """
         # TODO: modify to implement 3D grids
-        if x_lim is None and y_lim is None:
+        if x_lim is None and y_lim is None and z_lim is None:
             try:
                 x_lim, y_lim = np.round(np.max(self.xy, axis=0)) + np.array([self.dx, self.dy]) * 4  # X max, Y max
                 z_lim = self.z_lim
@@ -262,7 +266,8 @@ class Sgems:
                 x_lim = self.x_lim
                 y_lim = self.y_lim
                 z_lim = self.z_lim
-        if xo is None and yo is None:
+
+        if xo is None and yo is None and zo is None:
             try:
                 xo, yo = np.round(np.min(self.xy, axis=0)) - np.array([self.dx, self.dy]) * 4  # X min, Y min
                 zo = self.zo
@@ -273,7 +278,7 @@ class Sgems:
 
         nrow = int((y_lim - yo) // self.dy)  # Number of rows
         ncol = int((x_lim - xo) // self.dx)  # Number of columns
-        nlay = 1  # Number of layers
+        nlay = int((z_lim - zo) // self.dz)  # Number of layers
         along_r = np.ones(ncol) * self.dx  # Size of each cell along y-dimension - rows
         along_c = np.ones(nrow) * self.dy  # Size of each cell along x-dimension - columns
 
@@ -412,13 +417,14 @@ class Sgems:
         self.root = self.tree.getroot()
         self.object_file_names = []  # Empty object file names if reading new algorithm
 
-        name = self.root.find('algorithm').attrib['name']
+        name = self.root.find('algorithm').attrib['name']  # Algorithm name
 
         if self.res_dir is None:
-            # Generate result directory
+            # Generate result directory if none is given
             self.res_dir = jp(self.cwd, 'results', '_'.join([self.project_name, name, uuid.uuid1().hex]))
             os.makedirs(self.res_dir)
 
+        # By default, replace the grid name by 'computation_grid', and the name by the algorithm name.
         replace = [['Grid_Name', {'value': 'computation_grid', 'region': ''}],
                    ['Property_Name', {'value': name}]]
 
@@ -430,7 +436,7 @@ class Sgems:
 
     def show_tree(self):
         """
-        Displays the structure of the XML file, in order to get the path of updatable variables
+        Displays the structure of the XML file, in order to get the path of updatable variables.
         """
         try:
             for element in self.root:
@@ -451,7 +457,12 @@ class Sgems:
             print('No loaded XML file')
 
     def auto_fill(self):
-        """Ensures binary file of point set are properly generated"""
+        """
+        Ensures binary file of point set are properly generated.
+        In case of kriging, cokriging... ensures proper xml attribute names for feature and feature grid.
+        This is still quite specific and lots of nested loops, ideally parse all Sgems default XML
+        and build proper 'auto_fill' method.
+        """
 
         try:
             elist = []
@@ -589,7 +600,7 @@ class Sgems:
             subframe = self.dataframe[['x', 'y', pp]]  # Extract x, y, values
             ps_name = jp(self.res_dir, pp)  # Path of binary file
             write_point_set(ps_name, subframe)  # Write binary file
-            if pp not in self.object_file_names:
+            if pp not in self.object_file_names:  # Adding features name to load them within sgems
                 self.object_file_names.append(pp)
 
     def write_command(self):
@@ -685,6 +696,7 @@ class Sgems:
         plt.show()
 
     def plot_2d(self, save=False):
+        """Rudimentary 2D plot"""
         matrix = datread(jp(self.res_dir, 'results.grid'), start=3)
         matrix = np.where(matrix == -9966699, np.nan, matrix)
         matrix = matrix.reshape((self.nrow, self.ncol))
