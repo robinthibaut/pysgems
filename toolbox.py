@@ -217,8 +217,6 @@ class Sgems:
         self.along_c = [1]
         self.along_l = [1]
         self.bounding_box = None
-        self.generate_grid(xo=self.xo, yo=self.yo, zo=self.zo,
-                           x_lim=self.x_lim, y_lim=self.y_lim, z_lim=self.z_lim)
 
         # Data
         self.raw_data = None
@@ -229,6 +227,8 @@ class Sgems:
         if file_name:
             self.file_path = jp(self.data_dir, file_name)
             self.load_dataframe()
+            self.generate_grid(xo=self.xo, yo=self.yo, zo=self.zo,
+                               x_lim=self.x_lim, y_lim=self.y_lim, z_lim=self.z_lim)
             # self.raw_data, self.project_name, self.columns = self.loader()  # load raw data
             # easily access attributes based on their names.
         self.nodata = -999
@@ -269,6 +269,8 @@ class Sgems:
             self.dataframe.insert(2, 'z', np.zeros(self.dataframe.shape[0]))
             self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
             self.dz = 0
+        self.generate_grid(xo=self.xo, yo=self.yo, zo=self.zo,
+                           x_lim=self.x_lim, y_lim=self.y_lim, z_lim=self.z_lim)
 
     def generate_grid(self, xo=None, yo=None, zo=None, x_lim=None, y_lim=None, z_lim=None, nodes=0):
         """
