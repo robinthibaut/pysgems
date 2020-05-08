@@ -595,7 +595,9 @@ class Sgems:
             self.tree.write(self.op_file)
 
         if show:
-            self.show_tree()
+            print('Updated')
+            print(self.root.find(path).tag)
+            print(self.root.find(path).attrib)
 
     def make_data(self, features):
         """
@@ -606,6 +608,8 @@ class Sgems:
             subframe = self.dataframe[['x', 'y', pp]]  # Extract x, y, values
             ps_name = jp(self.res_dir, pp)  # Path of binary file
             write_point_set(ps_name, subframe)  # Write binary file
+            if pp not in self.object_file_names:
+                self.object_file_names.append(pp)
 
     def write_command(self):
         """Write python script that sgems will run"""
