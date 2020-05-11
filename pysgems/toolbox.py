@@ -702,7 +702,7 @@ class Sgems:
                   [str(sgems_files), 'OBJECT_FILES'],
                   [self.node_value_file.replace('\\', '//'), 'NODES_VALUES_FILE']]
 
-        with open('script_template.py') as sst:  # Update template
+        with open('../script_templates/script_template.py') as sst:  # Update template
             template = sst.read()
         for i in range(len(params)):  # Replaces the parameters
             template = template.replace(params[i][1], params[i][0])

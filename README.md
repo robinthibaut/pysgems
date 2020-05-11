@@ -46,7 +46,7 @@ The package expects the classical ASCII GEOEAS data format.
 import os
 from os.path import join as join_path
 
-import toolbox
+from pysgems import toolbox
 
 # Define working directory
 cwd = os.getcwd()
