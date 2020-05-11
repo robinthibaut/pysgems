@@ -53,7 +53,7 @@ data_dir = join_path(cwd, 'datasets', 'demo')
 f_name = 'sgems_dataset.dat'
 ```
 
-There are several ways to define grids in this package framework, theuser can refer to the methods documentation.
+There are several ways to define grids in this package framework, the user can refer to the methods documentation.
 
 The simplest way is to load the data and indicate cell dimensions (dx, dy, dz is 0 by default). If no spatial limits are imposed, they will be automatically generated to englobe all data points.
 
