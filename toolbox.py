@@ -217,7 +217,7 @@ class Sgems:
 
         # Data
         self.raw_data = None
-        self.project_name = None
+        self.project_name = ''
         self.columns = None
         self.xyz = None
         self.dataframe = None
