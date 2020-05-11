@@ -244,6 +244,8 @@ class Sgems:
         self.tree = None
         self.root = None
         self.auto_update = False  # Experimental feature to auto fill XML and saving binary files
+        dir_path = os.path.abspath(__file__ + "/../")
+        self.template_file = jp(dir_path, 'script_templates/script_template.py')  # Python template file path
 
     # Load sgems dataset
     def loader(self):
@@ -709,9 +711,7 @@ class Sgems:
                   [str(sgems_files), 'OBJECT_FILES'],
                   [self.node_value_file.replace('\\', '//'), 'NODES_VALUES_FILE']]
 
-        dir_path = os.path.abspath(__file__ + "/../../")
-
-        with open(jp(dir_path, 'script_templates/script_template.py')) as sst:
+        with open(self.template_file) as sst:
             template = sst.read()
         for i in range(len(params)):  # Replaces the parameters
             template = template.replace(params[i][1], params[i][0])
