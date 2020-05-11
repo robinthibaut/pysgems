@@ -9,6 +9,10 @@ The kriging example described in this file can be found in the 'demo.py' file.
 
 ## Installation
 
+```bash
+pip install pysgems
+```
+
 Users need to add this variable to their system environment variables:
 
 Name: GSTLAPPLIHOME
