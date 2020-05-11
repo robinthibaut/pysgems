@@ -16,7 +16,7 @@ sgems = toolbox.Sgems(dx=2, dy=2, data_dir=data_dir, file_name=f_name)
 sgems.res_dir = join_path(cwd, 'results', 'demo')
 # %% Generate grid. Grid dimensions are automatically generated based on the data points
 # unless specified otherwise
-sgems.generate_grid()
+# sgems.generate_grid()
 # %% Display point coordinates and grid
 sgems.plot_coordinates()
 # %% Which feature are available

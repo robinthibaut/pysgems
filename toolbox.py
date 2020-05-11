@@ -188,7 +188,8 @@ class Sgems:
                  res_dir=None,
                  dx=1, dy=1, dz=1,
                  xo=None, yo=None, zo=None,
-                 x_lim=None, y_lim=None, z_lim=None):
+                 x_lim=None, y_lim=None, z_lim=None,
+                 nodata=-999):
 
         # Directories
         self.cwd = os.getcwd()  # Main directory
@@ -230,7 +231,7 @@ class Sgems:
             self.node_value_file = jp(os.path.dirname(self.file_path), 'fnodes.txt')
             self.dis_file = jp(os.path.dirname(self.file_path), 'dis.info')
 
-        self.nodata = -999
+        self.nodata = nodata
         self.hard_data_objects = []  # List of names of hard data
         self.object_file_names = []  # List containing file names of point sets that will be loaded
 
