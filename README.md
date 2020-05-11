@@ -196,6 +196,8 @@ The package features should be separated in proper classes in proper folders.
 
 The package should be made more robust and able to support all SGEMS features.
 
+The make_data() method should be extended to support grids and multiple features.
+
 The package should be properly documented.
 
 The package should have more built-in visualization methods.
