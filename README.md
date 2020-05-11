@@ -1,6 +1,9 @@
 # pysgems 
-Use SGeMS (Standford Geostatistical Modeling Software) from within Python.
+Use SGeMS (Standford Geostatistical Modeling Software) within Python.
+
 Contributors / feedback from users are welcome.
+
+SGeMS home page: http://sgems.sourceforge.net/
 
 The kriging example described in this file can be found in the 'demo.py' file.
 
