@@ -183,7 +183,9 @@ def write_point_set(file_name, sub_dataframe, nodata=-999):
 
 class Sgems:
 
-    def __init__(self, data_dir='',
+    def __init__(self,
+                 cwd='',
+                 data_dir='',
                  file_name='',
                  res_dir=None,
                  dx=1, dy=1, dz=1,
@@ -192,7 +194,10 @@ class Sgems:
                  nodata=-999):
 
         # Directories
-        self.cwd = os.getcwd()  # Main directory
+        if not cwd:
+            self.cwd = os.path.dirname(os.getcwd())  # Main directory
+        else:
+            self.cwd = cwd
         self.algo_dir = jp(self.cwd, 'algorithms')  # algorithms directory
         self.data_dir = data_dir  # data directory
         self.res_dir = res_dir  # result dir initiated when modifying xml file if none given
@@ -238,11 +243,6 @@ class Sgems:
         # Algorithm XML
         self.tree = None
         self.root = None
-        self.op_file = jp(self.algo_dir, 'temp_output.xml')  # Temporary saves a modified XML
-        try:
-            os.remove(self.op_file)
-        except FileNotFoundError:
-            pass
         self.auto_update = False  # Experimental feature to auto fill XML and saving binary files
 
     # Load sgems dataset
@@ -289,7 +289,6 @@ class Sgems:
         :param x_lim:
         :param y_lim:
         :param z_lim:
-        :param nodes: flag for node computation
         """
 
         if x_lim is None:
@@ -469,6 +468,14 @@ class Sgems:
         Reads and parse XML file. It assumes the algorithm XML file is located in the algo_dir folder.
         :param algo_name: Name of the algorithm, without any extension, e.g. 'kriging', 'cokriging'...
         """
+        self.algo_dir = jp(self.cwd, 'algorithms')  # ensure proper algorithm directory
+
+        self.op_file = jp(self.algo_dir, 'temp_output.xml')  # Temporary saves a modified XML
+        try:
+            os.remove(self.op_file)
+        except FileNotFoundError:
+            pass
+
         self.tree = ET.parse(jp(self.algo_dir, '{}.xml'.format(algo_name)))
         self.root = self.tree.getroot()
         self.object_file_names = []  # Empty object file names if reading new algorithm
@@ -702,7 +709,9 @@ class Sgems:
                   [str(sgems_files), 'OBJECT_FILES'],
                   [self.node_value_file.replace('\\', '//'), 'NODES_VALUES_FILE']]
 
-        with open('../script_templates/script_template.py') as sst:  # Update template
+        dir_path = os.path.abspath(__file__ + "/../../")
+
+        with open(jp(dir_path, 'script_templates/script_template.py')) as sst:
             template = sst.read()
         for i in range(len(params)):  # Replaces the parameters
             template = template.replace(params[i][1], params[i][0])
