@@ -25,7 +25,7 @@ def main():
     print(sgems.columns)
     # %% Load your algorithm xml file in the 'algorithms' folder. A result folder will automatically be generated at
     # this time if no such folder is already defined.
-    algo_name = sgems.xml_reader('kriging')
+    sgems.xml_reader('kriging')
     # %% Show xml structure tree
     sgems.show_tree()
     # %% Modify xml below:
@@ -42,6 +42,7 @@ def main():
     sgems.run()
     # Plot 2D results
     sgems.plot_2d(save=True)
+
 
 if __name__ == '__main__':
     main()
