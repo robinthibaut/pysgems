@@ -4,7 +4,7 @@ import uuid
 import xml.etree.ElementTree as ET
 from os.path import join as jp
 
-from pysgems.utils import joinlist
+from develop.utils import joinlist
 
 
 class XML:
@@ -226,7 +226,6 @@ class XML:
     def write_command(self):
         """
         Write python script that sgems will run.
-        The sgems python script template must be located in the main folder.
         """
         if self.auto_update:
             # First creates necessary binary files

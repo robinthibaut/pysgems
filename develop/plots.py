@@ -3,7 +3,8 @@ from os.path import join as jp
 
 import matplotlib.pyplot as plt
 import numpy as np
-from pysgems.data_ops import datread
+
+from develop.data_ops import datread
 
 
 def plot_coordinates(self):

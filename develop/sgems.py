@@ -2,9 +2,9 @@
 import os
 from os.path import join as jp
 
-import pysgems.data_ops
-import pysgems.grid_ops
-import pysgems.script_ops
+import develop.data_ops
+import develop.grid_ops
+import develop.script_ops
 
 
 class Sgems:
@@ -31,7 +31,7 @@ class Sgems:
 
         # Data
         self.nodata = nodata
-        self.data = pysgems.data_ops.Operations()
+        self.data = develop.data_ops.Operations()
         if file_name:
             self.file_path = jp(self.data_dir, file_name)
             self.data.load_dataframe()
@@ -41,7 +41,7 @@ class Sgems:
 
         # Grid geometry - use self.generate_grid() to update values
         self.bounding_box = None
-        self.dis = pysgems.grid_ops.Discretize(dx=dx, dy=dy, dz=dz,
+        self.dis = develop.grid_ops.Discretize(dx=dx, dy=dy, dz=dz,
                                                xo=xo, yo=yo, zo=zo,
                                                x_lim=x_lim, y_lim=y_lim, z_lim=z_lim,
                                                dataframe=self.data.dataframe, nodata=self.nodata)
@@ -50,10 +50,11 @@ class Sgems:
         # Algorithm XML
         self.auto_update = False  # Experimental feature to auto fill XML and saving binary files
 
-        self.xml = pysgems.script_ops.XML(cwd=self.cwd,
+        self.xml = develop.script_ops.XML(cwd=self.cwd,
                                           res_dir=self.res_dir,
                                           project_name=self.data.project_name,
                                           columns=self.data.columns,
                                           auto_update=self.auto_update,
                                           algo_dir=self.algo_dir)
+
 

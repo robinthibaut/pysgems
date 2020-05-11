@@ -89,9 +89,9 @@ class Discretize:
         self.along_c = None
         self.along_l = None
 
-        # self.node_file = jp(os.path.dirname(self.file_path), 'nodes.npy')  # nodes files
-        # self.node_value_file = jp(os.path.dirname(self.file_path), 'fnodes.txt')
-        # self.dis_file = jp(os.path.dirname(self.file_path), 'dis.info')
+        self.node_file = jp(os.path.dirname(self.file_path), 'nodes.npy')  # nodes files
+        self.node_value_file = jp(os.path.dirname(self.file_path), 'fnodes.txt')
+        self.dis_file = jp(os.path.dirname(self.file_path), 'dis.info')
 
     def generate_grid(self,
                       xo=None,

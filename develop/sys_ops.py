@@ -29,7 +29,6 @@ class Commmands:
         bat.write(' '.join(['sgems', 'sgems.script']))
         bat.close()
 
-
     def run(self):
         """Call bat file, run sgems"""
         batch = jp(self.res_dir, 'RunSgems.bat')
