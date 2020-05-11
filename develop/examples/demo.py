@@ -22,7 +22,7 @@ def main():
     # %% Display point coordinates and grid
     sg.plot_coordinates()
     # %% Which feature are available
-    print(sg.columns)
+    print(sg.dis.columns)
     # %% Load your algorithm xml file in the 'algorithms' folder. A result folder will automatically be generated at
     # this time if no such folder is already defined.
     sg.xml.xml_reader('kriging')

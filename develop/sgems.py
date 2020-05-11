@@ -35,9 +35,6 @@ class Sgems:
         if file_name:
             self.file_path = jp(self.data_dir, file_name)
             self.data.load_dataframe()
-            self.node_file = jp(os.path.dirname(self.file_path), 'nodes.npy')  # nodes files
-            self.node_value_file = jp(os.path.dirname(self.file_path), 'fnodes.txt')
-            self.dis_file = jp(os.path.dirname(self.file_path), 'dis.info')
 
         # Grid geometry - use self.generate_grid() to update values
         self.bounding_box = None
@@ -56,5 +53,3 @@ class Sgems:
                                           columns=self.data.columns,
                                           auto_update=self.auto_update,
                                           algo_dir=self.algo_dir)
-
-
