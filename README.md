@@ -9,6 +9,8 @@ The kriging example described in this file can be found in the 'demo.py' file.
 
 ## Installation
 
+Clone this repository, or:
+
 ```bash
 pip install pysgems
 ```
