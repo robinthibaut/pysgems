@@ -33,15 +33,31 @@ class Sgems:
         self.nodata = nodata
         self.data = develop.data_ops.Operations()
         if file_name:
+
             self.file_path = jp(self.data_dir, file_name)
+
             self.data.load_dataframe()
+
+            if x_lim is None:
+                x_lim = self.data.dataframe['x'].max()
+            if y_lim is None:
+                y_lim = self.data.dataframe['y'].max()
+            if z_lim is None:
+                z_lim = self.data.dataframe['z'].max()
+
+            if xo is None:
+                xo = self.data.dataframe['x'].min()
+            if yo is None:
+                yo = self.data.dataframe['y'].min()
+            if zo is None:
+                zo = self.data.dataframe['z'].min()
 
         # Grid geometry - use self.generate_grid() to update values
         self.bounding_box = None
         self.dis = develop.grid_ops.Discretize(dx=dx, dy=dy, dz=dz,
                                                xo=xo, yo=yo, zo=zo,
                                                x_lim=x_lim, y_lim=y_lim, z_lim=z_lim,
-                                               dataframe=self.data.dataframe, nodata=self.nodata)
+                                               nodata=self.nodata)
         self.dis.generate_grid()
 
         # Algorithm XML

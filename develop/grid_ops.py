@@ -3,6 +3,7 @@
 import os
 import shutil
 import time
+from os.path import join as jp
 
 import numpy as np
 from shapely.geometry import Point, Polygon
@@ -68,10 +69,8 @@ class Discretize:
                  x_lim=None,
                  y_lim=None,
                  z_lim=None,
-                 dataframe=None,
                  nodata=None):
 
-        self.dataframe = dataframe
         self.nodata = nodata
         self.dx = dx
         self.dy = dy
@@ -88,10 +87,6 @@ class Discretize:
         self.along_r = None
         self.along_c = None
         self.along_l = None
-
-        self.node_file = jp(os.path.dirname(self.file_path), 'nodes.npy')  # nodes files
-        self.node_value_file = jp(os.path.dirname(self.file_path), 'fnodes.txt')
-        self.dis_file = jp(os.path.dirname(self.file_path), 'dis.info')
 
     def generate_grid(self,
                       xo=None,
@@ -112,20 +107,6 @@ class Discretize:
         :param y_lim:
         :param z_lim:
         """
-
-        if x_lim is None:
-            x_lim = self.dataframe['x'].max() + self.dx * 4
-        if y_lim is None:
-            y_lim = self.dataframe['y'].max() + self.dy * 4
-        if z_lim is None:
-            z_lim = self.dataframe['z'].max() + self.dz * 4
-
-        if xo is None:
-            xo = self.dataframe['x'].min() - self.dx * 4
-        if yo is None:
-            yo = self.dataframe['y'].min() - self.dy * 4
-        if zo is None:
-            zo = self.dataframe['z'].min() - self.dz * 4
 
         if self.dy > 0:
             nrow = int((y_lim - yo) // self.dy)  # Number of rows
@@ -201,63 +182,71 @@ class Discretize:
         else:
             return self.nodata
 
-    def compute_nodes(self):
+    def compute_nodes(self, xyz, node_file):
         """
         Determines node location for each data point.
         It is necessary to know the node number to assign the hard data property to the sgems grid.
-        :return: nodes number
+        :param xyz: Data points x, y, z coordinates
+        :param node_file: file path where data points cells will be stored
         """
-        xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
+
         nodes = np.array([self.my_node(c) for c in xyz])
 
-        np.save(self.node_file, nodes)  # Save to nodes to avoid recomputing each time
+        np.save(node_file, nodes)  # Save to nodes to avoid recomputing each time
 
-    def get_nodes(self):
+    def get_nodes(self, xyz, node_file, dis_file):
+        """
+
+        :param xyz: Data points 3D coordinates array
+        :param node_file: File path to the data points nodes files
+        :param dis_file: File path to the discretization file
+
+        """
+
         npar = np.array([self.dx, self.dy, self.dz,
                          self.xo, self.yo, self.zo,
                          self.x_lim, self.y_lim, self.z_lim,
                          self.nrow, self.ncol, self.nlay])
 
-        if os.path.isfile(self.dis_file):  # Check previous grid info
-            pdis = np.loadtxt(self.dis_file)
+        if os.path.isfile(dis_file):  # Check previous grid info
+            pdis = np.loadtxt(dis_file)
             # If different, recompute data points node by deleting previous node file
             if not np.array_equal(pdis, npar):
                 print('New grid found')
                 try:
-                    os.remove(self.node_file)
-                    os.remove(self.node_value_file)
+                    os.remove(node_file)
                 except FileNotFoundError:
                     pass
                 finally:
-                    np.savetxt(self.dis_file, npar)
-                    self.compute_nodes()
+                    np.savetxt(dis_file, npar)
+                    self.compute_nodes(xyz, node_file)
             else:
                 print('Using previous grid')
                 try:
-                    np.load(self.node_file)
+                    np.load(node_file)
                 except FileNotFoundError:
-                    self.compute_nodes()
+                    self.compute_nodes(xyz, node_file)
         else:
-            np.savetxt(self.dis_file, npar)
-            self.compute_nodes()
+            np.savetxt(dis_file, npar)
+            self.compute_nodes(xyz, node_file)
 
-        self.export_node_idx()
-
-    def nodes_cleanup(self, features):
+    def print_hard_data(self, subdata, node_file, output_dir):
         """
         Removes no-data rows from data frame and compute the mean of data points sharing the same cell.
-        :param features: str or list(str) of features name to save
+        Export the list of shape (n features, m nodes, 2) containing the node of each point data with the corresponding
+        value, for each feature.
+
+        :param subdata: Pandas dataframe whose columns are the values of features to save as hard data.
+        :param node_file: File path to the nodes files
+        :param output_dir: Directory where hard data lists will be saved
         :return: Filtered list of each attribute
         """
-        data_nodes = np.load(self.node_file)
+        data_nodes = np.load(node_file)
         unique_nodes = list(set(data_nodes))
 
-        if not isinstance(features, list):
-            features = [features]
-        fn = []
-        for h in features:  # For each feature
+        for h in subdata:  # For each feature
             # fixed nodes = [[node i, value i]....]
-            fixed_nodes = np.array([[data_nodes[dn], self.dataframe[h][dn]] for dn in range(len(data_nodes))])
+            fixed_nodes = np.array([[data_nodes[dn], subdata[h][dn]] for dn in range(len(data_nodes))])
             # Deletes points where val == nodata
             hard_data = np.delete(fixed_nodes, np.where(fixed_nodes == self.nodata)[0], axis=0)
             # If data points share the same cell, compute their mean and assign the value to the cell
@@ -267,20 +256,12 @@ class Discretize:
                     mean = np.mean(hard_data[where, 1])
                     hard_data[where, 1] = mean
 
-            fn.append(hard_data.tolist())
+            fn = hard_data.tolist()
 
-        return fn
+            # For each, feature X, saves a file X.hard
+            cell_values_name = jp(os.path.dirname(node_file), '{}.hard'.format(h))
+            with open(cell_values_name, 'w') as nd:
+                nd.write(repr(fn))
+            shutil.copyfile(cell_values_name,
+                            cell_values_name.replace(os.path.dirname(cell_values_name), output_dir))
 
-    # Save node list to load it into sgems later
-    def export_node_idx(self):
-        """
-        Export the list of shape (n features, m nodes, 2) containing the node of each point data with the corresponding
-        value, for each feature
-        """
-        self.hard_data_objects = self.columns[3:]
-        if not os.path.isfile(self.node_value_file):
-            hard = self.nodes_cleanup(features=self.hard_data_objects)
-            with open(self.node_value_file, 'w') as nd:
-                nd.write(repr(hard))
-            shutil.copyfile(self.node_value_file,
-                            self.node_value_file.replace(os.path.dirname(self.node_value_file), self.res_dir))
