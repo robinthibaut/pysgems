@@ -61,17 +61,20 @@ def blocks_from_rc(rows, columns, layers, xo=0, yo=0, zo=0):
 class Discretize:
 
     def __init__(self,
-                 dx=None,
-                 dy=None,
-                 dz=None,
-                 xo=None,
-                 yo=None,
-                 zo=None,
-                 x_lim=None,
-                 y_lim=None,
-                 z_lim=None,
-                 nodata=None):
+                 model,
+                 dx=1,
+                 dy=1,
+                 dz=1,
+                 xo=0,
+                 yo=0,
+                 zo=0,
+                 x_lim=1,
+                 y_lim=1,
+                 z_lim=1,
+                 nodata=-9966699):
 
+        self.model = model
+        self.model.dis = self
         self.nodata = nodata
         self.dx = dx
         self.dy = dy
@@ -138,6 +141,8 @@ class Discretize:
         self.along_r = along_r
         self.along_c = along_c
         self.along_l = along_l
+
+        self.model.dis = self
 
     def my_node(self, xyz):
         """
