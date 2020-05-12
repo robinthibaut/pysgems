@@ -70,4 +70,4 @@ class Sgems:
                                           auto_update=self.auto_update,
                                           algo_dir=self.algo_dir)
 
-        self.command = develop.sys_ops.Commmands()
+        self.command = develop.sys_ops.Commmands(self.res_dir)

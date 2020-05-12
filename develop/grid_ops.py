@@ -14,11 +14,12 @@ def blocks_from_rc(rows, columns, layers, xo=0, yo=0, zo=0):
     Yields blocks defining grid cells
     :param rows: array of x-widths along a row
     :param columns: array of y-widths along a column
+    :param layers: array of z-widths along a column
     :param xo: x origin
     :param yo: y origin
+    :param zo: z origin
     :return: generator of (cell node number, block vertices coordinates, block center)
     """
-    # TODO: adapt to 3D
     nrow = len(rows)
     ncol = len(columns)
     nlay = len(layers)
