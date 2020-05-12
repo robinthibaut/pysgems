@@ -170,9 +170,9 @@ class Operations:
             self.columns = list(self.dataframe.columns.values)
             self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
 
-    def make_data(self, features):
+    def export_01(self, features):
         """
-        Gives a list of dataset to be saved in sgems binary format and saves them to the result directory
+        Gives a list of point set names to be saved in sgems binary format and saves them to the result directory
         :param features:
         """
         if not isinstance(features, list):

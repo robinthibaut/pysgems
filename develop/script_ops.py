@@ -227,10 +227,6 @@ class XML:
         """
         Write python script that sgems will run.
         """
-        if self.auto_update:
-            # First creates necessary binary files
-            self.auto_fill()
-            self.make_data(self.object_file_names)
 
         run_algo_flag = ''  # This empty str will replace the # in front of the commands meant to execute sgems
         # within its python environment

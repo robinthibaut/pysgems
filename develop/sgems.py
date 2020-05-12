@@ -5,6 +5,7 @@ from os.path import join as jp
 import develop.data_ops
 import develop.grid_ops
 import develop.script_ops
+import develop.sys_ops
 
 
 class Sgems:
@@ -53,7 +54,6 @@ class Sgems:
                 zo = self.data.dataframe['z'].min()
 
         # Grid geometry - use self.generate_grid() to update values
-        self.bounding_box = None
         self.dis = develop.grid_ops.Discretize(dx=dx, dy=dy, dz=dz,
                                                xo=xo, yo=yo, zo=zo,
                                                x_lim=x_lim, y_lim=y_lim, z_lim=z_lim,
@@ -69,3 +69,5 @@ class Sgems:
                                           columns=self.data.columns,
                                           auto_update=self.auto_update,
                                           algo_dir=self.algo_dir)
+
+        self.command = develop.sys_ops.Commmands()

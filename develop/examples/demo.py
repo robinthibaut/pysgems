@@ -34,8 +34,8 @@ def main():
     sg.xml.xml_update('Hard_Data', 'grid', 'ag_grid')
     sg.xml.xml_update('Hard_Data', 'property', 'ag')
     # %% Write datasets of needed features
-    # sgems.make_data(['f1', 'f2'...'fn'])
-    sg.data.make_data('ag')
+    # sgems.export_01(['f1', 'f2'...'fn'])
+    sg.data.export_01('ag')
     # %% Write python script
     sg.write_command()
     # %% Run sgems
