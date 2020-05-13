@@ -211,7 +211,7 @@ It will generate a batch file and a script file. The batch file can later be use
 
 Check the results:
 
-<img src="examples/results/demo/results.png" alt="plot" style="width:30;height:30">
+<img src="pysgems/examples/results/demo/results.png" alt="plot" style="width:30;height:30">
 
 ### Other features
 
