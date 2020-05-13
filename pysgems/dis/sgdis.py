@@ -66,7 +66,7 @@ class Discretize(Package):
                  model,
                  dx=1,
                  dy=1,
-                 dz=1,
+                 dz=0,
                  xo=None,
                  yo=None,
                  zo=None,
@@ -109,7 +109,7 @@ class Discretize(Package):
         if zo is None:
             if self.parent.point_set is not None:
                 zs = self.parent.point_set.dataframe['z']
-                zo = np.min(zs) - 4*self.parent.point_set.dimension
+                zo = np.min(zs) - 4*self.dz
             else:
                 zo = 0
 
@@ -131,7 +131,7 @@ class Discretize(Package):
         if z_lim is None:
             if self.parent.point_set is not None:
                 zs = self.parent.point_set.dataframe['z']
-                z_lim = np.max(zs) + 4*self.parent.point_set.dimension
+                z_lim = np.max(zs) + 4*self.dz
             else:
                 x_lim = 1
 

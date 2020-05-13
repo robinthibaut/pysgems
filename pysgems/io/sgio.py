@@ -117,6 +117,16 @@ def write_point_set(file_name, sub_dataframe, nodata=-999):
             wb.write(struct.pack('>f', v))  # Values
 
 
+def export_eas(dataframe, filename='dataset'):
+    columns = list(dataframe.columns.values)
+    header = [filename, str(len(columns))] + columns
+    ri = dataframe.iterrows()
+    rows = [' '.join(list(map(str, r[1]))) for r in ri]
+    lines = header + rows
+    with open(filename+'.eas', 'w') as eas:
+        eas.writelines('\n'.join(lines))
+
+
 class PointSet(Package):
 
     def __init__(self,
@@ -173,3 +183,4 @@ class PointSet(Package):
             write_point_set(ps_name, subframe)  # Write binary file
             if pp not in self.parent.object_file_names:  # Adding features name to load them within sgems
                 self.parent.object_file_names.append(pp)
+
