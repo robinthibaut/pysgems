@@ -288,7 +288,6 @@ class Discretize:
                     hard_data[where, 1] = mean
 
             fn = hard_data.tolist()
-
             # For each, feature X, saves a file X.hard
             cell_values_name = jp(os.path.dirname(self.node_file), '{}.hard'.format(h))
             with open(cell_values_name, 'w') as nd:
