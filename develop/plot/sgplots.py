@@ -4,23 +4,24 @@ from os.path import join as jp
 import matplotlib.pyplot as plt
 import numpy as np
 
+from develop.base.packbase import Package
 from develop.io.sgio import datread
 
 
-class Plots:
+class Plots(Package):
 
     def __init__(self, model):
-        self.model = model
-        self.name = self.model.model_name
+        Package.__init__(self, model)
+        self.name = self.parent.model_name
 
     def plot_coordinates(self):
         try:
-            plt.plot(self.model.point_set.raw_data[:, 0], self.model.point_set.raw_data[:, 1], 'ko')
+            plt.plot(self.parent.point_set.raw_data[:, 0], self.parent.point_set.raw_data[:, 1], 'ko')
         except:
             pass
         try:
-            plt.xticks(np.cumsum(self.model.dis.along_r) + self.model.dis.xo - self.model.dis.dx, labels=[])
-            plt.yticks(np.cumsum(self.model.dis.along_c) + self.model.dis.yo - self.model.dis.dy, labels=[])
+            plt.xticks(np.cumsum(self.parent.dis.along_r) + self.parent.dis.xo - self.parent.dis.dx, labels=[])
+            plt.yticks(np.cumsum(self.parent.dis.along_c) + self.parent.dis.yo - self.parent.dis.dy, labels=[])
         except:
             pass
 
@@ -30,14 +31,14 @@ class Plots:
     def plot_2d(self, res_file=None, save=False):
         """Rudimentary 2D plot"""
         if res_file is None:
-            res_file = jp(self.model.res_dir, 'results.grid')
+            res_file = jp(self.parent.res_dir, 'results.grid')
         matrix = datread(res_file, start=3)
         matrix = np.where(matrix == -9966699, np.nan, matrix)
-        matrix = matrix.reshape((self.model.dis.nrow, self.model.dis.ncol))
-        extent = (self.model.dis.xo, self.model.dis.x_lim, self.model.dis.yo, self.model.dis.y_lim)
+        matrix = matrix.reshape((self.parent.dis.nrow, self.parent.dis.ncol))
+        extent = (self.parent.dis.xo, self.parent.dis.x_lim, self.parent.dis.yo, self.parent.dis.y_lim)
         plt.imshow(np.flipud(matrix), cmap='coolwarm', extent=extent)
-        plt.plot(self.model.point_set.raw_data[:, 0], self.model.point_set.raw_data[:, 1], 'k+', markersize=1, alpha=.7)
+        plt.plot(self.parent.point_set.raw_data[:, 0], self.parent.point_set.raw_data[:, 1], 'k+', markersize=1, alpha=.7)
         plt.colorbar()
         if save:
-            plt.savefig(jp(self.model.res_dir, 'results.png'), bbox_inches='tight', dpi=300)
+            plt.savefig(jp(self.parent.res_dir, 'results.png'), bbox_inches='tight', dpi=300)
         plt.show()
