@@ -118,31 +118,20 @@ def write_point_set(file_name, sub_dataframe, nodata=-999):
 class Operations:
 
     def __init__(self,
-                 xo=None,
-                 yo=None,
-                 zo=None,
-                 x_lim=None,
-                 y_lim=None,
-                 z_lim=None,
+                 model,
                  file_path=None,
                  res_dir=None):
 
+        self.model = model
         self.object_file_names = []
-        self.project_name = None
+        self.project_name = self.model.model_name
+        self.file_path = file_path
+        self.res_dir = res_dir
         self.raw_data = None
         self.dataframe = None
         self.columns = None
         self.xyz = None
         self.dz = None
-
-        self.xo = xo
-        self.yo = yo
-        self.zo = zo
-        self.x_lim = x_lim
-        self.y_lim = y_lim
-        self.z_lim = z_lim
-        self.file_path = file_path
-        self.res_dir = res_dir
 
     # Load sgems dataset
     def loader(self):
@@ -170,13 +159,19 @@ class Operations:
             self.columns = list(self.dataframe.columns.values)
             self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
 
-    def export_01(self, features):
+        self.model.point_set = self
+
+    def export_01(self, features=None):
         """
         Gives a list of point set names to be saved in sgems binary format and saves them to the result directory
-        :param features:
+        :param features: Names of features to export
         """
-        if not isinstance(features, list):
+
+        if (not isinstance(features, list)) and (features is not None):
             features = [features]
+        else:
+            features = self.dataframe.columns.values
+
         for pp in features:
             subframe = self.dataframe[['x', 'y', pp]]  # Extract x, y, values
             ps_name = jp(self.res_dir, pp)  # Path of binary file

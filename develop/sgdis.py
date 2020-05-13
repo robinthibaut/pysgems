@@ -65,52 +65,26 @@ class Discretize:
                  dx=1,
                  dy=1,
                  dz=1,
-                 xo=0,
-                 yo=0,
-                 zo=0,
-                 x_lim=1,
-                 y_lim=1,
-                 z_lim=1,
+                 xo=None,
+                 yo=None,
+                 zo=None,
+                 x_lim=None,
+                 y_lim=None,
+                 z_lim=None,
                  nodata=-9966699):
-
-        self.model = model
-        self.model.dis = self
-        self.nodata = nodata
-        self.dx = dx
-        self.dy = dy
-        self.dz = dz
-        self.xo = xo
-        self.yo = yo
-        self.zo = zo
-        self.x_lim = x_lim
-        self.y_lim = y_lim
-        self.z_lim = z_lim
-        self.nrow = None
-        self.ncol = None
-        self.nlay = None
-        self.along_r = None
-        self.along_c = None
-        self.along_l = None
-
-    def generate_grid(self,
-                      xo=None,
-                      yo=None,
-                      zo=None,
-                      x_lim=None,
-                      y_lim=None,
-                      z_lim=None):
         """
         Constructs the grid geometry. The user can not control directly the number of rows and columns
         but instead inputs the cell size in x and y dimensions.
         xo, yo, x_lim, y_lim, defining the bounding box of the grid, are None by default, and are computed
         based on the data points distribution.
-        :param xo:
-        :param yo:
-        :param zo:
-        :param x_lim:
-        :param y_lim:
-        :param z_lim:
         """
+
+        self.model = model
+        self.nodata = nodata
+
+        self.dx = dx
+        self.dy = dy
+        self.dz = dz
 
         if self.dy > 0:
             nrow = int((y_lim - yo) // self.dy)  # Number of rows
@@ -132,12 +106,15 @@ class Discretize:
         self.xo = xo
         self.yo = yo
         self.zo = zo
+
         self.x_lim = x_lim
         self.y_lim = y_lim
         self.z_lim = z_lim
+
         self.nrow = nrow
         self.ncol = ncol
         self.nlay = nlay
+
         self.along_r = along_r
         self.along_c = along_c
         self.along_l = along_l

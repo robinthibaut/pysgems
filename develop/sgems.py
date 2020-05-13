@@ -12,7 +12,8 @@ class Sgems:
 
         self.algo_dir = jp(self.model_wd, 'algorithms')  # algorithms directory
 
-        self.dis = None
+        self.dis = None  # Discretization instance
+        self.point_set = None
         # self.data_dir = data_dir  # data directory
         # self.res_dir = res_dir  # result dir initiated when modifying xml file if none given
         # self.file_name = file_name  # data file name
