@@ -4,7 +4,7 @@ from os.path import join as jp
 import matplotlib.pyplot as plt
 import numpy as np
 
-from develop.sgps import datread
+from develop.sgio import datread
 
 
 class Plots:

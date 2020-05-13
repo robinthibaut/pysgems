@@ -17,6 +17,8 @@ class XML:
         self.cwd = self.model.model_wd
         self.res_dir = self.model.res_dir
         self.algo_dir = algo_dir
+        if self.algo_dir is None:
+            self.algo_dir = jp(os.path.dirname(self.cwd), 'algorithms')
 
         self.op_file = jp(self.algo_dir, 'temp_output.xml')  # Temporary saves a modified XML
         self.tree = None

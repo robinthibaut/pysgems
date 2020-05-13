@@ -115,22 +115,29 @@ def write_point_set(file_name, sub_dataframe, nodata=-999):
             wb.write(struct.pack('>f', v))  # Values
 
 
-class Operations:
+class PointSet:
 
     def __init__(self,
                  model,
-                 file_path=None):
+                 pointset_path=None):
 
         self.model = model
         self.object_file_names = []
         self.project_name = self.model.model_name
-        self.file_path = file_path
+        self.file_path = pointset_path
         self.res_dir = self.model.res_dir
-        self.raw_data = None
-        self.dataframe = None
-        self.columns = None
-        self.xyz = None
-        self.dz = None
+
+        self.raw_data, self.project_name, self.columns = self.loader()
+        self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)
+        try:
+            self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
+        except KeyError:  # Assumes 2D dataset
+            self.dataframe.insert(2, 'z', np.zeros(self.dataframe.shape[0]))
+            self.columns = list(self.dataframe.columns.values)
+            self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
+            self.dz = 0
+
+        self.model.point_set = self
 
     # Load sgems dataset
     def loader(self):
@@ -148,7 +155,6 @@ class Operations:
         Loads sgems data set.
         Assumes that x, y, z are the first three columns and are labeled as such.
         """
-        # At this time, considers only 2D dataset
         self.raw_data, self.project_name, self.columns = self.loader()
         self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)
         try:
