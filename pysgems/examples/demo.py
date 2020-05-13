@@ -18,7 +18,7 @@ def main():
 
     # %% Load data point set
     data_dir = join_path(cwd, 'datasets', 'demo')
-    dataset = 'sgems_dataset.dat'
+    dataset = 'sgems_dataset.eas'
     file_path = join_path(data_dir, dataset)
 
     ps = PointSet(model=model, pointset_path=file_path)

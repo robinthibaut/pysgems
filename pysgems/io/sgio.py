@@ -118,6 +118,7 @@ def write_point_set(file_name, sub_dataframe, nodata=-999):
 
 
 def export_eas(dataframe, filename='dataset'):
+    """Exports a Pandas DataFrame to geo-eas format"""
     columns = list(dataframe.columns.values)
     header = [filename, str(len(columns))] + columns
     ri = dataframe.iterrows()
