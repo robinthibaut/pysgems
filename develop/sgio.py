@@ -5,6 +5,8 @@ from os.path import join as jp
 import numpy as np
 import pandas as pd
 
+from develop.packbase import Package
+
 
 def datread(file=None, start=0, end=None):
     # end must be set to None and NOT -1
@@ -115,17 +117,18 @@ def write_point_set(file_name, sub_dataframe, nodata=-999):
             wb.write(struct.pack('>f', v))  # Values
 
 
-class PointSet:
+class PointSet(Package):
 
     def __init__(self,
                  model,
                  pointset_path=None):
 
-        self.model = model
+        Package.__init__(self, model)
+
         self.object_file_names = []
-        self.project_name = self.model.model_name
+        self.project_name = self.parent.model_name
         self.file_path = pointset_path
-        self.res_dir = self.model.res_dir
+        self.res_dir = self.parent.res_dir
 
         self.dimension = 2
         self.raw_data, self.project_name, self.columns = self.loader()
@@ -140,7 +143,7 @@ class PointSet:
             self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
             self.dimension = 2
 
-        self.model.point_set = self
+        setattr(self.parent, 'point_set', self)
 
     # Load sgems dataset
     def loader(self):
@@ -152,23 +155,6 @@ class PointSet:
         columns_name = [h[0].lower() for h in head]  # Column names (lowered)
         data = datread(self.file_path, start=2 + n_features)  # Raw data
         return data, project_name, columns_name
-
-    def load_dataframe(self):
-        """
-        Loads sgems data set.
-        Assumes that x, y, z are the first three columns and are labeled as such.
-        """
-        self.raw_data, self.project_name, self.columns = self.loader()
-        self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)
-        try:
-            self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
-        except KeyError:  # Assumes 2D dataset
-            self.dataframe.insert(2, 'z', np.zeros(self.dataframe.shape[0]))
-            self.columns = list(self.dataframe.columns.values)
-            self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
-            self.dimension = 0
-
-        self.model.point_set = self
 
     def export_01(self, features=None):
         """
@@ -185,5 +171,5 @@ class PointSet:
             subframe = self.dataframe[['x', 'y', pp]]  # Extract x, y, values
             ps_name = jp(self.res_dir, pp)  # Path of binary file
             write_point_set(ps_name, subframe)  # Write binary file
-            if pp not in self.model.object_file_names:  # Adding features name to load them within sgems
-                self.model.object_file_names.append(pp)
+            if pp not in self.parent.object_file_names:  # Adding features name to load them within sgems
+                self.parent.object_file_names.append(pp)
