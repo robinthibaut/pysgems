@@ -3,20 +3,22 @@ import os
 import xml.etree.ElementTree as ET
 from os.path import join as jp
 
+from develop.packbase import Package
+
 auto_update = False
 
 
-class XML:
+class XML(Package):
     def __init__(self,
                  model,
                  algo_dir=None):
 
+        Package.__init__(self, model)
 
-        # self.model = model
-        self.project_name = self.model.model_name
+        self.project_name = self.parent.model_name
 
-        self.cwd = self.model.model_wd
-        self.res_dir = self.model.res_dir
+        self.cwd = self.parent.model_wd
+        self.res_dir = self.parent.res_dir
         self.algo_dir = algo_dir
         if self.algo_dir is None:
             self.algo_dir = jp(os.path.dirname(self.cwd), 'algorithms')
@@ -25,7 +27,7 @@ class XML:
         self.tree = None
         self.root = None
 
-        # self.model.algo = self
+        setattr(self.parent, 'algo', self)
 
     def xml_reader(self, algo_name):
         """
@@ -52,7 +54,8 @@ class XML:
             except AttributeError:
                 pass
 
-        # self.model.algo = self
+        setattr(self.parent.algo, 'tree', self.tree)
+        setattr(self.parent.algo, 'root', self.root)
 
     def show_tree(self):
         """
@@ -94,7 +97,7 @@ class XML:
             if (auto_update is True) and ('property' in new_attribute_dict):
                 # If one property point set needs to be used
                 pp = new_attribute_dict['property']  # Name property
-                if pp in self.model.point_set.columns:
+                if pp in self.parent.point_set.columns:
                     if 'grid' in new_attribute_dict:  # ensure default grid name
                         new_attribute_dict['grid'] = '{}_grid'.format(pp)
                     if 'value' in new_attribute_dict:  # ensure default grid name
@@ -111,7 +114,8 @@ class XML:
             print(self.root.find(path).tag)
             print(self.root.find(path).attrib)
 
-        # self.model.algo = self
+        setattr(self.parent.algo, 'tree', self.tree)
+        setattr(self.parent.algo, 'root', self.root)
 
     def auto_fill(self):
         """
@@ -133,10 +137,10 @@ class XML:
                 trk = list(element.attrib.keys())
 
                 for i in range(len(trv)):
-                    if (trv[i] in self.model.point_set.columns) \
+                    if (trv[i] in self.parent.point_set.columns) \
                             and ('Variable' or 'Hard_Data' in element.tag):
-                        if trv[i] not in self.model.object_file_names:
-                            self.model.object_file_names.append(trv[i])
+                        if trv[i] not in self.parent.object_file_names:
+                            self.parent.object_file_names.append(trv[i])
                             try:
                                 if trk[i - 1] == 'grid':  # ensure default grid name
                                     print(element.attrib)
@@ -181,9 +185,9 @@ class XML:
                         trk = list(e.attrib.keys())
 
                         for i in range(len(trv)):
-                            if trv[i] in self.model.point_set.columns:
-                                if trv[i] not in self.model.object_file_names:
-                                    self.model.object_file_names.append(trv[i])
+                            if trv[i] in self.parent.point_set.columns:
+                                if trv[i] not in self.parent.object_file_names:
+                                    self.parent.object_file_names.append(trv[i])
                                     if trk[i] == 'grid':  # ensure default grid name
                                         print('//'.join(c_list))
                                         print(e.attrib)

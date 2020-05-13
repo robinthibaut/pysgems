@@ -80,7 +80,6 @@ class Discretize(Package):
         based on the data points distribution.
         """
 
-        # self.model = model
         Package.__init__(self, model)
 
         self.node_file = None
@@ -170,7 +169,7 @@ class Discretize(Package):
         self.along_c = along_c
         self.along_l = along_l
 
-        # self.model.dis = self
+        setattr(self.parent, 'dis', self)
 
     def my_node(self, xyz):
         """
@@ -217,7 +216,7 @@ class Discretize(Package):
             print('found 1 node in {} s'.format(time.time() - start))
             return cell
         else:
-            return self.model.nodata
+            return self.parent.nodata
 
     def compute_nodes(self, xyz):
         """
@@ -283,7 +282,7 @@ class Discretize(Package):
             # fixed nodes = [[node i, value i]....]
             fixed_nodes = np.array([[data_nodes[dn], subdata[h][dn]] for dn in range(len(data_nodes))])
             # Deletes points where val == nodata
-            hard_data = np.delete(fixed_nodes, np.where(fixed_nodes == self.model.nodata)[0], axis=0)
+            hard_data = np.delete(fixed_nodes, np.where(fixed_nodes == self.parent.nodata)[0], axis=0)
             # If data points share the same cell, compute their mean and assign the value to the cell
             for n in unique_nodes:
                 where = np.where(hard_data[:, 0] == n)[0]
@@ -299,5 +298,5 @@ class Discretize(Package):
             shutil.copyfile(cell_values_name,
                             cell_values_name.replace(os.path.dirname(cell_values_name), output_dir))
 
-            self.model.hard_data.append(h)
+            self.parent.hard_data.append(h)
 
