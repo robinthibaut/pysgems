@@ -11,7 +11,8 @@ class XML:
                  model,
                  algo_dir=None):
 
-        self.model = model
+
+        # self.model = model
         self.project_name = self.model.model_name
 
         self.cwd = self.model.model_wd
@@ -24,7 +25,7 @@ class XML:
         self.tree = None
         self.root = None
 
-        self.model.algo = self
+        # self.model.algo = self
 
     def xml_reader(self, algo_name):
         """
@@ -51,7 +52,7 @@ class XML:
             except AttributeError:
                 pass
 
-        self.model.algo = self
+        # self.model.algo = self
 
     def show_tree(self):
         """
@@ -110,7 +111,7 @@ class XML:
             print(self.root.find(path).tag)
             print(self.root.find(path).attrib)
 
-        self.model.algo = self
+        # self.model.algo = self
 
     def auto_fill(self):
         """

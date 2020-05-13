@@ -25,7 +25,7 @@ def main():
 
     # %% Generate grid. Grid dimensions can automatically be generated based on the data points
     # unless specified otherwise, but cell dimensions dx, dy, (dz) must be specified
-    ds = Discretize(model=sg, dx=5, dy=5)
+    ds = Discretize(model=sg, dx=5, dy=5, xo=0, yo=0, x_lim=100, y_lim=100)
 
     # %% Display point coordinates and grid
     pl = Plots(model=sg)

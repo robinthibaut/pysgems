@@ -8,6 +8,8 @@ from os.path import join as jp
 import numpy as np
 from shapely.geometry import Point, Polygon
 
+from develop.packbase import Package
+
 
 def blocks_from_rc(rows, columns, layers, xo=0, yo=0, zo=0):
     """
@@ -58,7 +60,7 @@ def blocks_from_rc(rows, columns, layers, xo=0, yo=0, zo=0):
                 yield get_node(i, j, k), np.array(b), np.mean(b, axis=0)
 
 
-class Discretize:
+class Discretize(Package):
 
     def __init__(self,
                  model,
@@ -78,57 +80,59 @@ class Discretize:
         based on the data points distribution.
         """
 
-        self.model = model
+        # self.model = model
+        Package.__init__(self, model)
+
         self.node_file = None
 
         self.dx = dx
         self.dy = dy
         self.dz = dz
-        if self.model.point_set is not None:
-            if self.model.point_set.dimension == 2:
+        if self.parent.point_set is not None:
+            if self.parent.point_set.dimension == 2:
                 self.dz = 0
 
         # Grid origins
         if xo is None:
-            if self.model.point_set is not None:
-                xs = self.model.point_set.dataframe['x']
+            if self.parent.point_set is not None:
+                xs = self.parent.point_set.dataframe['x']
                 xo = np.min(xs) - 4*self.dx
             else:
                 xo = 0
 
         if yo is None:
-            if self.model.point_set is not None:
-                ys = self.model.point_set.dataframe['y']
+            if self.parent.point_set is not None:
+                ys = self.parent.point_set.dataframe['y']
                 yo = np.min(ys) - 4*self.dy
             else:
                 yo = 0
 
         if zo is None:
-            if self.model.point_set is not None:
-                zs = self.model.point_set.dataframe['z']
-                zo = np.min(zs) - 4*self.model.point_set.dimension
+            if self.parent.point_set is not None:
+                zs = self.parent.point_set.dataframe['z']
+                zo = np.min(zs) - 4*self.parent.point_set.dimension
             else:
                 zo = 0
 
         # Grid limits
         if x_lim is None:
-            if self.model.point_set is not None:
-                xs = self.model.point_set.dataframe['x']
+            if self.parent.point_set is not None:
+                xs = self.parent.point_set.dataframe['x']
                 x_lim = np.max(xs) + 4*self.dx
             else:
                 x_lim = 1
 
         if y_lim is None:
-            if self.model.point_set is not None:
-                ys = self.model.point_set.dataframe['y']
+            if self.parent.point_set is not None:
+                ys = self.parent.point_set.dataframe['y']
                 y_lim = np.max(ys) + 4*self.dy
             else:
                 y_lim = 1
 
         if z_lim is None:
-            if self.model.point_set is not None:
-                zs = self.model.point_set.dataframe['z']
-                z_lim = np.max(zs) + 4*self.model.point_set.dimension
+            if self.parent.point_set is not None:
+                zs = self.parent.point_set.dataframe['z']
+                z_lim = np.max(zs) + 4*self.parent.point_set.dimension
             else:
                 x_lim = 1
 
@@ -166,7 +170,7 @@ class Discretize:
         self.along_c = along_c
         self.along_l = along_l
 
-        self.model.dis = self
+        # self.model.dis = self
 
     def my_node(self, xyz):
         """
@@ -220,7 +224,6 @@ class Discretize:
         Determines node location for each data point.
         It is necessary to know the node number to assign the hard data property to the sgems grid.
         :param xyz: Data points x, y, z coordinates
-        :param node_file: file path where data points cells will be stored
         """
 
         nodes = np.array([self.my_node(c) for c in xyz])
@@ -229,10 +232,8 @@ class Discretize:
 
     def get_nodes(self, xyz, dis_file=None):
         """
-
         :param xyz: Data points 3D coordinates array
         :param dis_file: File path to the discretization file
-
         """
 
         npar = np.array([self.dx, self.dy, self.dz,
