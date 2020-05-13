@@ -84,6 +84,9 @@ class Discretize:
         self.dx = dx
         self.dy = dy
         self.dz = dz
+        if self.model.point_set is not None:
+            if self.model.point_set.dimension == 2:
+                self.dz = 0
 
         # Grid origins
         if xo is None:
@@ -103,7 +106,7 @@ class Discretize:
         if zo is None:
             if self.model.point_set is not None:
                 zs = self.model.point_set.dataframe['z']
-                zo = np.min(zs) - 4*self.model.point_set.dz
+                zo = np.min(zs) - 4*self.model.point_set.dimension
             else:
                 zo = 0
 
@@ -125,7 +128,7 @@ class Discretize:
         if z_lim is None:
             if self.model.point_set is not None:
                 zs = self.model.point_set.dataframe['z']
-                z_lim = np.max(zs) + 4*self.model.point_set.dz
+                z_lim = np.max(zs) + 4*self.model.point_set.dimension
             else:
                 x_lim = 1
 

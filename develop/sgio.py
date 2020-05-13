@@ -127,15 +127,18 @@ class PointSet:
         self.file_path = pointset_path
         self.res_dir = self.model.res_dir
 
+        self.dimension = 2
         self.raw_data, self.project_name, self.columns = self.loader()
         self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)
+
         try:
             self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
+            self.dimension = 3
         except KeyError:  # Assumes 2D dataset
             self.dataframe.insert(2, 'z', np.zeros(self.dataframe.shape[0]))
             self.columns = list(self.dataframe.columns.values)
             self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
-            self.dz = 0
+            self.dimension = 2
 
         self.model.point_set = self
 
@@ -163,7 +166,7 @@ class PointSet:
             self.dataframe.insert(2, 'z', np.zeros(self.dataframe.shape[0]))
             self.columns = list(self.dataframe.columns.values)
             self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
-            self.dz = 0
+            self.dimension = 0
 
         self.model.point_set = self
 

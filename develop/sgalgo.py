@@ -51,7 +51,7 @@ class XML:
             except AttributeError:
                 pass
 
-        self.model.algo.tree = self
+        self.model.algo = self
 
     def show_tree(self):
         """
@@ -110,7 +110,7 @@ class XML:
             print(self.root.find(path).tag)
             print(self.root.find(path).attrib)
 
-        self.model.algo.tree = self
+        self.model.algo = self
 
     def auto_fill(self):
         """
