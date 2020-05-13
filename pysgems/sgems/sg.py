@@ -23,7 +23,7 @@ class Sgems:
         if self.res_dir is None:
             # Generate result directory if none is given
             self.res_dir = jp(self.project_wd, 'results', '_'.join([self.project_name, uuid.uuid1().hex]))
-            os.makedirs(self.res_dir)
+        os.makedirs(self.res_dir)
 
         self.dis = None  # Discretization instance
         self.point_set = None  # Point set manager instance
