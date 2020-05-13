@@ -224,19 +224,37 @@ class Discretize(Package):
 
         np.save(self.cell_file, nodes)  # Save to nodes to avoid recomputing each time
 
-    def get_cells(self, xyz, dis_file=None):
+    def write_hard_data(self, subdata, dis_file=None, cell_file=None, output_dir=None):
         """
-        :param xyz: Data points 3D coordinates array
-        :param dis_file: File path to the discretization file
+        Removes no-data rows from data frame and compute the mean of data points sharing the same cell.
+        Export the list of shape (n features, m cells, 2) containing the node of each point data with the corresponding
+        value, for each feature.
+
+        :param dis_file:
+        :param cell_file:
+        :param subdata: Pandas dataframe whose columns are the values of features to save as hard data.
+        :param output_dir: Directory where hard data lists will be saved
+        :return: Filtered list of each attribute
         """
+
+        if cell_file is not None:
+            self.cell_file = cell_file
+
+        if self.cell_file is None:
+            self.cell_file = jp(self.parent.res_dir, 'cells.npy')
+
+        if output_dir is None:
+            output_dir = self.parent.res_dir
+
+        if dis_file is None:
+            dis_file = jp(os.path.dirname(self.cell_file), 'grid.dis')
+
+        xyz = subdata[['x', 'y', 'z']].to_numpy()
 
         npar = np.array([self.dx, self.dy, self.dz,
                          self.xo, self.yo, self.zo,
                          self.x_lim, self.y_lim, self.z_lim,
                          self.nrow, self.ncol, self.nlay])
-
-        if dis_file is None:
-            dis_file = jp(os.path.dirname(self.cell_file), 'grid.dis')
 
         if os.path.isfile(dis_file):  # Check previous grid info
             pdis = np.loadtxt(dis_file)
@@ -252,56 +270,37 @@ class Discretize(Package):
                     self.compute_cells(xyz)
             else:
                 print('Using previous grid')
-                try:
-                    np.load(self.cell_file)
-                except FileNotFoundError:
+                if not os.path.exists(self.cell_file):
                     self.compute_cells(xyz)
         else:
             np.savetxt(dis_file, npar)
             self.compute_cells(xyz)
 
-    def write_hard_data(self, subdata, cell_file=None, output_dir=None):
-        """
-        Removes no-data rows from data frame and compute the mean of data points sharing the same cell.
-        Export the list of shape (n features, m cells, 2) containing the node of each point data with the corresponding
-        value, for each feature.
-
-        :param cell_file:
-        :param subdata: Pandas dataframe whose columns are the values of features to save as hard data.
-        :param output_dir: Directory where hard data lists will be saved
-        :return: Filtered list of each attribute
-        """
-        if cell_file is not None:
-            self.cell_file = cell_file
-
-        if self.cell_file is None:
-            self.cell_file = jp(self.parent.res_dir, 'cells.locs')
-
-        xyz = subdata[['x', 'y', 'z']].to_numpy()
-        self.get_cells(xyz)
-
         data_nodes = np.load(self.cell_file)
         unique_nodes = list(set(data_nodes))
 
-        for h in subdata:  # For each feature
-            # fixed nodes = [[node i, value i]....]
-            fixed_nodes = np.array([[data_nodes[dn], subdata[h][dn]] for dn in range(len(data_nodes))])
-            # Deletes points where val == nodata
-            hard_data = np.delete(fixed_nodes, np.where(fixed_nodes == self.parent.nodata)[0], axis=0)
-            # If data points share the same cell, compute their mean and assign the value to the cell
-            for n in unique_nodes:
-                where = np.where(hard_data[:, 0] == n)[0]
-                if len(where) > 1:  # If more than 1 point per cell
-                    mean = np.mean(hard_data[where, 1])
-                    hard_data[where, 1] = mean
+        h = subdata.columns.values[-1]
+        # fixed nodes = [[node i, value i]....]
+        fixed_nodes = np.array([[data_nodes[dn], subdata[h][dn]] for dn in range(len(data_nodes))])
+        # Deletes points where val == nodata
+        hard_data = np.delete(fixed_nodes, np.where(fixed_nodes == self.parent.nodata)[0], axis=0)
+        # If data points share the same cell, compute their mean and assign the value to the cell
+        for n in unique_nodes:
+            where = np.where(hard_data[:, 0] == n)[0]
+            if len(where) > 1:  # If more than 1 point per cell
+                mean = np.mean(hard_data[where, 1])
+                hard_data[where, 1] = mean
 
             fn = hard_data.tolist()
             # For each, feature X, saves a file X.hard
             cell_values_name = jp(os.path.dirname(self.cell_file), '{}.hard'.format(h))
             with open(cell_values_name, 'w') as nd:
                 nd.write(repr(fn))
-            shutil.copyfile(cell_values_name,
-                            cell_values_name.replace(os.path.dirname(cell_values_name), output_dir))
+            try:
+                shutil.copyfile(cell_values_name,
+                                cell_values_name.replace(os.path.dirname(cell_values_name), output_dir))
+            except shutil.SameFileError:
+                pass
 
             self.parent.hard_data.append(h)
 

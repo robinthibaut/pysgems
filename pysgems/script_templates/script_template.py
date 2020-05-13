@@ -25,7 +25,7 @@ if hard_data_list:
         hard_data = [nodata for i in range(int(nrow*ncol))]
         for n in fn:
             hard_data[int(n[0])] = n[1]
-        sgems.set_property('PROJECT_NAME', ft, hard_data)
+        sgems.set_property('hard_data', ft, hard_data)
 
 #~sgems.execute('RunGeostatAlgorithm  ALGORITHM_NAME::/GeostatParamUtils/XML::ALGORITHM_XML')
 #~sgems.execute('SaveGeostatGrid  computation_grid::FEATURE_OUTPUT.grid::gslib::0::PROPERTY_NAME')
