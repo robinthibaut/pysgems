@@ -30,7 +30,7 @@ class Package(PackageInterface):
         Package init
 
         """
-        # To be able to access the parent model object's attributes
+        # To be able to access the parent project object's attributes
         self.parent = parent
 
         return

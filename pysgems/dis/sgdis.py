@@ -63,7 +63,7 @@ def blocks_from_rc(rows, columns, layers, xo=0, yo=0, zo=0):
 class Discretize(Package):
 
     def __init__(self,
-                 model,
+                 project,
                  dx=1,
                  dy=1,
                  dz=0,
@@ -80,7 +80,7 @@ class Discretize(Package):
         based on the data points distribution.
         """
 
-        Package.__init__(self, model)
+        Package.__init__(self, project)
 
         self.node_file = None
 

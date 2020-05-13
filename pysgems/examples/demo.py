@@ -11,32 +11,32 @@ from pysgems.sgems import sg
 
 
 def main():
-    # %% Initiate sgems model
+    # %% Initiate sgems pjt
     cwd = os.getcwd()  # Working directory
     rdir = join_path(cwd, 'results', 'demo')  # Results directory
-    model = sg.Sgems(model_name='sgems_test', model_wd=cwd, res_dir=rdir)
+    pjt = sg.Sgems(project_name='sgems_test', project_wd=cwd, res_dir=rdir)
 
     # %% Load data point set
     data_dir = join_path(cwd, 'datasets', 'demo')
     dataset = 'sgems_dataset.eas'
     file_path = join_path(data_dir, dataset)
 
-    ps = PointSet(model=model, pointset_path=file_path)
+    ps = PointSet(project=pjt, pointset_path=file_path)
 
     # %% Generate grid. Grid dimensions can automatically be generated based on the data points
     # unless specified otherwise, but cell dimensions dx, dy, (dz) must be specified
-    ds = Discretize(model=model, dx=5, dy=5)
+    ds = Discretize(project=pjt, dx=5, dy=5)
 
     # %% Display point coordinates and grid
-    pl = Plots(model=model)
+    pl = Plots(project=pjt)
     pl.plot_coordinates()
 
     # %% Which feature are available
-    print(model.point_set.columns)
+    print(pjt.point_set.columns)
 
     # %% Load your algorithm xml file in the 'algorithms' folder.
     algo_dir = join_path(os.path.dirname(cwd), 'algorithms')
-    al = XML(model=model, algo_dir=algo_dir)
+    al = XML(project=pjt, algo_dir=algo_dir)
     al.xml_reader('kriging')
 
     # %% Show xml structure tree
@@ -53,10 +53,10 @@ def main():
     ps.export_01('ag')
 
     # %% Write python script
-    model.write_command()
+    pjt.write_command()
 
     # %% Run sgems
-    model.run()
+    pjt.run()
     # Plot 2D results
     pl.plot_2d(save=True)
 

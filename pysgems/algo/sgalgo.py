@@ -10,14 +10,14 @@ auto_update = False
 
 class XML(Package):
     def __init__(self,
-                 model,
+                 project,
                  algo_dir=None):
 
-        Package.__init__(self, model)
+        Package.__init__(self, project)
 
-        self.project_name = self.parent.model_name
+        self.project_name = self.parent.project_name
 
-        self.cwd = self.parent.model_wd
+        self.cwd = self.parent.project_wd
         self.res_dir = self.parent.res_dir
         self.algo_dir = algo_dir
         if self.algo_dir is None:

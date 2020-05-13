@@ -10,19 +10,19 @@ from pysgems.utils.sgutils import joinlist
 
 class Sgems:
 
-    def __init__(self, model_name='sgems_test', model_wd='', res_dir='', script_dir='', **kwargs):
+    def __init__(self, project_name='sgems_test', project_wd='', res_dir='', script_dir='', **kwargs):
 
-        self.model_name = model_name
+        self.project_name = project_name
 
-        self.model_wd = model_wd
-        if not self.model_wd:
-            self.model_wd = os.getcwd()
+        self.project_wd = project_wd
+        if not self.project_wd:
+            self.project_wd = os.getcwd()
 
         self.res_dir = res_dir
         # result directory generated according to project and algorithm name
         if self.res_dir is None:
             # Generate result directory if none is given
-            self.res_dir = jp(self.model_wd, 'results', '_'.join([self.model_name, uuid.uuid1().hex]))
+            self.res_dir = jp(self.project_wd, 'results', '_'.join([self.project_name, uuid.uuid1().hex]))
             os.makedirs(self.res_dir)
 
         self.dis = None  # Discretization instance
@@ -42,7 +42,7 @@ class Sgems:
         Write python script that sgems will run.
         """
 
-        self.command_name = jp(self.res_dir, '{}_commands.py'.format(self.model_name))
+        self.command_name = jp(self.res_dir, '{}_commands.py'.format(self.project_name))
 
         run_algo_flag = ''  # This empty str will replace the # in front of the commands meant to execute sgems
         # within its python environment
@@ -67,7 +67,7 @@ class Sgems:
         params = [[run_algo_flag, '#~'],
                   [self.res_dir.replace('\\', '//'), 'RES_DIR'],  # for sgems convention...
                   [grid, 'GRID'],
-                  [self.model_name, 'PROJECT_NAME'],
+                  [self.project_name, 'PROJECT_NAME'],
                   [str(self.hard_data), 'FEATURES_LIST'],
                   ['results', 'FEATURE_OUTPUT'],  # results.grid = output file
                   [name, 'ALGORITHM_NAME'],

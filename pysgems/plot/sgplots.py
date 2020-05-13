@@ -10,9 +10,9 @@ from pysgems.io.sgio import datread
 
 class Plots(Package):
 
-    def __init__(self, model):
-        Package.__init__(self, model)
-        self.name = self.parent.model_name
+    def __init__(self, project):
+        Package.__init__(self, project)
+        self.name = self.parent.project_name
 
     def plot_coordinates(self):
         try:

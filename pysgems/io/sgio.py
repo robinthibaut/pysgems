@@ -131,13 +131,13 @@ def export_eas(dataframe, filename='dataset'):
 class PointSet(Package):
 
     def __init__(self,
-                 model,
+                 project,
                  pointset_path=None):
 
-        Package.__init__(self, model)
+        Package.__init__(self, project)
 
         self.object_file_names = []
-        self.project_name = self.parent.model_name
+        self.project_name = self.parent.project_name
         self.file_path = pointset_path
         self.res_dir = self.parent.res_dir
 
