@@ -280,6 +280,7 @@ class Discretize(Package):
         unique_nodes = list(set(data_nodes))
 
         h = subdata.columns.values[-1]
+        hd = []
         # fixed nodes = [[node i, value i]....]
         fixed_nodes = np.array([[data_nodes[dn], subdata[h][dn]] for dn in range(len(data_nodes))])
         # Deletes points where val == nodata
@@ -302,5 +303,5 @@ class Discretize(Package):
             except shutil.SameFileError:
                 pass
 
-        self.parent.hard_data.append(h)
+        setattr(self.parent, 'hard_data', hd.append(h))
 

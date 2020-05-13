@@ -60,11 +60,7 @@ def write_point_set(file_name, sub_dataframe, nodata=-999):
     # First, rows with no data occurrence are popped
     sub_dataframe = sub_dataframe[(sub_dataframe != nodata).all(axis=1)]
 
-    xyz = np.vstack(
-        (sub_dataframe['x'],
-         sub_dataframe['y'],
-         np.zeros(len(sub_dataframe)))  # 0 column for z
-    ).T  # We need X Y Z coordinates even if working in 2D
+    xyz = sub_dataframe[['x', 'y', 'z']].to_numpy()
 
     pp = sub_dataframe.columns[-1]  # Get name of the property
 
@@ -176,10 +172,10 @@ class PointSet(Package):
         if (not isinstance(features, list)) and (features is not None):
             features = [features]
         else:
-            features = self.dataframe.columns.values
+            features = self.dataframe.columns.values[3:]
 
         for pp in features:
-            subframe = self.dataframe[['x', 'y', pp]]  # Extract x, y, values
+            subframe = self.dataframe[['x', 'y', 'z', pp]]  # Extract x, y, values
             ps_name = jp(self.res_dir, pp)  # Path of binary file
             write_point_set(ps_name, subframe)  # Write binary file
             if pp not in self.parent.object_file_names:  # Adding features name to load them within sgems

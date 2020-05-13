@@ -31,7 +31,6 @@ class Sgems:
         self.nodata = nodata
 
         self.object_file_names = []  # List of features name needed for the algorithm
-        self.hard_data = []  # List of features name fixed as hard data
         self.command_name = ''
 
         if not script_dir:
@@ -73,7 +72,6 @@ class Sgems:
                   [self.res_dir.replace('\\', '//'), 'RES_DIR'],  # for sgems convention...
                   [grid, 'GRID'],
                   [self.project_name, 'PROJECT_NAME'],
-                  [str(self.hard_data), 'FEATURES_LIST'],
                   ['results', 'FEATURE_OUTPUT'],  # results.grid = output file
                   [name, 'ALGORITHM_NAME'],
                   [name_op, 'PROPERTY_NAME'],
