@@ -13,19 +13,18 @@ for file in OBJECT_FILES:
 sgems.execute('NewCartesianGrid  computation_grid::GRID')
 
 try:
-    with open("NODES_VALUES_FILE") as nf:
-        fn = eval(nf.read())
-
     properties = FEATURES_LIST
     nodata = -9966699
     sgems.execute('NewCartesianGrid  hard_data::GRID')
     nrow, ncol = list(map(int, 'GRID'.split('::')[:2]))
 
-    for p in range(len(properties)):
+    for ft in properties:
+        with open(ft+'.hard') as nf:
+            fn = eval(nf.read())
         hard_data = [nodata for i in range(int(nrow*ncol))]
-        for n in fn[p]:
+        for n in fn:
             hard_data[int(n[0])] = n[1]
-        sgems.set_property('PROJECT_NAME', properties[p], hard_data)
+        sgems.set_property('PROJECT_NAME', ft, hard_data)
 except IOError:
     pass
 

@@ -9,6 +9,7 @@ from develop import sgems
 def main():
     # %% Define working directory
     cwd = os.getcwd()
+    sg = sgems.Sgems(model_name='sgems_test', model_wd=cwd)
     # %% Define datasets directory
     data_dir = join_path(cwd, 'datasets', 'demo')
     # %% Define file name

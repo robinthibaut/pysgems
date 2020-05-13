@@ -2,6 +2,7 @@
 import os
 import subprocess
 import time
+import uuid
 from os.path import join as jp
 
 from develop.sgutils import joinlist
@@ -12,8 +13,17 @@ class Sgems:
     def __init__(self, model_name='sgems_test', model_wd='', res_dir='', script_dir='', **kwargs):
 
         self.model_name = model_name
+
         self.model_wd = model_wd
+        if not self.model_wd:
+            self.model_wd = os.getcwd()
+
         self.res_dir = res_dir
+        # result directory generated according to project and algorithm name
+        if self.res_dir is None:
+            # Generate result directory if none is given
+            self.res_dir = jp(self.model_wd, 'results', '_'.join([self.model_name, uuid.uuid1().hex]))
+            os.makedirs(self.res_dir)
 
         self.dis = None  # Discretization instance
         self.point_set = None  # Point set manager instance
@@ -21,6 +31,7 @@ class Sgems:
 
         self.object_file_names = []  # List of features name needed for the algorithm
         self.hard_data = []  # List of features name fixed as hard data
+        self.command_name = ''
 
         if not script_dir:
             dir_path = os.path.abspath(__file__ + "/../")
@@ -30,6 +41,8 @@ class Sgems:
         """
         Write python script that sgems will run.
         """
+
+        self.command_name = jp(self.res_dir, '{}_commands.py'.format(self.model_name))
 
         run_algo_flag = ''  # This empty str will replace the # in front of the commands meant to execute sgems
         # within its python environment
@@ -60,22 +73,21 @@ class Sgems:
                   [name, 'ALGORITHM_NAME'],
                   [name, 'PROPERTY_NAME'],
                   [algo_xml, 'ALGORITHM_XML'],
-                  [str(sgems_files), 'OBJECT_FILES'],
-                  [self.dis.node_value_file.replace('\\', '//'), 'NODES_VALUES_FILE']]
+                  [str(sgems_files), 'OBJECT_FILES']]
 
         with open(self.template_file) as sst:
             template = sst.read()
         for i in range(len(params)):  # Replaces the parameters
             template = template.replace(params[i][1], params[i][0])
 
-        with open(jp(self.res_dir, 'simusgems.py'), 'w') as sstw:  # Write sgems python file
+        with open(self.command_name, 'w') as sstw:  # Write sgems python file
             sstw.write(template)
 
     def script_file(self):
         """Create script file"""
         run_script = jp(self.res_dir, 'sgems.script')
         rscpt = open(run_script, 'w')
-        rscpt.write(' '.join(['RunScript', jp(self.res_dir, 'simusgems.py')]))
+        rscpt.write(' '.join(['RunScript', self.command_name]))
         rscpt.close()
 
     def bat_file(self):

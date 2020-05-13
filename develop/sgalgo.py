@@ -1,6 +1,5 @@
 #  Copyright (c) 2020. Robin Thibaut, Ghent University
 import os
-import uuid
 import xml.etree.ElementTree as ET
 from os.path import join as jp
 
@@ -39,12 +38,6 @@ class XML:
         self.root = self.tree.getroot()
 
         name = self.root.find('algorithm').attrib['name']  # Algorithm name
-
-        # result directory generated according to project and algorithm name
-        if self.res_dir is None:
-            # Generate result directory if none is given
-            self.res_dir = jp(self.cwd, 'results', '_'.join([self.project_name, name, uuid.uuid1().hex]))
-            os.makedirs(self.res_dir)
 
         # By default, replace the grid name by 'computation_grid', and the name by the algorithm name.
         replace = [['Grid_Name', {'value': 'computation_grid', 'region': ''}],
