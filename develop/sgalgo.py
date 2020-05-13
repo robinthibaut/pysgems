@@ -19,20 +19,17 @@ class XML:
         self.res_dir = self.model.res_dir
         self.algo_dir = algo_dir
 
-        self.columns = self.model.point_set.columns
-
         self.op_file = jp(self.algo_dir, 'temp_output.xml')  # Temporary saves a modified XML
         self.tree = None
         self.root = None
+
+        self.model.algo = self
 
     def xml_reader(self, algo_name):
         """
         Reads and parse XML file. It assumes the algorithm XML file is located in the algo_dir folder.
         :param algo_name: Name of the algorithm, without any extension, e.g. 'kriging', 'cokriging'...
         """
-        self.algo_dir = jp(self.cwd, 'algorithms')  # ensure proper algorithm directory
-
-        self.op_file = jp(self.algo_dir, 'temp_output.xml')  # Temporary saves a modified XML
         try:
             os.remove(self.op_file)
         except FileNotFoundError:
@@ -40,7 +37,6 @@ class XML:
 
         self.tree = ET.parse(jp(self.algo_dir, '{}.xml'.format(algo_name)))
         self.root = self.tree.getroot()
-        self.object_file_names = []  # Empty object file names if reading new algorithm
 
         name = self.root.find('algorithm').attrib['name']  # Algorithm name
 
@@ -59,6 +55,8 @@ class XML:
                 self.xml_update(path=r[0], new_attribute_dict=r[1])
             except AttributeError:
                 pass
+
+        self.model.algo.tree = self
 
     def show_tree(self):
         """
@@ -82,6 +80,43 @@ class XML:
         except TypeError:
             print('No loaded XML file')
 
+    def xml_update(self, path,
+                   attribute_name=None,
+                   value=None,
+                   new_attribute_dict=None,
+                   show=1):
+        """
+        Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
+        :param path: object path
+        :param attribute_name: name of the attribute to modify
+        :param value: new value for attribute
+        :param new_attribute_dict: dictionary defining new attribute
+        :param show: whether to display updated xml or not
+        """
+
+        if new_attribute_dict is not None:
+            if (auto_update is True) and ('property' in new_attribute_dict):
+                # If one property point set needs to be used
+                pp = new_attribute_dict['property']  # Name property
+                if pp in self.model.point_set.columns:
+                    if 'grid' in new_attribute_dict:  # ensure default grid name
+                        new_attribute_dict['grid'] = '{}_grid'.format(pp)
+                    if 'value' in new_attribute_dict:  # ensure default grid name
+                        new_attribute_dict['value'] = '{}_grid'.format(pp)
+            self.root.find(path).attrib = new_attribute_dict
+            self.tree.write(self.op_file)
+
+        else:
+            self.root.find(path).attrib[attribute_name] = value
+            self.tree.write(self.op_file)
+
+        if show:
+            print('Updated')
+            print(self.root.find(path).tag)
+            print(self.root.find(path).attrib)
+
+        self.model.algo.tree = self
+
     def auto_fill(self):
         """
         Ensures binary file of point set are properly generated.
@@ -102,10 +137,10 @@ class XML:
                 trk = list(element.attrib.keys())
 
                 for i in range(len(trv)):
-                    if (trv[i] in self.columns) \
+                    if (trv[i] in self.model.point_set.columns) \
                             and ('Variable' or 'Hard_Data' in element.tag):
-                        if trv[i] not in self.object_file_names:
-                            self.object_file_names.append(trv[i])
+                        if trv[i] not in self.model.object_file_names:
+                            self.model.object_file_names.append(trv[i])
                             try:
                                 if trk[i - 1] == 'grid':  # ensure default grid name
                                     print(element.attrib)
@@ -150,9 +185,9 @@ class XML:
                         trk = list(e.attrib.keys())
 
                         for i in range(len(trv)):
-                            if trv[i] in self.columns:
-                                if trv[i] not in self.object_file_names:
-                                    self.object_file_names.append(trv[i])
+                            if trv[i] in self.model.point_set.columns:
+                                if trv[i] not in self.model.object_file_names:
+                                    self.model.object_file_names.append(trv[i])
                                     if trk[i] == 'grid':  # ensure default grid name
                                         print('//'.join(c_list))
                                         print(e.attrib)
@@ -174,44 +209,5 @@ class XML:
         except TypeError:
             print('No loaded XML file')
 
-    def xml_update(self, path,
-                   attribute_name=None,
-                   value=None,
-                   new_attribute_dict=None,
-                   show=1):
-        """
-        Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
-        :param path: object path
-        :param attribute_name: name of the attribute to modify
-        :param value: new value for attribute
-        :param new_attribute_dict: dictionary defining new attribute
-        :param show: whether to display updated xml or not
-        """
 
-        if new_attribute_dict is not None:
-            if (auto_update is True) and ('property' in new_attribute_dict):
-                # If one property point set needs to be used
-                pp = new_attribute_dict['property']  # Name property
-                if pp in self.columns:
-                    ps_name = jp(self.res_dir, pp)  # Path of binary file
-                    feature = os.path.basename(ps_name)  # If object not already in list
-                    if feature not in self.object_file_names:
-                        self.object_file_names.append(feature)
-                    if 'grid' in new_attribute_dict:  # ensure default grid name
-                        new_attribute_dict['grid'] = '{}_grid'.format(pp)
-                    if 'value' in new_attribute_dict:  # ensure default grid name
-                        new_attribute_dict['value'] = '{}_grid'.format(pp)
-
-            self.root.find(path).attrib = new_attribute_dict
-            self.tree.write(self.op_file)
-
-        else:
-
-            self.root.find(path).attrib[attribute_name] = value
-            self.tree.write(self.op_file)
-
-        if show:
-            print('Updated')
-            print(self.root.find(path).tag)
-            print(self.root.find(path).attrib)
 

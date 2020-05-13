@@ -86,6 +86,51 @@ class Discretize:
         self.dy = dy
         self.dz = dz
 
+        # Grid origins
+        if xo is None:
+            if self.model.point_set is not None:
+                xs = self.model.point_set.dataframe['x']
+                xo = np.min(xs) - 4*self.dx
+            else:
+                xo = 0
+
+        if yo is None:
+            if self.model.point_set is not None:
+                ys = self.model.point_set.dataframe['y']
+                yo = np.min(ys) - 4*self.dy
+            else:
+                yo = 0
+
+        if zo is None:
+            if self.model.point_set is not None:
+                zs = self.model.point_set.dataframe['z']
+                zo = np.min(zs) - 4*self.model.point_set.dz
+            else:
+                zo = 0
+
+        # Grid limits
+        if x_lim is None:
+            if self.model.point_set is not None:
+                xs = self.model.point_set.dataframe['x']
+                x_lim = np.max(xs) + 4*self.dx
+            else:
+                x_lim = 1
+
+        if y_lim is None:
+            if self.model.point_set is not None:
+                ys = self.model.point_set.dataframe['y']
+                y_lim = np.max(ys) + 4*self.dy
+            else:
+                y_lim = 1
+
+        if z_lim is None:
+            if self.model.point_set is not None:
+                zs = self.model.point_set.dataframe['z']
+                z_lim = np.max(zs) + 4*self.model.point_set.dz
+            else:
+                x_lim = 1
+
+        # Cell dimensions
         if self.dy > 0:
             nrow = int((y_lim - yo) // self.dy)  # Number of rows
         else:
@@ -136,16 +181,16 @@ class Discretize:
         poly_xy = Polygon([(self.xo, self.yo), (self.x_lim, self.yo), (self.x_lim, self.y_lim), (self.xo, self.y_lim)])
         poly_xz = Polygon([(self.xo, self.zo), (self.x_lim, self.zo), (self.x_lim, self.z_lim), (self.xo, self.z_lim)])
 
-        if self.dz == 0:
-            crit = p_xy.within(poly_xy)
+        if self.dz == 0:  # if 2D
+            crit = p_xy.within(poly_xy)  # Check if point in 2D bounding box
         else:
             crit = p_xy.within(poly_xy) and p_xz.within(poly_xz)
 
-        if crit:
-            if self.dz > 0:
-                dmin = np.min([self.dx, self.dy, self.dz]) / 2
-            else:
-                dmin = np.min([self.dx, self.dy]) / 2
+        if crit:  # if point inside
+            if self.dz > 0:  # if 3D
+                dmin = np.min([self.dx, self.dy, self.dz]) / 2  # minimum distance under which a point is in a cell
+            else:  # if 2D
+                dmin = np.min([self.dx, self.dy]) / 2  # minimum distance under which a point is in a cell
 
             blocks = blocks_from_rc(self.along_c, self.along_r, self.along_l,
                                     self.xo, self.yo, self.zo)

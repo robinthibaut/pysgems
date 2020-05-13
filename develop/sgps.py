@@ -157,6 +157,7 @@ class Operations:
             self.dataframe.insert(2, 'z', np.zeros(self.dataframe.shape[0]))
             self.columns = list(self.dataframe.columns.values)
             self.xyz = self.dataframe[['x', 'y', 'z']].to_numpy()
+            self.dz = 0
 
         self.model.point_set = self
 
