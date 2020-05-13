@@ -184,4 +184,3 @@ class PointSet(Package):
             write_point_set(ps_name, subframe)  # Write binary file
             if pp not in self.parent.object_file_names:  # Adding features name to load them within sgems
                 self.parent.object_file_names.append(pp)
-
