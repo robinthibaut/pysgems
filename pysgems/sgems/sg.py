@@ -10,7 +10,7 @@ from pysgems.utils.sgutils import joinlist
 
 class Sgems:
 
-    def __init__(self, project_name='sgems_test', project_wd='', res_dir='', script_dir='', **kwargs):
+    def __init__(self, project_name='sgems_test', project_wd='', res_dir='', script_dir='', nodata=-9966699, **kwargs):
 
         self.project_name = project_name
 
@@ -28,6 +28,7 @@ class Sgems:
         self.dis = None  # Discretization instance
         self.point_set = None  # Point set manager instance
         self.algo = None  # XML manipulation instance
+        self.nodata = nodata
 
         self.object_file_names = []  # List of features name needed for the algorithm
         self.hard_data = None  # List of features name fixed as hard data
