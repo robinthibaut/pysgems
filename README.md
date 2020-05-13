@@ -5,7 +5,7 @@ Contributors / feedback from users are welcome.
 
 SGeMS home page: http://sgems.sourceforge.net/
 
-The kriging example described in this file can be found in the 'demo.py' file.
+The kriging example described in this file can be found in the 'demo_kriging.py' file.
 
 ## Installation
 
@@ -61,7 +61,7 @@ from pysgems.sgems import sg
 
 # Initiate sgems project
 cwd = os.getcwd()  # Working directory
-rdir = join_path(cwd, 'results', 'demo')  # Results directory
+rdir = join_path(cwd, 'results', 'demo_kriging')  # Results directory
 pjt = sg.Sgems(project_name='sgems_test', project_wd=cwd, res_dir=rdir)
 ```
 
@@ -71,7 +71,7 @@ The next step is to create a package object "PointSet". The first parameter of t
 
 ```python
 # Load data point set
-data_dir = join_path(cwd, 'datasets', 'demo')
+data_dir = join_path(cwd, 'datasets', 'demo_kriging')
 dataset = 'sgems_dataset.eas'
 file_path = join_path(data_dir, dataset)
 

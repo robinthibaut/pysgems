@@ -13,11 +13,11 @@ from pysgems.sgems import sg
 def main():
     # %% Initiate sgems pjt
     cwd = os.getcwd()  # Working directory
-    rdir = join_path(cwd, 'results', 'demo')  # Results directory
+    rdir = join_path(cwd, 'results', 'demo_kriging')  # Results directory
     pjt = sg.Sgems(project_name='sgems_test', project_wd=cwd, res_dir=rdir)
 
     # %% Load data point set
-    data_dir = join_path(cwd, 'datasets', 'demo')
+    data_dir = join_path(cwd, 'datasets', 'demo_kriging')
     dataset = 'sgems_dataset.eas'
     file_path = join_path(data_dir, dataset)
 
