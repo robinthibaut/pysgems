@@ -5,7 +5,7 @@ import time
 import uuid
 from os.path import join as jp
 
-from develop.sgutils import joinlist
+from develop.utils.sgutils import joinlist
 
 
 class Sgems:

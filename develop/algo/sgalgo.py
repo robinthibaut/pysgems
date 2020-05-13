@@ -3,7 +3,7 @@ import os
 import xml.etree.ElementTree as ET
 from os.path import join as jp
 
-from develop.packbase import Package
+from develop.base.packbase import Package
 
 auto_update = False
 

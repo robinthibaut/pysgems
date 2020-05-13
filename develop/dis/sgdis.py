@@ -8,7 +8,7 @@ from os.path import join as jp
 import numpy as np
 from shapely.geometry import Point, Polygon
 
-from develop.packbase import Package
+from develop.base.packbase import Package
 
 
 def blocks_from_rc(rows, columns, layers, xo=0, yo=0, zo=0):

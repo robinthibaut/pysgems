@@ -3,18 +3,17 @@
 import os
 from os.path import join as join_path
 
-from develop import sgems
-from develop.sgalgo import XML
-from develop.sgdis import Discretize
-from develop.sgio import PointSet
-from develop.sgplots import Plots
+from develop.algo.sgalgo import XML
+from develop.dis.sgdis import Discretize
+from develop.io.sgio import PointSet
+from develop.plot.sgplots import Plots
 
 
 def main():
     # %% Initiate sgems model
     cwd = os.getcwd()  # Working directory
     rdir = join_path(cwd, 'results', 'demo')  # Results directory
-    sg = sgems.Sgems(model_name='sgems_test', model_wd=cwd, res_dir=rdir)
+    sg = sg.Sgems(model_name='sgems_test', model_wd=cwd, res_dir=rdir)
 
     # %% Load data point set
     data_dir = join_path(cwd, 'datasets', 'demo')
@@ -25,7 +24,7 @@ def main():
 
     # %% Generate grid. Grid dimensions can automatically be generated based on the data points
     # unless specified otherwise, but cell dimensions dx, dy, (dz) must be specified
-    ds = Discretize(model=sg, dx=5, dy=5, xo=0, yo=0, x_lim=100, y_lim=100)
+    ds = Discretize(model=sg, dx=5, dy=5)
 
     # %% Display point coordinates and grid
     pl = Plots(model=sg)
