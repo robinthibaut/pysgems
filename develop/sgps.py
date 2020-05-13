@@ -119,14 +119,13 @@ class Operations:
 
     def __init__(self,
                  model,
-                 file_path=None,
-                 res_dir=None):
+                 file_path=None):
 
         self.model = model
         self.object_file_names = []
         self.project_name = self.model.model_name
         self.file_path = file_path
-        self.res_dir = res_dir
+        self.res_dir = self.model.res_dir
         self.raw_data = None
         self.dataframe = None
         self.columns = None
