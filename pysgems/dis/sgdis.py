@@ -302,5 +302,5 @@ class Discretize(Package):
             except shutil.SameFileError:
                 pass
 
-            self.parent.hard_data.append(h)
+        self.parent.hard_data.append(h)
 

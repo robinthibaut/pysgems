@@ -49,11 +49,15 @@ class Sgems:
         # within its python environment
         try:
             name = self.algo.root.find('algorithm').attrib['name']  # Algorithm name
+            name_op = name
+            if name == 'sgsim':
+                name_op += '__real0'
             with open(self.algo.op_file) as alx:  # Remove unwanted \n
                 algo_xml = alx.read().strip('\n')
 
         except AttributeError or FileNotFoundError:
             name = 'None'
+            name_op = name
             algo_xml = 'None'
             run_algo_flag = '#'  # If no algorithm loaded, then just loads the data
 
@@ -72,7 +76,7 @@ class Sgems:
                   [str(self.hard_data), 'FEATURES_LIST'],
                   ['results', 'FEATURE_OUTPUT'],  # results.grid = output file
                   [name, 'ALGORITHM_NAME'],
-                  [name, 'PROPERTY_NAME'],
+                  [name_op, 'PROPERTY_NAME'],
                   [algo_xml, 'ALGORITHM_XML'],
                   [str(sgems_files), 'OBJECT_FILES']]
 
