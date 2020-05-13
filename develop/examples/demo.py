@@ -3,39 +3,40 @@
 import os
 from os.path import join as join_path
 
-from develop.algo.sgalgo import XML
-from develop.dis.sgdis import Discretize
-from develop.io.sgio import PointSet
-from develop.plot.sgplots import Plots
+from pysgems.algo.sgalgo import XML
+from pysgems.dis.sgdis import Discretize
+from pysgems.io.sgio import PointSet
+from pysgems.plot.sgplots import Plots
+from pysgems.sgems import sg
 
 
 def main():
     # %% Initiate sgems model
     cwd = os.getcwd()  # Working directory
     rdir = join_path(cwd, 'results', 'demo')  # Results directory
-    sg = sg.Sgems(model_name='sgems_test', model_wd=cwd, res_dir=rdir)
+    model = sg.Sgems(model_name='sgems_test', model_wd=cwd, res_dir=rdir)
 
     # %% Load data point set
     data_dir = join_path(cwd, 'datasets', 'demo')
     dataset = 'sgems_dataset.dat'
     file_path = join_path(data_dir, dataset)
 
-    ps = PointSet(model=sg, pointset_path=file_path)
+    ps = PointSet(model=model, pointset_path=file_path)
 
     # %% Generate grid. Grid dimensions can automatically be generated based on the data points
     # unless specified otherwise, but cell dimensions dx, dy, (dz) must be specified
-    ds = Discretize(model=sg, dx=5, dy=5)
+    ds = Discretize(model=model, dx=5, dy=5)
 
     # %% Display point coordinates and grid
-    pl = Plots(model=sg)
+    pl = Plots(model=model)
     pl.plot_coordinates()
 
     # %% Which feature are available
-    print(sg.point_set.columns)
+    print(model.point_set.columns)
 
     # %% Load your algorithm xml file in the 'algorithms' folder.
     algo_dir = join_path(os.path.dirname(cwd), 'algorithms')
-    al = XML(model=sg, algo_dir=algo_dir)
+    al = XML(model=model, algo_dir=algo_dir)
     al.xml_reader('kriging')
 
     # %% Show xml structure tree
@@ -52,10 +53,10 @@ def main():
     ps.export_01('ag')
 
     # %% Write python script
-    sg.write_command()
+    model.write_command()
 
     # %% Run sgems
-    sg.run()
+    model.run()
     # Plot 2D results
     pl.plot_2d(save=True)
 
