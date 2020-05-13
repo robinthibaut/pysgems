@@ -6,7 +6,6 @@ import time
 from os.path import join as jp
 
 import numpy as np
-from shapely.geometry import Point, Polygon
 
 from pysgems.base.packbase import Package
 
@@ -181,18 +180,14 @@ class Discretize(Package):
         start = time.time()
         rn = np.array(xyz)
         # first check if point is within the grid
-        p_xy = Point([rn[0], rn[1]])
-        p_xz = Point([rn[0], rn[2]])
-        poly_xy = Polygon([(self.xo, self.yo), (self.x_lim, self.yo), (self.x_lim, self.y_lim), (self.xo, self.y_lim)])
-        poly_xz = Polygon([(self.xo, self.zo), (self.x_lim, self.zo), (self.x_lim, self.z_lim), (self.xo, self.z_lim)])
 
-        if self.dz == 0:  # if 2D
-            crit = p_xy.within(poly_xy)  # Check if point in 2D bounding box
-        else:
-            crit = p_xy.within(poly_xy) and p_xz.within(poly_xz)
+        crit = 0
+        if np.all(rn >= np.array([self.xo, self.yo, self.zo])) and \
+                np.all(rn <= np.array([self.x_lim, self.y_lim, self.z_lim])):
+            crit = 1
 
         if crit:  # if point inside
-            if self.dz > 0:  # if 3D
+            if self.parent.point_set.dimension == 3:  # if 3D
                 dmin = np.min([self.dx, self.dy, self.dz]) / 2  # minimum distance under which a point is in a cell
             else:  # if 2D
                 dmin = np.min([self.dx, self.dy]) / 2  # minimum distance under which a point is in a cell
@@ -278,6 +273,9 @@ class Discretize(Package):
         """
         if cell_file is not None:
             self.cell_file = cell_file
+
+        if self.cell_file is None:
+            self.cell_file = jp(self.parent.res_dir, 'cells.locs')
 
         xyz = subdata[['x', 'y', 'z']].to_numpy()
         self.get_cells(xyz)

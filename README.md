@@ -98,7 +98,7 @@ pl = Plots(project=pjt)
 pl.plot_coordinates()
 ```
 
-<img src="pysgems/examples/results/demo/grid.png" alt="plot" style="width:30;height:30">
+<img src="pysgems/examples/results/demo_kriging/grid.png" alt="plot" style="width:30;height:30">
 
 #### Get algorithm XML from SGeMS
 
@@ -211,7 +211,7 @@ It will generate a batch file and a script file. The batch file can later be use
 
 Check the results:
 
-<img src="pysgems/examples/results/demo/results.png" alt="plot" style="width:30;height:30">
+<img src="pysgems/examples/results/demo_kriging/results.png" alt="plot" style="width:30;height:30">
 
 ### Other features
 
