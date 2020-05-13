@@ -213,10 +213,6 @@ Check the results:
 
 <img src="pysgems/examples/results/demo_kriging/results.png" alt="plot" style="width:30;height:30">
 
-### Other features
-
-It is possible to fix hard data to a grid given the hard data point set. See get_nodes() method.
-
 ## Contribution and points to improve
 
 Contributors and feedback from users are welcome. 
