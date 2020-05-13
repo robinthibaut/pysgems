@@ -44,48 +44,64 @@ This package revolves around modifying this Python script file.
 
 This package was designed with 2D estimation/simulation problems in mind, it should support 3D grids but it hasn't been tested yet.
 
-### Load data and generate computation grid
+### Creating an SGEMS project
 
-The package expects the classical ASCII GEOEAS data format.
+#### Initiate
+A SGEMS project is created by first creating a pjt object "Sgems". When you create the project object you can define the project's name, workspace path, results directory path, python scripts templates directory path, and the last parameter is the 'no-data' value to take into accounts 'no-data points'. All of these are optional parameters. If no result directory is provided, one will automatically be generated with an unique name.
 
 ```python
 import os
 from os.path import join as join_path
 
-from pysgems import toolbox
+from pysgems.algo.sgalgo import XML
+from pysgems.dis.sgdis import Discretize
+from pysgems.io.sgio import PointSet
+from pysgems.plot.sgplots import Plots
+from pysgems.sgems import sg
 
-# Define working directory
-cwd = os.getcwd()
-# Define datasets directory
+# Initiate sgems project
+cwd = os.getcwd()  # Working directory
+rdir = join_path(cwd, 'results', 'demo')  # Results directory
+pjt = sg.Sgems(project_name='sgems_test', project_wd=cwd, res_dir=rdir)
+```
+
+#### Load point set
+
+The next step is to create a package object "PointSet". The first parameter of the PointSet class is a project object, which ties a PointSet object to a specific project. The second parameter is the path to the dataset file. The package expects the classical ASCII GEOEAS data format.
+
+```python
+# Load data point set
 data_dir = join_path(cwd, 'datasets', 'demo')
-# Define file name
-f_name = 'sgems_dataset.dat'
+dataset = 'sgems_dataset.eas'
+file_path = join_path(data_dir, dataset)
+
+ps = PointSet(project=pjt, pointset_path=file_path)
 ```
 
-There are several ways to define grids in this package framework, the user can refer to the methods documentation.
+#### Tie the project to a grid
 
-The simplest way is to load the data and indicate cell dimensions (dx, dy, dz is 0 by default). If no spatial limits are imposed, they will be automatically generated to englobe all data points.
-
-It is possible to take into accounts 'no-data points' by indicating the 'no-data' value.
+The next package to add is the spatial discretization package. Create a package object "Discretize". The first parameter is the project object to which the package will be tied. You have to input cell dimensions dx, dy. By default, dz=0. Optionally specify the grid bounding box by adding parameters xo, yo, zo, x_lim, y_lim, z_lim. If none is provided, the bounding box will automatically be computed based on the data points coordinates (assuming that a "PoinSet" object has been added to the project).
 
 ```python
-sgems = toolbox.Sgems(dx=2, dy=2, data_dir=data_dir, file_name=f_name, nodata=-999)
+# Generate grid. Grid dimensions can automatically be generated based on the data points
+# unless specified otherwise, but cell dimensions dx, dy, (dz) must be specified
+ds = Discretize(project=pjt, dx=5, dy=5)
 ```
 
-Optionally provide a results directory name, if none is provided, one will automatically be generated with an unique name.
+#### Visualize your project geometry
+
+To check your grid geometry and visualize data points, create a package object "Plots" and tie it to the project.
 
 ```python
-sgems.res_dir = join_path(cwd, 'results', 'demo')
+# Display point coordinates and grid
+pl = Plots(project=pjt)
+pl.plot_coordinates()
 ```
 
-The loaded dataset can be explored by:
+<img src="examples/results/demo/grid.png" alt="plot" style="width:30;height:30">
 
-```python
-sgems.columns  # Display features name
-sgems.dataframe  # Pandas DataFrame
-```
+#### Get algorithm XML from SGeMS
 
-### Get algorithm XML from SGeMS
 Users must first run their algorithm inside SGeMS, view the Commands Panel, copy the algorithm XML and paste it into a XML file (e.g. algorithm.xml), and save this file into the 'algorithms' folder.
 
 The algorithm XML starts and ends with:
@@ -93,22 +109,26 @@ The algorithm XML starts and ends with:
 <parameters> ... </parameters>
 ```
 
-#### Edit algorithm
+Use a package object "XML" to load your algorithms. The first parameter is the project object. The second parameter is the path to the folder in which your algorithms xml files are stored.
 
-Let's take for example the kriging algorithm.
+```python
+#  Load your algorithm xml file in the 'algorithms' folder.
+algo_dir = join_path(os.path.dirname(cwd), 'algorithms')
+al = XML(project=pjt, algo_dir=algo_dir)
+```
 
+Let's take for example the kriging algorithm stored in ../algorithms/kriging.xml.
 Read the 'kriging.xml' file in the following way:
 
 ```python
-sgems.xml_reader('kriging')
-
+al.xml_reader('kriging')
 ```
 
 Display the XML structure:
 
 ```python
 
-sgems.show_tree()
+al.show_tree()
 
 ```
 
@@ -119,10 +139,10 @@ Path
 {attribute1: value1, ..., attribute_n: value_n}
 ```
 
-For the kriging algorithm the first lines will look like this:
+For the kriging algorithm the first lines will be:
 
 ```python
-algorithm
+out:algorithm
 {'name': 'kriging_mean'}
 Variogram
 {'nugget': '0', 'structures_count': '1'}
@@ -135,60 +155,63 @@ Variogram//structure_1//ranges
 To modify an element:
 
 ```python
-sgems.xml_update(path, attribute_name, new_value)
+al.xml_update(path, attribute_name, new_value)
 ```
 
 For example:
 
 ```python
-sgems.xml_update('Variogram', 'nugget', '0.01')
-sgems.xml_update('Variogram', 'structure_1', 'type', 'Exponential')
+al.xml_update('Variogram', 'nugget', '0.01')
+al.xml_update('Variogram', 'structure_1', 'type', 'Exponential')
 ```
 
 The following is also acceptable:
 
 ```python
-sgems.xml_update('Variogram//structure_1//ranges', new_attribute_dict={'max': '150', 'medium': '150', 'min': '150'})
+al.xml_update('Variogram//structure_1//ranges', new_attribute_dict={'max': '150', 'medium': '150', 'min': '150'})
 ```
 
-A Python script template is stored in the main folder. To load the updated XML algorithm into the SGEMS Python script template:
+#### Exports needed point sets in SGEMS binary format.
 
-```python
-sgems.write_commands()
-```
-
-The files will be loaded in the results folder (automatically generated or user-defined).
-
-
-### Exports needed point sets in SGEMS binary format.
-
-In order to use the dataset within SGEMS, it is necessary to export the needed point sets in the SGEMS binary format.
-
+In order to use the data set within SGEMS, it is necessary to export the needed point sets in the SGEMS binary format.
 Get the list of features name available to export:
 
 ```python
-print(sgems.columns)
+print(sg.point_set.columns)
+out: ['x', 'y', 'z', 'ag', 'as', 'au', 'cu', 'pb', 's', 'zn']
 ```
 
 The line
 
 ```python
-sgems.make_data('feature_name')
+ps.export_01('feature_name')
 ```
 
 Will export the desired feature point set in SGEMS binary format to the results folder. Rows containing the no-data value will not be exported.
 
-At this time, the make_data() method only supports point sets for individual features. It should be extended to support grids and multiple features.
+At this time, the export_01 method only supports point sets for individual features. It should be extended to support grids and multiple features.
 
-### Run SGEMS
+#### Run SGEMS
 
-Run the algorithm via:
+To load the updated XML algorithm into the SGEMS Python script template:
 
 ```python
-sgems.run()
+sg.write_command()
+```
+
+The files will be loaded in the results folder (automatically generated or user-defined).
+
+Run the algorithm by:
+
+```python
+sg.run()
 ```
 
 It will generate a batch file and a script file. The batch file can later be used outside of Python.
+
+Check the results:
+
+<img src="examples/results/demo/results.png" alt="plot" style="width:30;height:30">
 
 ### Other features
 
@@ -198,11 +221,9 @@ It is possible to fix hard data to a grid given the hard data point set. See get
 
 Contributors and feedback from users are welcome. 
 
-The package features should be separated in proper classes in proper folders.
-
 The package should be made more robust and able to support all SGEMS features.
 
-The make_data() method should be extended to support grids and multiple features.
+More methods should be build to export/import binary grids and point sets with multiple features.
 
 The package should be properly documented.
 
