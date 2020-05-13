@@ -98,7 +98,7 @@ pl = Plots(project=pjt)
 pl.plot_coordinates()
 ```
 
-<img src="examples/results/demo/grid.png" alt="plot" style="width:30;height:30">
+<img src="pysgems/examples/results/demo/grid.png" alt="plot" style="width:30;height:30">
 
 #### Get algorithm XML from SGeMS
 
