@@ -176,5 +176,5 @@ class Operations:
             subframe = self.dataframe[['x', 'y', pp]]  # Extract x, y, values
             ps_name = jp(self.res_dir, pp)  # Path of binary file
             write_point_set(ps_name, subframe)  # Write binary file
-            if pp not in self.object_file_names:  # Adding features name to load them within sgems
-                self.object_file_names.append(pp)
+            if pp not in self.model.object_file_names:  # Adding features name to load them within sgems
+                self.model.object_file_names.append(pp)

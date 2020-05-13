@@ -19,7 +19,8 @@ class Sgems:
         self.point_set = None  # Point set manager instance
         self.algo = None  # XML manipulation instance
 
-        self.object_file_names = []
+        self.object_file_names = []  # List of features name needed for the algorithm
+        self.hard_data = []  # List of features name fixed as hard data
 
         if not script_dir:
             dir_path = os.path.abspath(__file__ + "/../")
@@ -54,7 +55,7 @@ class Sgems:
                   [self.res_dir.replace('\\', '//'), 'RES_DIR'],  # for sgems convention...
                   [grid, 'GRID'],
                   [self.model_name, 'PROJECT_NAME'],
-                  [str(self.hard_data_objects), 'FEATURES_LIST'],
+                  [str(self.hard_data), 'FEATURES_LIST'],
                   ['results', 'FEATURE_OUTPUT'],  # results.grid = output file
                   [name, 'ALGORITHM_NAME'],
                   [name, 'PROPERTY_NAME'],

@@ -295,3 +295,5 @@ class Discretize:
             shutil.copyfile(cell_values_name,
                             cell_values_name.replace(os.path.dirname(cell_values_name), output_dir))
 
+            self.model.hard_data.append(h)
+
