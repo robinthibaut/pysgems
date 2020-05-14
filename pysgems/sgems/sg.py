@@ -69,6 +69,7 @@ class Sgems:
         sgems_files = [sf + '.sgems' for sf in self.object_file_names]
 
         # The list below is the list of flags that will be replaced in the sgems python script
+        # TODO: add option to change output file name (now default 'results.grid')
         params = [[run_algo_flag, '#~'],
                   [self.res_dir.replace('\\', '//'), 'RES_DIR'],  # for sgems convention...
                   [grid, 'GRID'],

@@ -1,4 +1,5 @@
 #  Copyright (c) 2020. Robin Thibaut, Ghent University
+import os
 import struct
 from os.path import join as jp
 
@@ -116,7 +117,8 @@ def write_point_set(file_name, sub_dataframe, nodata=-999):
 def export_eas(dataframe, filename='dataset'):
     """Exports a Pandas DataFrame to geo-eas format"""
     columns = list(dataframe.columns.values)
-    header = [filename, str(len(columns))] + columns
+    name = os.path.basename(filename).split('.')[0]
+    header = [name, str(len(columns))] + columns
     ri = dataframe.iterrows()
     rows = [' '.join(list(map(str, r[1]))) for r in ri]
     lines = header + rows
