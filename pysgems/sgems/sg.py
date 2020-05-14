@@ -3,6 +3,7 @@ import os
 import subprocess
 import time
 import uuid
+import warnings
 from os.path import join as jp
 
 from pysgems.utils.sgutils import joinlist
@@ -10,7 +11,30 @@ from pysgems.utils.sgutils import joinlist
 
 class Sgems:
 
-    def __init__(self, project_name='sgems_test', project_wd='', res_dir='', script_dir='', nodata=-9966699, **kwargs):
+    def __init__(self,
+                 project_name='sgems_test',
+                 project_wd='',
+                 res_dir='',
+                 script_dir='',
+                 exe_name='',
+                 nodata=-9966699,
+                 check_env=True,
+                 **kwargs):
+
+        if check_env:
+            # First check if sgems installation files are in the user environment variables
+            gstl_home = os.environ.get('GSTLAPPLIHOME')
+            if not gstl_home:
+                warnings.warn('GSTLAPPLIHOME environment variable does not exist')
+            else:
+                path = os.getenv('Path')
+                if gstl_home not in path:
+                    warnings.warn('Variable {} does not exist in Path environment variable'.format(gstl_home))
+                if not exe_name:  # If no sgems exe file name is provided,
+                    # checks for sgems exe file in the GSTLAPPLIHOME path
+                    for file in os.listdir(gstl_home):
+                        if file.endswith(".exe") and ('sgems' in file) and ('uninstall' not in file):
+                            exe_name = file
 
         self.project_name = project_name
 
@@ -25,6 +49,8 @@ class Sgems:
             self.res_dir = jp(self.project_wd, 'results', '_'.join([self.project_name, uuid.uuid1().hex]))
         if not os.path.exists(self.res_dir):
             os.makedirs(self.res_dir)
+
+        self.exe_name = exe_name
 
         self.dis = None  # Discretization instance
         self.point_set = None  # Point set manager instance
@@ -108,7 +134,7 @@ class Sgems:
         batch = jp(self.res_dir, 'RunSgems.bat')
         bat = open(batch, 'w')
         bat.write(' '.join(['cd', self.res_dir, '\n']))
-        bat.write(' '.join(['sgems', 'sgems.script']))
+        bat.write(' '.join([self.exe_name, 'sgems.script']))
         bat.close()
 
     def run(self):

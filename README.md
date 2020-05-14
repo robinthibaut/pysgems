@@ -27,7 +27,7 @@ It is also necessary to add the path of your SGEMS folder to the system variable
 
 This package works by calling SGEMS via the command in the Command Prompt:
 ```bash
-sgems sgems.script
+sgems.exe sgems.script
 ```
 
 The sgems.script contains a command that SGEMS will execute internally:
