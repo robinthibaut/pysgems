@@ -49,9 +49,14 @@ class Sgems:
         # within its python environment
         try:
             name = self.algo.root.find('algorithm').attrib['name']  # Algorithm name
-            name_op = name
-            if name == 'sgsim':
-                name_op += '__real0'
+            try:
+                # When performing simulations, sgems automatically add '__realn'
+                # to the name of the nth generated property.
+                nr = int(self.algo.root.find('Nb_Realizations').attrib['value'])
+                name_op = '::'.join([name + '__real' + str(i) for i in range(nr)])
+            except AttributeError:
+                name_op = name
+
             with open(self.algo.op_file) as alx:  # Remove unwanted \n
                 algo_xml = alx.read().strip('\n')
 
@@ -76,7 +81,7 @@ class Sgems:
                   [self.project_name, 'PROJECT_NAME'],
                   ['results', 'FEATURE_OUTPUT'],  # results.grid = output file
                   [name, 'ALGORITHM_NAME'],
-                  [name_op, 'PROPERTY_NAME'],
+                  [name_op, 'OUTPUT_LIST'],
                   [algo_xml, 'ALGORITHM_XML'],
                   [str(sgems_files), 'OBJECT_FILES']]
 
