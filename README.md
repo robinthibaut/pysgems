@@ -142,7 +142,7 @@ Path
 For the kriging algorithm the first lines will be:
 
 ```python
-out:algorithm
+algorithm
 {'name': 'kriging_mean'}
 Variogram
 {'nugget': '0', 'structures_count': '1'}
