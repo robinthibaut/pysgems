@@ -1,5 +1,5 @@
 # pysgems 
-Use SGeMS (Standford Geostatistical Modeling Software) within Python.
+Use SGeMS (Stanford Geostatistical Modeling Software) within Python.
 
 Contributors / feedback from users are welcome.
 
