@@ -1,5 +1,6 @@
 #  Copyright (c) 2020. Robin Thibaut, Ghent University
 import os
+import uuid
 import xml.etree.ElementTree as ET
 from os.path import join as jp
 
@@ -23,7 +24,7 @@ class XML(Package):
         if self.algo_dir is None:
             self.algo_dir = jp(self.cwd, 'algorithms')
 
-        self.op_file = jp(self.algo_dir, 'temp_output.xml')  # Temporary saves a modified XML
+        self.op_file = jp(self.algo_dir, f'{uuid.uuid4().hex}.xml')  # Temporary saves a modified XML
         self.tree = None
         self.root = None
 
