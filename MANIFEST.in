@@ -1,0 +1,6 @@
+include pysgems/examples/*.py
+include pysgems/algorithms/kriging.xml
+include pysgems/algorithms/sgsim.xml
+include pysgems/examples/datasets/demo_kriging/*.eas
+include pysgems/examples/datasets/demo_sgsim/*.eas
+include pysgems/script_templates/*.py
