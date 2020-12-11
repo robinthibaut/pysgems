@@ -144,5 +144,10 @@ class Sgems:
             self.bat_file()
         start = time.time()
 
+        try:
+            os.remove(self.algo.op_file)
+        except FileNotFoundError:
+            pass
+
         subprocess.call([batch])  # Opens the BAT file
         print('ran algorithm in {} s'.format(time.time() - start))
