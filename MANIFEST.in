@@ -1,4 +1,13 @@
+include pysgems/algo/*
+include pysgems/base/*
+include pysgems/dis/*
+include pysgems/io/*
+include pysgems/plot/*
+include pysgems/sgems/*
+include pysgems/utils/*
+
 include pysgems/examples/*.py
+
 include pysgems/algorithms/kriging.xml
 include pysgems/algorithms/sgsim.xml
 include pysgems/examples/datasets/demo_kriging/*.eas
