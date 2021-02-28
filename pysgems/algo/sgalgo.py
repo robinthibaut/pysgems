@@ -10,9 +10,7 @@ auto_update = False
 
 
 class XML(Package):
-    def __init__(self,
-                 project,
-                 algo_dir=None):
+    def __init__(self, project, algo_dir=None):
 
         Package.__init__(self, project)
 
@@ -22,13 +20,14 @@ class XML(Package):
         self.res_dir = self.parent.res_dir
         self.algo_dir = algo_dir
         if self.algo_dir is None:
-            self.algo_dir = jp(self.cwd, 'algorithms')
+            self.algo_dir = jp(self.cwd, "algorithms")
 
-        self.op_file = jp(self.algo_dir, f'{uuid.uuid4().hex}.xml')  # Temporary saves a modified XML
+        # Temporary saves a modified XML
+        self.op_file = jp(self.algo_dir, f"{uuid.uuid4().hex}.xml")
         self.tree = None
         self.root = None
 
-        setattr(self.parent, 'algo', self)
+        setattr(self.parent, "algo", self)
 
     def xml_reader(self, algo_name):
         """
@@ -40,14 +39,16 @@ class XML(Package):
         except FileNotFoundError:
             pass
 
-        self.tree = ET.parse(jp(self.algo_dir, '{}.xml'.format(algo_name)))
+        self.tree = ET.parse(jp(self.algo_dir, "{}.xml".format(algo_name)))
         self.root = self.tree.getroot()
 
-        name = self.root.find('algorithm').attrib['name']  # Algorithm name
+        name = self.root.find("algorithm").attrib["name"]  # Algorithm name
 
         # By default, replace the grid name by 'computation_grid', and the name by the algorithm name.
-        replace = [['Grid_Name', {'value': 'computation_grid', 'region': ''}],
-                   ['Property_Name', {'value': name}]]
+        replace = [
+            ["Grid_Name", {"value": "computation_grid", "region": ""}],
+            ["Property_Name", {"value": name}],
+        ]
 
         for r in replace:
             try:
@@ -55,8 +56,8 @@ class XML(Package):
             except AttributeError:
                 pass
 
-        setattr(self.parent.algo, 'tree', self.tree)
-        setattr(self.parent.algo, 'root', self.root)
+        setattr(self.parent.algo, "tree", self.tree)
+        setattr(self.parent.algo, "root", self.root)
 
     def show_tree(self):
         """
@@ -72,19 +73,17 @@ class XML(Package):
                     elems = list(element)
                     for e in elems:
                         c_list.append(e.tag)
-                        print('//'.join(c_list))
+                        print("//".join(c_list))
                         print(e.attrib)
                         element = list(e)
                         if len(element) == 0:
                             c_list.pop(-1)
         except TypeError:
-            print('No loaded XML file')
+            print("No loaded XML file")
 
-    def xml_update(self, path,
-                   attribute_name=None,
-                   value=None,
-                   new_attribute_dict=None,
-                   show=1):
+    def xml_update(
+        self, path, attribute_name=None, value=None, new_attribute_dict=None, show=1
+    ):
         """
         Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
         :param path: object path
@@ -95,14 +94,14 @@ class XML(Package):
         """
 
         if new_attribute_dict is not None:
-            if (auto_update is True) and ('property' in new_attribute_dict):
+            if (auto_update is True) and ("property" in new_attribute_dict):
                 # If one property point set needs to be used
-                pp = new_attribute_dict['property']  # Name property
+                pp = new_attribute_dict["property"]  # Name property
                 if pp in self.parent.point_set.columns:
-                    if 'grid' in new_attribute_dict:  # ensure default grid name
-                        new_attribute_dict['grid'] = '{}_grid'.format(pp)
-                    if 'value' in new_attribute_dict:  # ensure default grid name
-                        new_attribute_dict['value'] = '{}_grid'.format(pp)
+                    if "grid" in new_attribute_dict:  # ensure default grid name
+                        new_attribute_dict["grid"] = "{}_grid".format(pp)
+                    if "value" in new_attribute_dict:  # ensure default grid name
+                        new_attribute_dict["value"] = "{}_grid".format(pp)
             self.root.find(path).attrib = new_attribute_dict
             self.tree.write(self.op_file)
 
@@ -111,12 +110,12 @@ class XML(Package):
             self.tree.write(self.op_file)
 
         if show:
-            print('Updated')
+            print("Updated")
             print(self.root.find(path).tag)
             print(self.root.find(path).attrib)
 
-        setattr(self.parent.algo, 'tree', self.tree)
-        setattr(self.parent.algo, 'root', self.root)
+        setattr(self.parent.algo, "tree", self.tree)
+        setattr(self.parent.algo, "root", self.root)
 
     def auto_fill(self):
         """
@@ -138,41 +137,63 @@ class XML(Package):
                 trk = list(element.attrib.keys())
 
                 for i in range(len(trv)):
-                    if (trv[i] in self.parent.point_set.columns) \
-                            and ('Variable' or 'Hard_Data' in element.tag):
+                    if (trv[i] in self.parent.point_set.columns) and (
+                        "Variable" or "Hard_Data" in element.tag
+                    ):
                         if trv[i] not in self.parent.object_file_names:
                             self.parent.object_file_names.append(trv[i])
                             try:
-                                if trk[i - 1] == 'grid':  # ensure default grid name
+                                if trk[i - 1] == "grid":  # ensure default grid name
                                     print(element.attrib)
-                                    element.attrib['grid'] = '{}_grid'.format(trv[i])
-                                    self.xml_update('//'.join(c_list), 'grid', '{}_grid'.format(trv[i]))
-                                    print('>>>')
+                                    element.attrib["grid"] = "{}_grid".format(trv[i])
+                                    self.xml_update(
+                                        "//".join(c_list),
+                                        "grid",
+                                        "{}_grid".format(trv[i]),
+                                    )
+                                    print(">>>")
                                     print(element.attrib)
-                                if trk[i - 1] == 'value' and trk[i] == 'property':  # ensure default grid name
+                                # ensure default grid name
+                                if trk[i - 1] == "value" and trk[i] == "property":
                                     print(element.attrib)
-                                    element.attrib['value'] = '{}_grid'.format(trv[i])
-                                    self.xml_update('//'.join(c_list), 'value', '{}_grid'.format(trv[i]))
-                                    print('>>>')
+                                    element.attrib["value"] = "{}_grid".format(trv[i])
+                                    self.xml_update(
+                                        "//".join(c_list),
+                                        "value",
+                                        "{}_grid".format(trv[i]),
+                                    )
+                                    print(">>>")
                                     print(element.attrib)
                             except IndexError:
                                 pass
                             try:
-                                if 'Grid' in elist[-2].tag:
+                                if "Grid" in elist[-2].tag:
                                     tp = list(elist[-2].attrib.keys())
-                                    if 'grid' in tp:
-                                        print('//'.join(c_list[:-2]))
+                                    if "grid" in tp:
+                                        print("//".join(c_list[:-2]))
                                         print(elist[-2].attrib)
-                                        elist[-2].attrib['grid'] = '{}_grid'.format(trv[i])
-                                        self.xml_update(elist[-2].tag, 'grid', '{}_grid'.format(trv[i]))
-                                        print('>>>')
+                                        elist[-2].attrib["grid"] = "{}_grid".format(
+                                            trv[i]
+                                        )
+                                        self.xml_update(
+                                            elist[-2].tag,
+                                            "grid",
+                                            "{}_grid".format(trv[i]),
+                                        )
+                                        print(">>>")
                                         print(elist[-2].attrib)
-                                    if 'value' in tp:
-                                        print('//'.join(c_list[:-2]))
+                                    if "value" in tp:
+                                        print("//".join(c_list[:-2]))
                                         print(elist[-2].attrib)
-                                        elist[-2].attrib['value'] = '{}_grid'.format(trv[i])
-                                        self.xml_update(elist[-2].tag, 'value', '{}_grid'.format(trv[i]))
-                                        print('>>>')
+                                        elist[-2].attrib["value"] = "{}_grid".format(
+                                            trv[i]
+                                        )
+                                        self.xml_update(
+                                            elist[-2].tag,
+                                            "value",
+                                            "{}_grid".format(trv[i]),
+                                        )
+                                        print(">>>")
                                         print(elist[-2].attrib)
                             except IndexError:
                                 pass
@@ -189,26 +210,31 @@ class XML(Package):
                             if trv[i] in self.parent.point_set.columns:
                                 if trv[i] not in self.parent.object_file_names:
                                     self.parent.object_file_names.append(trv[i])
-                                    if trk[i] == 'grid':  # ensure default grid name
-                                        print('//'.join(c_list))
+                                    if trk[i] == "grid":  # ensure default grid name
+                                        print("//".join(c_list))
                                         print(e.attrib)
-                                        e.attrib['grid'] = '{}_grid'.format(trv[i])
-                                        self.xml_update('//'.join(c_list), 'grid', '{}_grid'.format(trv[i]))
-                                        print('>>>')
+                                        e.attrib["grid"] = "{}_grid".format(trv[i])
+                                        self.xml_update(
+                                            "//".join(c_list),
+                                            "grid",
+                                            "{}_grid".format(trv[i]),
+                                        )
+                                        print(">>>")
                                         print(e.attrib)
-                                    if trk[i] == 'value':  # ensure default grid name
-                                        print('//'.join(c_list))
+                                    if trk[i] == "value":  # ensure default grid name
+                                        print("//".join(c_list))
                                         print(e.attrib)
-                                        e.attrib['value'] = '{}_grid'.format(trv[i])
-                                        self.xml_update('//'.join(c_list), 'value', '{}_grid'.format(trv[i]))
-                                        print('>>>')
+                                        e.attrib["value"] = "{}_grid".format(trv[i])
+                                        self.xml_update(
+                                            "//".join(c_list),
+                                            "value",
+                                            "{}_grid".format(trv[i]),
+                                        )
+                                        print(">>>")
                                         print(e.attrib)
 
                         element = list(e)
                         if len(element) == 0:
                             c_list.pop(-1)
         except TypeError:
-            print('No loaded XML file')
-
-
-
+            print("No loaded XML file")
