@@ -8,15 +8,15 @@ class PackageInterface(object):
     @abc.abstractmethod
     def parent(self):
         raise NotImplementedError(
-            'must define get_model_dim_arrays in child '
-            'class to use this base class')
+            "must define get_model_dim_arrays in child " "class to use this base class"
+        )
 
     @parent.setter
     @abc.abstractmethod
     def parent(self, name):
         raise NotImplementedError(
-            'must define get_model_dim_arrays in child '
-            'class to use this base class')
+            "must define get_model_dim_arrays in child " "class to use this base class"
+        )
 
 
 class Package(PackageInterface):
