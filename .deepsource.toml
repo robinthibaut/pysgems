@@ -18,3 +18,7 @@ enabled = true
 [[transformers]]
 name = "black"
 enabled = true
+
+[[transformers]]
+name = "yapf"
+enabled = true
