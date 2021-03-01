@@ -26,7 +26,13 @@ def main():
 
     # %% Generate grid. Grid dimensions can automatically be generated based on the data points
     # unless specified otherwise, but cell dimensions dx, dy, (dz) must be specified
-    ds = Discretize(project=pjt, dx=10, dy=10, xo=0, yo=0, x_lim=1500, y_lim=1000)
+    ds = Discretize(project=pjt,
+                    dx=10,
+                    dy=10,
+                    xo=0,
+                    yo=0,
+                    x_lim=1500,
+                    y_lim=1000)
 
     # %% Display point coordinates and grid
     pl = Plots(project=pjt)
@@ -47,7 +53,11 @@ def main():
     # By default, the feature grid name of feature X is called 'X_grid'.
     # sgems.xml_update(path, attribute, new value)
     al.xml_update("Assign_Hard_Data", "value", "1")
-    al.xml_update("Hard_Data", new_attribute_dict={"grid": "hd_grid", "property": "hd"})
+    al.xml_update("Hard_Data",
+                  new_attribute_dict={
+                      "grid": "hd_grid",
+                      "property": "hd"
+                  })
 
     # %% Write python script
     pjt.write_command()

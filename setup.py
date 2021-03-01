@@ -1,8 +1,7 @@
 from setuptools import find_packages, setup
 
-my_pckg = find_packages(
-    include=["pysgems"], exclude=["pysgems.deprecated", "pysgems.develop"]
-)
+my_pckg = find_packages(include=["pysgems"],
+                        exclude=["pysgems.deprecated", "pysgems.develop"])
 print(my_pckg)
 
 setup(

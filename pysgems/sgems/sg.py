@@ -10,39 +10,33 @@ from pysgems.utils.sgutils import joinlist
 
 
 class Sgems:
-    def __init__(
-        self,
-        project_name="sgems_test",
-        project_wd="",
-        res_dir="",
-        script_dir="",
-        exe_name="",
-        nodata=-9966699,
-        check_env=True,
-        **kwargs
-    ):
+    def __init__(self,
+                 project_name="sgems_test",
+                 project_wd="",
+                 res_dir="",
+                 script_dir="",
+                 exe_name="",
+                 nodata=-9966699,
+                 check_env=True,
+                 **kwargs):
 
         if check_env:
             # First check if sgems installation files are in the user environment variables
             gstl_home = os.environ.get("GSTLAPPLIHOME")
             if not gstl_home:
-                warnings.warn("GSTLAPPLIHOME environment variable does not exist")
+                warnings.warn(
+                    "GSTLAPPLIHOME environment variable does not exist")
             else:
                 path = os.getenv("Path")
                 if gstl_home not in path:
                     warnings.warn(
-                        "Variable {} does not exist in Path environment variable".format(
-                            gstl_home
-                        )
-                    )
+                        "Variable {} does not exist in Path environment variable"
+                        .format(gstl_home))
                 if not exe_name:  # If no sgems exe file name is provided,
                     # checks for sgems exe file in the GSTLAPPLIHOME path
                     for file in os.listdir(gstl_home):
-                        if (
-                            file.endswith(".exe")
-                            and ("sgems" in file)
-                            and ("uninstall" not in file)
-                        ):
+                        if (file.endswith(".exe") and ("sgems" in file)
+                                and ("uninstall" not in file)):
                             exe_name = file
 
         self.project_name = project_name
@@ -58,7 +52,8 @@ class Sgems:
             self.res_dir = jp(
                 self.project_wd,
                 "results",
-                "_".join([self.project_name, uuid.uuid1().hex]),
+                "_".join([self.project_name,
+                          uuid.uuid1().hex]),
             )
         if not os.path.exists(self.res_dir):
             os.makedirs(self.res_dir)
@@ -70,31 +65,37 @@ class Sgems:
         self.algo = None  # XML manipulation instance
         self.nodata = nodata
 
-        self.object_file_names = []  # List of features name needed for the algorithm
+        self.object_file_names = [
+        ]  # List of features name needed for the algorithm
         self.command_name = ""
 
         if not script_dir:
             dir_path = os.path.abspath(__file__ + "/../../")
             # Python template file path
-            self.template_file = jp(dir_path, "script_templates/script_template.py")
+            self.template_file = jp(dir_path,
+                                    "script_templates/script_template.py")
 
     def write_command(self):
         """
         Write python script that sgems will run.
         """
 
-        self.command_name = jp(self.res_dir, "{}_commands.py".format(self.project_name))
+        self.command_name = jp(self.res_dir,
+                               "{}_commands.py".format(self.project_name))
 
         # This empty str will replace the # in front of the commands meant to execute sgems
         run_algo_flag = ""
         # within its python environment
         try:
-            name = self.algo.root.find("algorithm").attrib["name"]  # Algorithm name
+            name = self.algo.root.find("algorithm").attrib[
+                "name"]  # Algorithm name
             try:
                 # When performing simulations, sgems automatically add '__realn'
                 # to the name of the nth generated property.
-                nr = int(self.algo.root.find("Nb_Realizations").attrib["value"])
-                name_op = "::".join([name + "__real" + str(i) for i in range(nr)])
+                nr = int(
+                    self.algo.root.find("Nb_Realizations").attrib["value"])
+                name_op = "::".join(
+                    [name + "__real" + str(i) for i in range(nr)])
             except AttributeError:
                 name_op = name
 
