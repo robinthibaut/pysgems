@@ -46,8 +46,13 @@ class XML(Package):
 
         # By default, replace the grid name by 'computation_grid', and the name by the algorithm name.
         replace = [
-            ["Grid_Name", {"value": "computation_grid", "region": ""}],
-            ["Property_Name", {"value": name}],
+            ["Grid_Name", {
+                "value": "computation_grid",
+                "region": ""
+            }],
+            ["Property_Name", {
+                "value": name
+            }],
         ]
 
         for r in replace:
@@ -81,9 +86,12 @@ class XML(Package):
         except TypeError:
             print("No loaded XML file")
 
-    def xml_update(
-        self, path, attribute_name=None, value=None, new_attribute_dict=None, show=1
-    ):
+    def xml_update(self,
+                   path,
+                   attribute_name=None,
+                   value=None,
+                   new_attribute_dict=None,
+                   show=1):
         """
         Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
         :param path: object path
@@ -138,14 +146,15 @@ class XML(Package):
 
                 for i in range(len(trv)):
                     if (trv[i] in self.parent.point_set.columns) and (
-                        "Variable" or "Hard_Data" in element.tag
-                    ):
+                            "Variable" or "Hard_Data" in element.tag):
                         if trv[i] not in self.parent.object_file_names:
                             self.parent.object_file_names.append(trv[i])
                             try:
-                                if trk[i - 1] == "grid":  # ensure default grid name
+                                if trk[i -
+                                       1] == "grid":  # ensure default grid name
                                     print(element.attrib)
-                                    element.attrib["grid"] = "{}_grid".format(trv[i])
+                                    element.attrib["grid"] = "{}_grid".format(
+                                        trv[i])
                                     self.xml_update(
                                         "//".join(c_list),
                                         "grid",
@@ -154,9 +163,11 @@ class XML(Package):
                                     print(">>>")
                                     print(element.attrib)
                                 # ensure default grid name
-                                if trk[i - 1] == "value" and trk[i] == "property":
+                                if trk[i -
+                                       1] == "value" and trk[i] == "property":
                                     print(element.attrib)
-                                    element.attrib["value"] = "{}_grid".format(trv[i])
+                                    element.attrib["value"] = "{}_grid".format(
+                                        trv[i])
                                     self.xml_update(
                                         "//".join(c_list),
                                         "value",
@@ -172,9 +183,8 @@ class XML(Package):
                                     if "grid" in tp:
                                         print("//".join(c_list[:-2]))
                                         print(elist[-2].attrib)
-                                        elist[-2].attrib["grid"] = "{}_grid".format(
-                                            trv[i]
-                                        )
+                                        elist[-2].attrib[
+                                            "grid"] = "{}_grid".format(trv[i])
                                         self.xml_update(
                                             elist[-2].tag,
                                             "grid",
@@ -185,9 +195,8 @@ class XML(Package):
                                     if "value" in tp:
                                         print("//".join(c_list[:-2]))
                                         print(elist[-2].attrib)
-                                        elist[-2].attrib["value"] = "{}_grid".format(
-                                            trv[i]
-                                        )
+                                        elist[-2].attrib[
+                                            "value"] = "{}_grid".format(trv[i])
                                         self.xml_update(
                                             elist[-2].tag,
                                             "value",
@@ -209,11 +218,13 @@ class XML(Package):
                         for i in range(len(trv)):
                             if trv[i] in self.parent.point_set.columns:
                                 if trv[i] not in self.parent.object_file_names:
-                                    self.parent.object_file_names.append(trv[i])
+                                    self.parent.object_file_names.append(
+                                        trv[i])
                                     if trk[i] == "grid":  # ensure default grid name
                                         print("//".join(c_list))
                                         print(e.attrib)
-                                        e.attrib["grid"] = "{}_grid".format(trv[i])
+                                        e.attrib["grid"] = "{}_grid".format(
+                                            trv[i])
                                         self.xml_update(
                                             "//".join(c_list),
                                             "grid",
@@ -224,7 +235,8 @@ class XML(Package):
                                     if trk[i] == "value":  # ensure default grid name
                                         print("//".join(c_list))
                                         print(e.attrib)
-                                        e.attrib["value"] = "{}_grid".format(trv[i])
+                                        e.attrib["value"] = "{}_grid".format(
+                                            trv[i])
                                         self.xml_update(
                                             "//".join(c_list),
                                             "value",

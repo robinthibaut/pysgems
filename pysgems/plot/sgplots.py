@@ -24,15 +24,13 @@ class Plots(Package):
             pass
         try:
             plt.xticks(
-                np.cumsum(self.parent.dis.along_r)
-                + self.parent.dis.xo
-                - self.parent.dis.dx,
+                np.cumsum(self.parent.dis.along_r) + self.parent.dis.xo -
+                self.parent.dis.dx,
                 labels=[],
             )
             plt.yticks(
-                np.cumsum(self.parent.dis.along_c)
-                + self.parent.dis.yo
-                - self.parent.dis.dy,
+                np.cumsum(self.parent.dis.along_c) + self.parent.dis.yo -
+                self.parent.dis.dy,
                 labels=[],
             )
         except:
@@ -64,7 +62,7 @@ class Plots(Package):
         )
         plt.colorbar()
         if save:
-            plt.savefig(
-                jp(self.parent.res_dir, "results.png"), bbox_inches="tight", dpi=300
-            )
+            plt.savefig(jp(self.parent.res_dir, "results.png"),
+                        bbox_inches="tight",
+                        dpi=300)
         plt.show()

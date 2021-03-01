@@ -46,7 +46,10 @@ def blocks_from_rc(rows, columns, layers, xo=0, yo=0, zo=0):
         for i in range(nrow):
             for j in range(ncol):
                 b = [
-                    [c_sum[j] - delc[j], r_sum[i] - delr[i], l_sum[k] - dell[k]],
+                    [
+                        c_sum[j] - delc[j], r_sum[i] - delr[i],
+                        l_sum[k] - dell[k]
+                    ],
                     [c_sum[j], r_sum[i] - delr[i], l_sum[k] - dell[k]],
                     [c_sum[j] - delc[j], r_sum[i], l_sum[k] - dell[k]],
                     [c_sum[j], r_sum[i], l_sum[k] - dell[k]],
@@ -186,8 +189,7 @@ class Discretize(Package):
 
         crit = 0
         if np.all(rn >= np.array([self.xo, self.yo, self.zo])) and np.all(
-            rn <= np.array([self.x_lim, self.y_lim, self.z_lim])
-        ):
+                rn <= np.array([self.x_lim, self.y_lim, self.z_lim])):
             crit = 1
 
         if crit:  # if point inside
@@ -198,9 +200,9 @@ class Discretize(Package):
                 # minimum distance under which a point is in a cell
                 dmin = np.min([self.dx, self.dy]) / 2
 
-            blocks = blocks_from_rc(
-                self.along_c, self.along_r, self.along_l, self.xo, self.yo, self.zo
-            )  # cell generator
+            blocks = blocks_from_rc(self.along_c, self.along_r, self.along_l,
+                                    self.xo, self.yo,
+                                    self.zo)  # cell generator
 
             # mapping data points to cells:
             # slow but memory-effective method
@@ -210,7 +212,8 @@ class Discretize(Package):
                 c = b[2]
                 dc = np.linalg.norm(rn - c)  # Euclidean distance
                 if dc <= dmin:  # If point is inside cell
-                    print("found 1 cell id in {} s".format(time.time() - start))
+                    print("found 1 cell id in {} s".format(time.time() -
+                                                           start))
                     return b[0]
                 if dc < vmin:
                     vmin = dc
@@ -232,7 +235,11 @@ class Discretize(Package):
         # Save to nodes to avoid recomputing each time
         np.save(self.cell_file, nodes)
 
-    def write_hard_data(self, subdata, dis_file=None, cell_file=None, output_dir=None):
+    def write_hard_data(self,
+                        subdata,
+                        dis_file=None,
+                        cell_file=None,
+                        output_dir=None):
         """
         Removes no-data rows from data frame and compute the mean of data points sharing the same cell.
         Export the list of shape (n features, m cells, 2) containing the node of each point data with the corresponding
@@ -259,22 +266,20 @@ class Discretize(Package):
 
         xyz = subdata[["x", "y", "z"]].to_numpy()
 
-        npar = np.array(
-            [
-                self.dx,
-                self.dy,
-                self.dz,
-                self.xo,
-                self.yo,
-                self.zo,
-                self.x_lim,
-                self.y_lim,
-                self.z_lim,
-                self.nrow,
-                self.ncol,
-                self.nlay,
-            ]
-        )
+        npar = np.array([
+            self.dx,
+            self.dy,
+            self.dz,
+            self.xo,
+            self.yo,
+            self.zo,
+            self.x_lim,
+            self.y_lim,
+            self.z_lim,
+            self.nrow,
+            self.ncol,
+            self.nlay,
+        ])
 
         if os.path.isfile(dis_file):  # Check previous grid info
             pdis = np.loadtxt(dis_file)
@@ -302,13 +307,12 @@ class Discretize(Package):
         h = subdata.columns.values[-1]
         hd = []
         # fixed nodes = [[node i, value i]....]
-        fixed_nodes = np.array(
-            [[data_nodes[dn], subdata[h][dn]] for dn in range(len(data_nodes))]
-        )
+        fixed_nodes = np.array([[data_nodes[dn], subdata[h][dn]]
+                                for dn in range(len(data_nodes))])
         # Deletes points where val == nodata
-        hard_data = np.delete(
-            fixed_nodes, np.where(fixed_nodes == self.parent.nodata)[0], axis=0
-        )
+        hard_data = np.delete(fixed_nodes,
+                              np.where(fixed_nodes == self.parent.nodata)[0],
+                              axis=0)
         # If data points share the same cell, compute their mean and assign the value to the cell
         for n in unique_nodes:
             where = np.where(hard_data[:, 0] == n)[0]
@@ -318,15 +322,15 @@ class Discretize(Package):
 
             fn = hard_data.tolist()
             # For each, feature X, saves a file X.hard
-            cell_values_name = jp(os.path.dirname(self.cell_file), "{}.hard".format(h))
+            cell_values_name = jp(os.path.dirname(self.cell_file),
+                                  "{}.hard".format(h))
             with open(cell_values_name, "w") as nd:
                 nd.write(repr(fn))
             try:
                 shutil.copyfile(
                     cell_values_name,
-                    cell_values_name.replace(
-                        os.path.dirname(cell_values_name), output_dir
-                    ),
+                    cell_values_name.replace(os.path.dirname(cell_values_name),
+                                             output_dir),
                 )
             except shutil.SameFileError:
                 pass
