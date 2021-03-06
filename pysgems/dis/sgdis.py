@@ -6,11 +6,15 @@ import time
 from os.path import join as jp
 
 import numpy as np
+from loguru import logger
 
 from pysgems.base.packbase import Package
 
 
-def blocks_from_rc(rows, columns, layers, xo=0, yo=0, zo=0):
+def blocks_from_rc(rows: np.array,
+                   columns: np.array,
+                   layers: np.array,
+                   xo: float = 0, yo: float = 0, zo: float = 0):
     """
     Yields blocks defining grid cells
     :param rows: array of x-widths along a row
@@ -31,7 +35,7 @@ def blocks_from_rc(rows, columns, layers, xo=0, yo=0, zo=0):
     c_sum = np.cumsum(delc) + xo
     l_sum = np.cumsum(delc) + zo
 
-    def get_node(r, c, h):
+    def get_node(r: int, c: int, h: int) -> int:
         """
         Get node index to fix hard data
         :param r: row number
@@ -65,15 +69,15 @@ class Discretize(Package):
     def __init__(
         self,
         project,
-        dx=1,
-        dy=1,
-        dz=0,
-        xo=None,
-        yo=None,
-        zo=None,
-        x_lim=None,
-        y_lim=None,
-        z_lim=None,
+        dx: float = 1,
+        dy: float = 1,
+        dz: float = 0,
+        xo: float = None,
+        yo: float = None,
+        zo: float = None,
+        x_lim: float = None,
+        y_lim: float = None,
+        z_lim: float = None,
     ):
         """
         Constructs the grid geometry. The user can not control directly the number of rows and columns
@@ -94,6 +98,8 @@ class Discretize(Package):
                 self.dz = 0
 
         # Grid origins
+        # If a PointSet is already loaded into the project, automatically defines the limits
+        # (if no limits are given)
         if xo is None:
             if self.parent.point_set is not None:
                 xs = self.parent.point_set.dataframe["x"]

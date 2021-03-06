@@ -3,6 +3,7 @@ from os.path import join as jp
 
 import matplotlib.pyplot as plt
 import numpy as np
+from loguru import logger
 
 from pysgems.base.packbase import Package
 from pysgems.io.sgio import datread
@@ -15,12 +16,14 @@ class Plots(Package):
 
     def plot_coordinates(self):
         try:
+            # Scatter plot (2D)
             plt.plot(
                 self.parent.point_set.raw_data[:, 0],
                 self.parent.point_set.raw_data[:, 1],
                 "ko",
             )
-        except:
+        except Exception as e:
+            logger.info(e)
             pass
         try:
             plt.xticks(
@@ -33,7 +36,8 @@ class Plots(Package):
                 self.parent.dis.dy,
                 labels=[],
             )
-        except:
+        except Exception as e:
+            logger.info(e)
             pass
 
         plt.grid("blue")
