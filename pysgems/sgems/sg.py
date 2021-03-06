@@ -23,7 +23,7 @@ class Sgems:
                  **kwargs):
 
         logger.add(jp(res_dir, f"{project_name}.log"))
-        logger.info("Project initiated")
+        logger.info(f"Project {project_name} initiated")
 
         if check_env:
             # First check if sgems installation files are in the user environment variables

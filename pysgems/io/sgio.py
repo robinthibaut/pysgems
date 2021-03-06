@@ -13,12 +13,15 @@ from pysgems.base.packbase import Package
 def datread(file: str = None, start: int = 0, end: int = None):
     # end must be set to None and NOT -1
     """Reads space separated dat file"""
-    with open(file, "r") as fr:
-        lines = np.copy(fr.readlines())[start:end]
-        try:
-            op = np.array([list(map(float, line.split())) for line in lines])
-        except ValueError:
-            op = [line.split() for line in lines]
+    try:
+        with open(file, "r") as fr:
+            lines = np.copy(fr.readlines())[start:end]
+            try:
+                op = np.array([list(map(float, line.split())) for line in lines])
+            except ValueError:
+                op = [line.split() for line in lines]
+    except FileNotFoundError:
+        logger.error(f"File {file} not found.")
     return op
 
 
