@@ -14,5 +14,5 @@ for file in OBJECT_FILES:
 
 sgems.execute("NewCartesianGrid  computation_grid::GRID")
 
-#~sgems.execute('RunGeostatAlgorithm  ALGORITHM_NAME::/GeostatParamUtils/XML::ALGORITHM_XML')
-#~sgems.execute('SaveGeostatGrid  computation_grid::FEATURE_OUTPUT.grid::gslib::0::OUTPUT_LIST')
+# ~sgems.execute('RunGeostatAlgorithm  ALGORITHM_NAME::/GeostatParamUtils/XML::ALGORITHM_XML')
+# ~sgems.execute('SaveGeostatGrid  computation_grid::FEATURE_OUTPUT.grid::gslib::0::OUTPUT_LIST')

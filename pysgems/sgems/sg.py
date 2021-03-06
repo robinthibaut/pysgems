@@ -10,15 +10,17 @@ from pysgems.utils.sgutils import joinlist
 
 
 class Sgems:
-    def __init__(self,
-                 project_name: str = "sgems_test",
-                 project_wd: str = "",
-                 res_dir: str = "",
-                 script_dir: str = "",
-                 exe_name: str = "",
-                 nodata: int = -9966699,  # sgems default value, do not change this
-                 check_env: bool = True,
-                 **kwargs):
+    def __init__(
+        self,
+        project_name: str = "sgems_test",
+        project_wd: str = "",
+        res_dir: str = "",
+        script_dir: str = "",
+        exe_name: str = "",
+        nodata: int = -9966699,  # sgems default value, do not change this
+        check_env: bool = True,
+        **kwargs,
+    ):
 
         if check_env:
             # First check if sgems installation files are in the user environment variables
@@ -76,8 +78,8 @@ class Sgems:
         if not script_dir:
             dir_path = os.path.abspath(__file__ + "/../../")
             # Python template file path
-            self.template_file = jp(dir_path,
-                                    "script_templates", "script_template.py")
+            self.template_file = jp(dir_path, "script_templates",
+                                    "script_template.py")
 
     def write_command(self):
         """
@@ -91,7 +93,8 @@ class Sgems:
         run_algo_flag = ""
         # within its python environment
         try:
-            name = self.algo.root.find("algorithm").attrib[ "name"]  # Algorithm name
+            name = self.algo.root.find("algorithm").attrib[
+                "name"]  # Algorithm name
             try:
                 # When performing simulations, sgems automatically add '__realn'
                 # to the name of the nth generated property.
