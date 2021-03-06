@@ -11,13 +11,13 @@ from pysgems.utils.sgutils import joinlist
 
 class Sgems:
     def __init__(self,
-                 project_name="sgems_test",
-                 project_wd="",
-                 res_dir="",
-                 script_dir="",
-                 exe_name="",
-                 nodata=-9966699,
-                 check_env=True,
+                 project_name: str = "sgems_test",
+                 project_wd: str = "",
+                 res_dir: str = "",
+                 script_dir: str = "",
+                 exe_name: str = "",
+                 nodata: int = -9966699,  # sgems default value, do not change this
+                 check_env: bool = True,
                  **kwargs):
 
         if check_env:
@@ -39,12 +39,15 @@ class Sgems:
                                 and ("uninstall" not in file)):
                             exe_name = file
 
+        # Project name
         self.project_name = project_name
 
+        # Working directory
         self.project_wd = project_wd
         if not self.project_wd:
             self.project_wd = os.getcwd()
 
+        # Results directory
         self.res_dir = res_dir
         # result directory generated according to project and algorithm name
         if self.res_dir is None:
@@ -58,6 +61,7 @@ class Sgems:
         if not os.path.exists(self.res_dir):
             os.makedirs(self.res_dir)
 
+        # Exe name
         self.exe_name = exe_name
 
         self.dis = None  # Discretization instance
@@ -73,7 +77,7 @@ class Sgems:
             dir_path = os.path.abspath(__file__ + "/../../")
             # Python template file path
             self.template_file = jp(dir_path,
-                                    "script_templates/script_template.py")
+                                    "script_templates", "script_template.py")
 
     def write_command(self):
         """
@@ -87,8 +91,7 @@ class Sgems:
         run_algo_flag = ""
         # within its python environment
         try:
-            name = self.algo.root.find("algorithm").attrib[
-                "name"]  # Algorithm name
+            name = self.algo.root.find("algorithm").attrib[ "name"]  # Algorithm name
             try:
                 # When performing simulations, sgems automatically add '__realn'
                 # to the name of the nth generated property.
@@ -121,7 +124,7 @@ class Sgems:
         ]  # Grid information
         grid = joinlist("::", sgrid)  # Grid in sgems format
 
-        sgems_files = [sf + ".sgems" for sf in self.object_file_names]
+        sgems_files = [f"{sf}.sgems" for sf in self.object_file_names]
 
         # The list below is the list of flags that will be replaced in the sgems python script
         # TODO: add option to change output file name (now default 'results.grid')
