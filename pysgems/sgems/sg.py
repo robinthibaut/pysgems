@@ -6,6 +6,8 @@ import uuid
 import warnings
 from os.path import join as jp
 
+from loguru import logger
+
 from pysgems.utils.sgutils import joinlist
 
 
@@ -20,24 +22,33 @@ class Sgems:
                  check_env: bool = True,
                  **kwargs):
 
+        logger.add(jp(res_dir, f"{project_name}.log"))
+        logger.info("Project initiated")
+
         if check_env:
             # First check if sgems installation files are in the user environment variables
             gstl_home = os.environ.get("GSTLAPPLIHOME")
             if not gstl_home:
-                warnings.warn(
-                    "GSTLAPPLIHOME environment variable does not exist")
+                msg = "GSTLAPPLIHOME environment variable does not exist"
+                warnings.warn(msg)
+                logger.info(msg)
             else:
+                msg = "GSTLAPPLIHOME environment variable found"
+                logger.info(msg)
                 path = os.getenv("Path")
                 if gstl_home not in path:
+                    msg = f"Variable {gstl_home} does not exist in Path environment variable"
                     warnings.warn(
-                        "Variable {} does not exist in Path environment variable"
-                        .format(gstl_home))
+                        msg)
+                    logger.info(msg)
                 if not exe_name:  # If no sgems exe file name is provided,
                     # checks for sgems exe file in the GSTLAPPLIHOME path
                     for file in os.listdir(gstl_home):
                         if (file.endswith(".exe") and ("sgems" in file)
                                 and ("uninstall" not in file)):
                             exe_name = file
+                msg = f"sgems exe file : {exe_name}"
+                logger.info(msg)
 
         # Project name
         self.project_name = project_name
@@ -85,13 +96,13 @@ class Sgems:
         """
 
         self.command_name = jp(self.res_dir,
-                               "{}_commands.py".format(self.project_name))
+                               f"{self.project_name}_commands.py")
 
         # This empty str will replace the # in front of the commands meant to execute sgems
         run_algo_flag = ""
         # within its python environment
         try:
-            name = self.algo.root.find("algorithm").attrib[ "name"]  # Algorithm name
+            name = self.algo.root.find("algorithm").attrib["name"]  # Algorithm name
             try:
                 # When performing simulations, sgems automatically add '__realn'
                 # to the name of the nth generated property.
@@ -180,4 +191,4 @@ class Sgems:
             pass
 
         subprocess.call([batch])  # Opens the BAT file
-        print("ran algorithm in {} s".format(time.time() - start))
+        logger.info(f"ran algorithm in {time.time() - start} s")
