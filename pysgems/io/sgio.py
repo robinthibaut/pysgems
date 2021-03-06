@@ -66,7 +66,7 @@ def write_point_set(file_name: str, sub_dataframe: pd.DataFrame, nodata: int = -
 
     pp = sub_dataframe.columns[-1]  # Get name of the property
 
-    grid_name = "{}_grid".format(pp)
+    grid_name = f"{pp}_grid"
 
     ext = ".sgems"
     if ext not in file_name:
@@ -138,8 +138,6 @@ class PointSet(Package):
         self.file_path = pointset_path
         self.res_dir = self.parent.res_dir
 
-        logger.add(jp(self.res_dir, "log_pointset.log"))
-
         self.dimension = 2
         # Load raw data
         self.raw_data, self.project_name, self.columns = self.loader()
@@ -177,6 +175,7 @@ class PointSet(Package):
         head = datread(self.file_path, start=2, end=2 + n_features)
         columns_name = [h[0].lower() for h in head]  # Column names (lowered)
         data = datread(self.file_path, start=2 + n_features)  # Raw data
+        logger.info("Data loaded.")
         return data, project_name, columns_name
 
     def export_01(self, features: list = None):
@@ -198,3 +197,4 @@ class PointSet(Package):
             if (pp not in self.parent.object_file_names
                 ):  # Adding features name to load them within sgems
                 self.parent.object_file_names.append(pp)
+            logger.info(f"Feature {pp} exported to binary file")

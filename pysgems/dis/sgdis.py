@@ -5,6 +5,7 @@ import shutil
 import time
 from os.path import join as jp
 
+import pandas as pd
 import numpy as np
 from loguru import logger
 
@@ -182,7 +183,7 @@ class Discretize(Package):
 
         setattr(self.parent, "dis", self)
 
-    def my_cell(self, xyz):
+    def my_cell(self, xyz: np.array):
         """
         Given a point coordinate xy [x, y], computes its cell number by computing the euclidean distance of each cell
         center.
@@ -229,7 +230,7 @@ class Discretize(Package):
         else:
             return self.parent.nodata
 
-    def compute_cells(self, xyz):
+    def compute_cells(self, xyz: np.array):
         """
         Determines cell location for each data point.
         It is necessary to know the cell number to assign the hard data property to the sgems grid.
@@ -242,10 +243,10 @@ class Discretize(Package):
         np.save(self.cell_file, nodes)
 
     def write_hard_data(self,
-                        subdata,
-                        dis_file=None,
-                        cell_file=None,
-                        output_dir=None):
+                        subdata: pd.DataFrame,
+                        dis_file: str = None,
+                        cell_file: str = None,
+                        output_dir: str = None):
         """
         Removes no-data rows from data frame and compute the mean of data points sharing the same cell.
         Export the list of shape (n features, m cells, 2) containing the node of each point data with the corresponding
@@ -291,7 +292,7 @@ class Discretize(Package):
             pdis = np.loadtxt(dis_file)
             # If different, recompute data points cell by deleting previous cell file
             if not np.array_equal(pdis, npar):
-                print("New grid found")
+                logger.info("New grid found")
                 try:
                     os.remove(self.cell_file)
                 except FileNotFoundError:
@@ -300,7 +301,7 @@ class Discretize(Package):
                     np.savetxt(dis_file, npar)
                     self.compute_cells(xyz)
             else:
-                print("Using previous grid")
+                logger.info("Using previous grid")
                 if not os.path.exists(self.cell_file):
                     self.compute_cells(xyz)
         else:
@@ -329,7 +330,7 @@ class Discretize(Package):
             fn = hard_data.tolist()
             # For each, feature X, saves a file X.hard
             cell_values_name = jp(os.path.dirname(self.cell_file),
-                                  "{}.hard".format(h))
+                                  f"{h}.hard")
             with open(cell_values_name, "w") as nd:
                 nd.write(repr(fn))
             try:
