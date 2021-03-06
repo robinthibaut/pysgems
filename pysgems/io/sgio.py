@@ -3,13 +3,14 @@ import os
 import struct
 from os.path import join as jp
 
+from loguru import logger
 import numpy as np
 import pandas as pd
 
 from pysgems.base.packbase import Package
 
 
-def datread(file=None, start=0, end=None):
+def datread(file: str = None, start: int = 0, end: int = None):
     # end must be set to None and NOT -1
     """Reads space separated dat file"""
     with open(file, "r") as fr:
@@ -21,7 +22,7 @@ def datread(file=None, start=0, end=None):
     return op
 
 
-def write_point_set(file_name, sub_dataframe, nodata=-999):
+def write_point_set(file_name: str, sub_dataframe: pd.Dataframe, nodata: int = -999):
     # TODO: build similar method to save grid files.
     """
     Function to write sgems binary point set files.
@@ -114,7 +115,7 @@ def write_point_set(file_name, sub_dataframe, nodata=-999):
             wb.write(struct.pack(">f", v))  # Values
 
 
-def export_eas(dataframe, filename="dataset"):
+def export_eas(dataframe: pd.DataFrame, filename: str = "dataset"):
     """Exports a Pandas DataFrame to geo-eas format"""
     columns = list(dataframe.columns.values)
     name = os.path.basename(filename).split(".")[0]
@@ -127,8 +128,9 @@ def export_eas(dataframe, filename="dataset"):
 
 
 class PointSet(Package):
-    def __init__(self, project, pointset_path=None):
+    def __init__(self, project, pointset_path: str = None, force_2d: bool = False):
 
+        # Initiate from parent
         Package.__init__(self, project)
 
         self.object_file_names = []
@@ -136,19 +138,32 @@ class PointSet(Package):
         self.file_path = pointset_path
         self.res_dir = self.parent.res_dir
 
+        logger.add(jp(self.res_dir, "log_pointset.log"))
+
         self.dimension = 2
+        # Load raw data
         self.raw_data, self.project_name, self.columns = self.loader()
+        # Put into panda DataFrame
         self.dataframe = pd.DataFrame(data=self.raw_data, columns=self.columns)
 
+        # Assess the dimensionality
         try:
+            # If Z (depth) information exists, sets the dimensionality to 3
             self.xyz = self.dataframe[["x", "y", "z"]].to_numpy()
             self.dimension = 3
+            logger.info("3D dataset detected.")
+            if force_2d:
+                logger.info("3D dataset detected, but 2D will be enforced.")
+                self.dataframe["z"] = np.zeros(self.dataframe.shape[0])
         except KeyError:  # Assumes 2D dataset
+            logger.info("2D dataset detected.")
+            # Replaces Z dimension by 0's
             self.dataframe.insert(2, "z", np.zeros(self.dataframe.shape[0]))
             self.columns = list(self.dataframe.columns.values)
             self.xyz = self.dataframe[["x", "y", "z"]].to_numpy()
             self.dimension = 2
 
+        # Set attribute to parent
         setattr(self.parent, "point_set", self)
 
     # Load sgems dataset
@@ -164,7 +179,7 @@ class PointSet(Package):
         data = datread(self.file_path, start=2 + n_features)  # Raw data
         return data, project_name, columns_name
 
-    def export_01(self, features=None):
+    def export_01(self, features: list = None):
         """
         Gives a list of point set names to be saved in sgems binary format and saves them to the result directory
         :param features: Names of features to export
