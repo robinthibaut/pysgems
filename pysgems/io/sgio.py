@@ -3,9 +3,9 @@ import os
 import struct
 from os.path import join as jp
 
-from loguru import logger
 import numpy as np
 import pandas as pd
+from loguru import logger
 
 from pysgems.base.packbase import Package
 
@@ -22,7 +22,9 @@ def datread(file: str = None, start: int = 0, end: int = None):
     return op
 
 
-def write_point_set(file_name: str, sub_dataframe: pd.Dataframe, nodata: int = -999):
+def write_point_set(file_name: str,
+                    sub_dataframe: pd.Dataframe,
+                    nodata: int = -999):
     # TODO: build similar method to save grid files.
     """
     Function to write sgems binary point set files.
@@ -128,7 +130,10 @@ def export_eas(dataframe: pd.DataFrame, filename: str = "dataset"):
 
 
 class PointSet(Package):
-    def __init__(self, project, pointset_path: str = None, force_2d: bool = False):
+    def __init__(self,
+                 project,
+                 pointset_path: str = None,
+                 force_2d: bool = False):
 
         # Initiate from parent
         Package.__init__(self, project)
