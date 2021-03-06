@@ -5,17 +5,21 @@ import shutil
 import time
 from os.path import join as jp
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from loguru import logger
 
 from pysgems.base.packbase import Package
 
 
-def blocks_from_rc(rows: np.array,
-                   columns: np.array,
-                   layers: np.array,
-                   xo: float = 0, yo: float = 0, zo: float = 0):
+def blocks_from_rc(
+    rows: np.array,
+    columns: np.array,
+    layers: np.array,
+    xo: float = 0,
+    yo: float = 0,
+    zo: float = 0,
+):
     """
     Yields blocks defining grid cells
     :param rows: array of x-widths along a row
@@ -242,11 +246,13 @@ class Discretize(Package):
         # Save to nodes to avoid recomputing each time
         np.save(self.cell_file, nodes)
 
-    def write_hard_data(self,
-                        subdata: pd.DataFrame,
-                        dis_file: str = None,
-                        cell_file: str = None,
-                        output_dir: str = None):
+    def write_hard_data(
+        self,
+        subdata: pd.DataFrame,
+        dis_file: str = None,
+        cell_file: str = None,
+        output_dir: str = None,
+    ):
         """
         Removes no-data rows from data frame and compute the mean of data points sharing the same cell.
         Export the list of shape (n features, m cells, 2) containing the node of each point data with the corresponding
@@ -329,8 +335,7 @@ class Discretize(Package):
 
             fn = hard_data.tolist()
             # For each, feature X, saves a file X.hard
-            cell_values_name = jp(os.path.dirname(self.cell_file),
-                                  f"{h}.hard")
+            cell_values_name = jp(os.path.dirname(self.cell_file), f"{h}.hard")
             with open(cell_values_name, "w") as nd:
                 nd.write(repr(fn))
             try:
