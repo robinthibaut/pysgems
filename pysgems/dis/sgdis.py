@@ -11,10 +11,14 @@ from loguru import logger
 from pysgems.base.packbase import Package
 
 
-def blocks_from_rc(rows: np.array,
-                   columns: np.array,
-                   layers: np.array,
-                   xo: float = 0, yo: float = 0, zo: float = 0):
+def blocks_from_rc(
+    rows: np.array,
+    columns: np.array,
+    layers: np.array,
+    xo: float = 0,
+    yo: float = 0,
+    zo: float = 0,
+):
     """
     Yields blocks defining grid cells
     :param rows: array of x-widths along a row
