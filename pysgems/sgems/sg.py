@@ -31,7 +31,7 @@ class Sgems:
             if not gstl_home:
                 msg = "GSTLAPPLIHOME environment variable does not exist"
                 warnings.warn(msg)
-                logger.info(msg)
+                logger.warning(msg)
             else:
                 msg = "GSTLAPPLIHOME environment variable found"
                 logger.info(msg)
@@ -40,14 +40,14 @@ class Sgems:
                     msg = f"Variable {gstl_home} does not exist in Path environment variable"
                     warnings.warn(
                         msg)
-                    logger.info(msg)
+                    logger.warning(msg)
                 if not exe_name:  # If no sgems exe file name is provided,
                     # checks for sgems exe file in the GSTLAPPLIHOME path
                     for file in os.listdir(gstl_home):
                         if (file.endswith(".exe") and ("sgems" in file)
                                 and ("uninstall" not in file)):
                             exe_name = file
-                msg = f"sgems exe file : {exe_name}"
+                msg = f"sgems exe file : {exe_name} in {gstl_home}"
                 logger.info(msg)
 
         # Project name
