@@ -1,4 +1,4 @@
-<img src="/img/Pysgems.png" alt="plot">
+<img src="/img/Pysgems.png" height="200">
 
 [![DOI](https://zenodo.org/badge/261676899.svg)](https://zenodo.org/badge/latestdoi/261676899)
 # pysgems
@@ -17,6 +17,7 @@ Clone this repository, or:
 ```bash
 pip install pysgems
 ```
+Note that SGEMS only runs on Microsoft Windows.
 
 Users need to add this variable to their system environment variables:
 
@@ -218,16 +219,16 @@ Check the results:
 
 ## Contribution and points to improve
 
-Contributors and feedback from users are welcome. 
+- Contributors and feedback from users are welcome. 
 
-The package should be made more robust and able to support all SGEMS features.
+- The package should be made more robust and able to support all SGEMS features.
 
-More methods should be build to export/import binary grids and point sets with multiple features.
+- More methods should be build to export/import binary grids and point sets with multiple features.
 
-The package should be properly documented.
+- The package should be properly documented.
 
-The package should have more built-in visualization methods.
+- The package should have more built-in visualization methods.
 
-The Python script template should be more generic and its modification more flexible.
+- The Python script template should be more generic and its modification more flexible.
 
-More examples should be uploaded.
+- More examples should be uploaded.
