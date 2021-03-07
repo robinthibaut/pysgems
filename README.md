@@ -1,3 +1,5 @@
+<img src="/img/Pysgems.png" alt="plot">
+
 [![DOI](https://zenodo.org/badge/261676899.svg)](https://zenodo.org/badge/latestdoi/261676899)
 # pysgems
 Use SGeMS (Stanford Geostatistical Modeling Software) within Python.
