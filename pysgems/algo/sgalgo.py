@@ -4,6 +4,8 @@ import uuid
 import xml.etree.ElementTree as ET
 from os.path import join as jp
 
+from loguru import logger
+
 from pysgems.base.packbase import Package
 
 auto_update = False
@@ -70,21 +72,21 @@ class XML(Package):
         """
         try:
             for element in self.root:
-                print(element.tag)
-                print(element.attrib)
+                logger.info(element.tag)
+                logger.info(element.attrib)
                 elems = list(element)
                 c_list = [element.tag]
                 while len(elems) > 0:
                     elems = list(element)
                     for e in elems:
                         c_list.append(e.tag)
-                        print("//".join(c_list))
-                        print(e.attrib)
+                        logger.info("//".join(c_list))
+                        logger.info(e.attrib)
                         element = list(e)
                         if len(element) == 0:
                             c_list.pop(-1)
         except TypeError:
-            print("No loaded XML file")
+            logger.info("No loaded XML file")
 
     def xml_update(self,
                    path,
@@ -118,9 +120,9 @@ class XML(Package):
             self.tree.write(self.op_file)
 
         if show:
-            print("Updated")
-            print(self.root.find(path).tag)
-            print(self.root.find(path).attrib)
+            logger.info("Updated")
+            logger.info(self.root.find(path).tag)
+            logger.info(self.root.find(path).attrib)
 
         setattr(self.parent.algo, "tree", self.tree)
         setattr(self.parent.algo, "root", self.root)
@@ -152,7 +154,7 @@ class XML(Package):
                             try:
                                 if trk[i -
                                        1] == "grid":  # ensure default grid name
-                                    print(element.attrib)
+                                    logger.info(element.attrib)
                                     element.attrib["grid"] = "{}_grid".format(
                                         trv[i])
                                     self.xml_update(
@@ -160,12 +162,12 @@ class XML(Package):
                                         "grid",
                                         "{}_grid".format(trv[i]),
                                     )
-                                    print(">>>")
-                                    print(element.attrib)
+                                    logger.info(">>>")
+                                    logger.info(element.attrib)
                                 # ensure default grid name
                                 if trk[i -
                                        1] == "value" and trk[i] == "property":
-                                    print(element.attrib)
+                                    logger.info(element.attrib)
                                     element.attrib["value"] = "{}_grid".format(
                                         trv[i])
                                     self.xml_update(
@@ -173,16 +175,16 @@ class XML(Package):
                                         "value",
                                         "{}_grid".format(trv[i]),
                                     )
-                                    print(">>>")
-                                    print(element.attrib)
+                                    logger.info(">>>")
+                                    logger.info(element.attrib)
                             except IndexError:
                                 pass
                             try:
                                 if "Grid" in elist[-2].tag:
                                     tp = list(elist[-2].attrib.keys())
                                     if "grid" in tp:
-                                        print("//".join(c_list[:-2]))
-                                        print(elist[-2].attrib)
+                                        logger.info("//".join(c_list[:-2]))
+                                        logger.info(elist[-2].attrib)
                                         elist[-2].attrib[
                                             "grid"] = "{}_grid".format(trv[i])
                                         self.xml_update(
@@ -190,11 +192,11 @@ class XML(Package):
                                             "grid",
                                             "{}_grid".format(trv[i]),
                                         )
-                                        print(">>>")
-                                        print(elist[-2].attrib)
+                                        logger.info(">>>")
+                                        logger.info(elist[-2].attrib)
                                     if "value" in tp:
-                                        print("//".join(c_list[:-2]))
-                                        print(elist[-2].attrib)
+                                        logger.info("//".join(c_list[:-2]))
+                                        logger.info(elist[-2].attrib)
                                         elist[-2].attrib[
                                             "value"] = "{}_grid".format(trv[i])
                                         self.xml_update(
@@ -202,8 +204,8 @@ class XML(Package):
                                             "value",
                                             "{}_grid".format(trv[i]),
                                         )
-                                        print(">>>")
-                                        print(elist[-2].attrib)
+                                        logger.info(">>>")
+                                        logger.info(elist[-2].attrib)
                             except IndexError:
                                 pass
 
@@ -221,8 +223,8 @@ class XML(Package):
                                     self.parent.object_file_names.append(
                                         trv[i])
                                     if trk[i] == "grid":  # ensure default grid name
-                                        print("//".join(c_list))
-                                        print(e.attrib)
+                                        logger.info("//".join(c_list))
+                                        logger.info(e.attrib)
                                         e.attrib["grid"] = "{}_grid".format(
                                             trv[i])
                                         self.xml_update(
@@ -230,11 +232,11 @@ class XML(Package):
                                             "grid",
                                             "{}_grid".format(trv[i]),
                                         )
-                                        print(">>>")
-                                        print(e.attrib)
+                                        logger.info(">>>")
+                                        logger.info(e.attrib)
                                     if trk[i] == "value":  # ensure default grid name
-                                        print("//".join(c_list))
-                                        print(e.attrib)
+                                        logger.info("//".join(c_list))
+                                        logger.info(e.attrib)
                                         e.attrib["value"] = "{}_grid".format(
                                             trv[i])
                                         self.xml_update(
@@ -242,11 +244,11 @@ class XML(Package):
                                             "value",
                                             "{}_grid".format(trv[i]),
                                         )
-                                        print(">>>")
-                                        print(e.attrib)
+                                        logger.info(">>>")
+                                        logger.info(e.attrib)
 
                         element = list(e)
                         if len(element) == 0:
                             c_list.pop(-1)
         except TypeError:
-            print("No loaded XML file")
+            logger.info("No loaded XML file")
