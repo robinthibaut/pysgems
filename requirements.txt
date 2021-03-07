@@ -1,5 +1,5 @@
 numpy~=1.18.5
-pandas~=1.0.5
+pandas~=1.2.3
 scipy
 matplotlib~=3.2.2
 loguru~=0.5.3
