@@ -22,7 +22,7 @@ class Sgems:
                  check_env: bool = True,
                  **kwargs):
 
-        logger.add(jp(res_dir, f"{project_name}.log"))
+        logger.add(jp(project_wd, f"{project_name}.log"), rotation="100 MB")
         logger.info(f"Project {project_name} initiated")
 
         if check_env:

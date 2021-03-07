@@ -5,8 +5,8 @@ import shutil
 import time
 from os.path import join as jp
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from loguru import logger
 
 from pysgems.base.packbase import Package
@@ -68,17 +68,17 @@ def blocks_from_rc(rows: np.array,
 
 class Discretize(Package):
     def __init__(
-        self,
-        project,
-        dx: float = 1,
-        dy: float = 1,
-        dz: float = 0,
-        xo: float = None,
-        yo: float = None,
-        zo: float = None,
-        x_lim: float = None,
-        y_lim: float = None,
-        z_lim: float = None,
+            self,
+            project,
+            dx: float = 1,
+            dy: float = 1,
+            dz: float = 0,
+            xo: float = None,
+            yo: float = None,
+            zo: float = None,
+            x_lim: float = None,
+            y_lim: float = None,
+            z_lim: float = None,
     ):
         """
         Constructs the grid geometry. The user can not control directly the number of rows and columns

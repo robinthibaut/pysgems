@@ -3,9 +3,9 @@ import os
 import struct
 from os.path import join as jp
 
-from loguru import logger
 import numpy as np
 import pandas as pd
+from loguru import logger
 
 from pysgems.base.packbase import Package
 
@@ -198,6 +198,6 @@ class PointSet(Package):
             ps_name = jp(self.res_dir, pp)  # Path of binary file
             write_point_set(ps_name, subframe)  # Write binary file
             if (pp not in self.parent.object_file_names
-                ):  # Adding features name to load them within sgems
+            ):  # Adding features name to load them within sgems
                 self.parent.object_file_names.append(pp)
             logger.info(f"Feature {pp} exported to binary file")
