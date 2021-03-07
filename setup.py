@@ -5,7 +5,7 @@ my_pckg = find_packages(include=["pysgems"],
 
 setup(
     name="pysgems",
-    version="1.1.8",
+    version="1.1.9",
     packages=my_pckg,
     include_package_data=True,
     url="https://github.com/robinthibaut/pysgems",
@@ -13,6 +13,7 @@ setup(
     author="Robin Thibaut",
     author_email="robin.thibaut@UGent.be",
     description="Use SGeMS (Stanford Geostatistical Modeling Software) within Python.",
+    long_description="Use SGeMS (Stanford Geostatistical Modeling Software) within Python.",
     install_requires=["numpy", "pandas", "scipy", "matplotlib", "loguru"],
     classifiers=[
         "Programming Language :: Python :: 3",
