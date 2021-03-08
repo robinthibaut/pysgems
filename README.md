@@ -1,4 +1,4 @@
-<img src="/img/Pysgems-01.png" height="150">
+<img src="/img/Pysgems-02.png" height="150">
 
 [![DOI](https://zenodo.org/badge/261676899.svg)](https://zenodo.org/badge/latestdoi/261676899)
 [![PyPI version](https://badge.fury.io/py/pysgems.svg)](https://badge.fury.io/py/pysgems)
