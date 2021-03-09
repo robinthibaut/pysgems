@@ -2,6 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/261676899.svg)](https://zenodo.org/badge/latestdoi/261676899)
 [![PyPI version](https://badge.fury.io/py/pysgems.svg)](https://badge.fury.io/py/pysgems)
+[![Downloads](https://pepy.tech/badge/pysgems)](https://pepy.tech/project/pysgems)
 
 # pysgems
 Use SGeMS (Stanford Geostatistical Modeling Software) within Python.
