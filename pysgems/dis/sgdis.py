@@ -142,7 +142,7 @@ class Discretize(Package):
                 zs = self.parent.point_set.dataframe["z"]
                 z_lim = np.max(zs) + 4 * self.dz
             else:
-                x_lim = 1
+                z_lim = 1
 
         # Cell dimensions
         if self.dy > 0:
