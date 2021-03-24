@@ -24,11 +24,11 @@ Note that SGEMS only runs on Microsoft Windows.
 
 Users need to add this variable to their system environment variables:
 
-Name: GSTLAPPLIHOME
+Name: `GSTLAPPLIHOME`
 
-Value: Path to your SGEMS folder (e.g., C:\Program Files (x86)\SGeMS)
+Value: Path to your SGEMS folder (e.g., `C:\Program Files (x86)\SGeMS`)
 
-It is also necessary to add the path of your SGEMS folder to the system variable 'Path'.
+*Important*: It is also necessary to add the path of your SGEMS folder to the system variable 'Path'.
 
 ## Introduction
 
