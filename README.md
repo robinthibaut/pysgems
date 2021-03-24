@@ -26,7 +26,7 @@ Users need to add this variable to their system environment variables:
 
 Name: GSTLAPPLIHOME
 
-Value: Path to your SGEMS folder (e.g. C:\Program Files (x86)\SGeMS)
+Value: Path to your SGEMS folder (e.g., C:\Program Files (x86)\SGeMS)
 
 It is also necessary to add the path of your SGEMS folder to the system variable 'Path'.
 
@@ -43,7 +43,7 @@ The sgems.script contains a command that SGEMS will execute internally:
 RunScript python_script.py
 ```
 
-The python_script file contains a Python script (ver. <= 2.7.x) that SGEMS will execute, as if ran into the Run Script... window of SGEMS.
+The python_script file contains a Python script (ver. <= 2.7.x) that SGEMS will execute, as if ran into the `Run Script...` window of SGEMS.
 
 This package revolves around modifying this Python script file.
 
@@ -109,7 +109,7 @@ pl.plot_coordinates()
 
 #### Get algorithm XML from SGeMS
 
-Users must first run their algorithm inside SGeMS, view the Commands Panel, copy the algorithm XML and paste it into a XML file (e.g. algorithm.xml), and save this file into the 'algorithms' folder.
+Users must first run their algorithm inside SGeMS, view the Commands Panel, copy the algorithm XML and paste it into a XML file (e.g., algorithm.xml), and save this file into the 'algorithms' folder.
 
 The algorithm XML starts and ends with:
 ```xml
