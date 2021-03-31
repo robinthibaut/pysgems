@@ -12,15 +12,17 @@ from pysgems.utils.sgutils import joinlist
 
 
 class Sgems:
-    def __init__(self,
-                 project_name: str = "sgems_test",
-                 project_wd: str = "",
-                 res_dir: str = "",
-                 script_dir: str = "",
-                 exe_name: str = "",
-                 nodata: int = -9966699,  # sgems default value, do not change this
-                 check_env: bool = True,
-                 **kwargs):
+    def __init__(
+        self,
+        project_name: str = "sgems_test",
+        project_wd: str = "",
+        res_dir: str = "",
+        script_dir: str = "",
+        exe_name: str = "",
+        nodata: int = -9966699,  # sgems default value, do not change this
+        check_env: bool = True,
+        **kwargs,
+    ):
 
         logger.add(jp(project_wd, f"{project_name}.log"), rotation="100 MB")
         logger.info(f"Project {project_name} initiated")
@@ -38,14 +40,16 @@ class Sgems:
                 path = os.getenv("Path")
                 if gstl_home not in path:
                     msg = f"Variable {gstl_home} does not exist in Path environment variable"
-                    warnings.warn(
-                        msg)
+                    warnings.warn(msg)
                     logger.warning(msg)
                 if not exe_name:  # If no sgems exe file name is provided,
                     # checks for sgems exe file in the GSTLAPPLIHOME path
                     for file in os.listdir(gstl_home):
-                        if (file.endswith(".exe") and ("sgems" in file)
-                                and ("uninstall" not in file)):
+                        if (
+                            file.endswith(".exe")
+                            and ("sgems" in file)
+                            and ("uninstall" not in file)
+                        ):
                             exe_name = file
                 msg = f"sgems exe file : {exe_name} in {gstl_home}"
                 logger.info(msg)
@@ -66,8 +70,7 @@ class Sgems:
             self.res_dir = jp(
                 self.project_wd,
                 "results",
-                "_".join([self.project_name,
-                          uuid.uuid1().hex]),
+                "_".join([self.project_name, uuid.uuid1().hex]),
             )
         if not os.path.exists(self.res_dir):
             os.makedirs(self.res_dir)
@@ -80,23 +83,20 @@ class Sgems:
         self.algo = None  # XML manipulation instance
         self.nodata = nodata
 
-        self.object_file_names = [
-        ]  # List of features name needed for the algorithm
+        self.object_file_names = []  # List of features name needed for the algorithm
         self.command_name = ""
 
         if not script_dir:
             dir_path = os.path.abspath(__file__ + "/../../")
             # Python template file path
-            self.template_file = jp(dir_path,
-                                    "script_templates", "script_template.py")
+            self.template_file = jp(dir_path, "script_templates", "script_template.py")
 
     def write_command(self):
         """
         Write python script that sgems will run.
         """
 
-        self.command_name = jp(self.res_dir,
-                               f"{self.project_name}_commands.py")
+        self.command_name = jp(self.res_dir, f"{self.project_name}_commands.py")
 
         # This empty str will replace the # in front of the commands meant to execute sgems
         run_algo_flag = ""
@@ -106,10 +106,8 @@ class Sgems:
             try:
                 # When performing simulations, sgems automatically add '__realn'
                 # to the name of the nth generated property.
-                nr = int(
-                    self.algo.root.find("Nb_Realizations").attrib["value"])
-                name_op = "::".join(
-                    [name + "__real" + str(i) for i in range(nr)])
+                nr = int(self.algo.root.find("Nb_Realizations").attrib["value"])
+                name_op = "::".join([name + "__real" + str(i) for i in range(nr)])
             except AttributeError:
                 name_op = name
 
