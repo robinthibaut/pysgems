@@ -55,7 +55,7 @@ def main():
     # %% Run sgems
     pjt.run()
     # Plot 2D results
-    pl.plot_2d(save=True)
+    pl.plot_2d("results",save=True)
 
 
 if __name__ == "__main__":
