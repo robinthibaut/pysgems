@@ -220,6 +220,8 @@ Check the results:
 
 <img src="pysgems/examples/results/demo_kriging/results.png" alt="plot" style="width:30;height:30">
 
+<img src="pysgems/examples/results/demo_kriging/results_var.png" alt="plot" style="width:30;height:30">
+
 ## Contribution and points to improve
 
 - Contributors and feedback from users are welcome. 
