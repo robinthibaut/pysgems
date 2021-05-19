@@ -46,7 +46,7 @@ class Plots(Package):
         plt.grid("blue")
         plt.show()
 
-    def plot_2d(self, res_file=None, save=False):
+    def plot_2d(self, name, res_file=None, save=False):
         """Rudimentary 2D plot"""
         if res_file is None:
             res_file = jp(self.parent.res_dir, "results.grid")
@@ -73,6 +73,6 @@ class Plots(Package):
         plt.colorbar()
         if save:
             plt.savefig(
-                jp(self.parent.res_dir, "results.png"), bbox_inches="tight", dpi=300
+                jp(self.parent.res_dir, name), bbox_inches="tight", dpi=300
             )
         plt.show()

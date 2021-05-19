@@ -55,8 +55,10 @@ def main():
     # %% Run sgems
     pjt.run()
     # Plot 2D results
-    pl.plot_2d(save=True)
-
+    namekriging = "results"
+    result_file_kriging = join_path(rdir, namekriging + ".grid")
+    save = "kriging"
+    pl.plot_2d(namekriging, res_file=result_file_kriging, save=save)
 
 if __name__ == "__main__":
     main()
