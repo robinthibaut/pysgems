@@ -16,4 +16,5 @@ sgems.execute("NewCartesianGrid  computation_grid::GRID")
 
 #~sgems.execute('RunGeostatAlgorithm  ALGORITHM_NAME::/GeostatParamUtils/XML::ALGORITHM_XML')
 #~sgems.execute('SaveGeostatGrid  computation_grid::FEATURE_OUTPUT.grid::gslib::0::OUTPUT_LIST')
-#~sgems.execute('SaveGeostatGrid  computation_grid::FEATURE_OUTPUT(var).grid::gslib::1::OUTPUT_LIST_krig_var')
+if "kriging" in "ALGORITHM_NAME":  # Save variance grid
+#~    sgems.execute('SaveGeostatGrid  computation_grid::FEATURE_OUTPUT_var.grid::gslib::1::OUTPUT_LIST_krig_var')
