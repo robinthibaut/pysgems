@@ -59,16 +59,15 @@ def main():
     pjt.run()
 
     # Plot 2D results
-    namekriging = "results"
-    result_file_kriging = join_path(rdir, namekriging + ".grid")
+    name_kriging = "results"
+    result_file_kriging = join_path(rdir,  f"{name_kriging}.grid")
     save = "kriging"
-    pl.plot_2d(namekriging, res_file=result_file_kriging, save=save)
+    pl.plot_2d(name_kriging, res_file=result_file_kriging, save=save)
 
-    namekrigingvar = "results(var)"
-    result_file_kriging_variance = join_path(rdir, namekrigingvar + ".grid")
+    name_krigingvar = "results_var"
+    result_file_kriging_variance = join_path(rdir, f"{name_krigingvar}.grid")
     save = "kriging_var"
-    pl.plot_2d(namekrigingvar, res_file=result_file_kriging_variance, save=save)
-
+    pl.plot_2d(name_krigingvar, res_file=result_file_kriging_variance, save=save)
 
 
 if __name__ == "__main__":
