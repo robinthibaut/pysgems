@@ -1,6 +1,6 @@
 <img src="/img/Pysgems-03.png" height="150">
 
-[![DOI](https://zenodo.org/badge/261676899.svg)](https://zenodo.org/badge/latestdoi/261676899)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4773587.svg)](https://doi.org/10.5281/zenodo.4773587)
 [![PyPI version](https://badge.fury.io/py/pysgems.svg)](https://badge.fury.io/py/pysgems)
 [![Downloads](https://pepy.tech/badge/pysgems)](https://pepy.tech/project/pysgems)
 
