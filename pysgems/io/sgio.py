@@ -22,6 +22,8 @@ def datread(file: str = None, start: int = 0, end: int = None):
                 op = [line.split() for line in lines]
     except FileNotFoundError:
         logger.error(f"File {file} not found.")
+        op = None
+
     return op
 
 

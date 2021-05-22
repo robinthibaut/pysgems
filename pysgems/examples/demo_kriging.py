@@ -57,8 +57,17 @@ def main():
 
     # %% Run sgems
     pjt.run()
+
     # Plot 2D results
-    pl.plot_2d(save=True)
+    name_kriging = "results"
+    result_file_kriging = join_path(rdir,  f"{name_kriging}.grid")
+    save = "kriging"
+    pl.plot_2d(name_kriging, res_file=result_file_kriging, save=save)
+
+    name_krigingvar = "results_var"
+    result_file_kriging_variance = join_path(rdir, f"{name_krigingvar}.grid")
+    save = "kriging_var"
+    pl.plot_2d(name_krigingvar, res_file=result_file_kriging_variance, save=save)
 
 
 if __name__ == "__main__":
