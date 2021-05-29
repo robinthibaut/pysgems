@@ -74,7 +74,7 @@ pjt = sg.Sgems(project_name='sgems_test', project_wd=cwd, res_dir=rdir)
 
 #### Load point set
 
-The next step is to create a package object "PointSet". The first parameter of the PointSet class is a project object, which ties a PointSet object to a specific project. The second parameter is the path to the dataset file. The package expects the classical ASCII GEOEAS data format.
+The next step is to create a package object "PointSet". The first parameter of the PointSet class is a project object, which ties a PointSet object to a specific project. The second parameter is the path to the dataset file. The package expects the ASCII GEOEAS data format.
 
 ```python
 # Load data point set
