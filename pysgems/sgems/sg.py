@@ -21,11 +21,16 @@ class Sgems:
         exe_name: str = "",
         nodata: int = -9966699,  # sgems default value, do not change this
         check_env: bool = True,
+        verbose: bool = True,
         **kwargs,
     ):
 
+        self.verbose = verbose
+
         logger.add(jp(project_wd, f"{project_name}.log"), rotation="100 MB")
-        logger.info(f"Project {project_name} initiated")
+
+        if self.verbose:
+            logger.info(f"Project {project_name} initiated")
 
         if check_env:
             # First check if sgems installation files are in the user environment variables
@@ -189,4 +194,5 @@ class Sgems:
             pass
 
         subprocess.call([batch])  # Opens the BAT file
-        logger.info(f"ran algorithm in {time.time() - start} s")
+        if self.verbose:
+            logger.info(f"ran algorithm in {time.time() - start} s")
