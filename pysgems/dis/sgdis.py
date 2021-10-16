@@ -38,7 +38,7 @@ def blocks_from_rc(
     dell = layers
     r_sum = np.cumsum(delr) + yo
     c_sum = np.cumsum(delc) + xo
-    l_sum = np.cumsum(delc) + zo
+    l_sum = np.cumsum(dell) + zo
 
     def get_node(r: int, c: int, h: int) -> int:
         """
@@ -147,24 +147,24 @@ class Discretize(Package):
 
         # Cell dimensions
         if self.dy > 0:
-            nrow = int((y_lim - yo) // self.dy)  # Number of rows
+            nrow = abs(int((y_lim - yo) // self.dy))  # Number of rows
         else:
             nrow = 1
         if self.dx > 0:
-            ncol = int((x_lim - xo) // self.dx)  # Number of columns
+            ncol = abs(int((x_lim - xo) // self.dx))  # Number of columns
         else:
             ncol = 1
         if self.dz > 0:
-            nlay = int((z_lim - zo) // self.dz)  # Number of layers
+            nlay = abs(int((z_lim - zo) // self.dz))  # Number of layers
         else:
             nlay = 1
 
         # Size of each cell along y-dimension - rows
-        along_r = np.ones(ncol) * self.dx
+        along_r = np.ones(ncol) * self.dx * np.sign(x_lim)
         # Size of each cell along x-dimension - columns
-        along_c = np.ones(nrow) * self.dy
+        along_c = np.ones(nrow) * self.dy * np.sign(y_lim)
         # Size of each cell along x-dimension - columns
-        along_l = np.ones(nlay) * self.dz
+        along_l = np.ones(nlay) * self.dz * np.sign(z_lim)
 
         self.xo = xo
         self.yo = yo
@@ -186,7 +186,7 @@ class Discretize(Package):
 
     def my_cell(self, xyz: np.array):
         """
-        Given a point coordinate xy [x, y], computes its cell number by computing the euclidean distance of each cell
+        Given a point coordinate xyz [x, y, z], computes its cell number by computing the euclidean distance of each cell
         center.
         :param xyz:  x, y, z coordinate of data point
         :return:
@@ -195,12 +195,13 @@ class Discretize(Package):
         rn = np.array(xyz)
         # first check if point is within the grid
 
-        crit = 0
-        if np.all(rn >= np.array([self.xo, self.yo, self.zo])) and np.all(
-            rn <= np.array([self.x_lim, self.y_lim, self.z_lim])
-        ):
-            crit = 1
+        # crit = 0
+        # if np.all(rn >= np.array([self.xo, self.yo, self.zo])) and np.all(
+        #     rn <= np.array([self.x_lim, self.y_lim, self.z_lim])
+        # ):
+        #     crit = 1
 
+        crit = 1
         if crit:  # if point inside
             if self.parent.point_set.dimension == 3:  # if 3D
                 # minimum distance under which a point is in a cell
