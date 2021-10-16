@@ -73,7 +73,7 @@ class Discretize(Package):
         project,
         dx: float = 1,
         dy: float = 1,
-        dz: float = 0,
+        dz: float = 1,
         xo: float = None,
         yo: float = None,
         zo: float = None,
