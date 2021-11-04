@@ -47,7 +47,11 @@ class Plots(Package):
         plt.show()
 
     def plot_2d(self, name, res_file=None, save=False):
-        """Rudimentary 2D plot"""
+        """Rudimentary 2D plot
+        :param name: name of the plot
+        :param res_file: file to plot
+        :param save: save the plot
+        """
         if res_file is None:
             res_file = jp(self.parent.res_dir, "results.grid")
         matrix = datread(res_file, start=3)

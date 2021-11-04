@@ -12,7 +12,12 @@ from pysgems.base.packbase import Package
 
 def datread(file: str = None, start: int = 0, end: int = None):
     # end must be set to None and NOT -1
-    """Reads space separated dat file"""
+    """Reads space separated dat file
+    :param file: file to read
+    :param start: start line
+    :param end: end line
+    :return: a numpy array
+    """
     try:
         with open(file, "r") as fr:
             lines = np.copy(fr.readlines())[start:end]
@@ -59,7 +64,7 @@ def write_point_set(file_name: str, sub_dataframe: pd.DataFrame, nodata: int = -
         values (nx,ny,nz are the number of cells in the x,y,z directions).
 
     :param nodata: nodata value, rows containing this value are omitted.
-    :param file_name:
+    :param file_name: file name to write
     :param sub_dataframe: Sub-frame of the feature to be exported [x, y, feature value]
     :return:
     """
@@ -121,7 +126,10 @@ def write_point_set(file_name: str, sub_dataframe: pd.DataFrame, nodata: int = -
 
 
 def export_eas(dataframe: pd.DataFrame, filename: str = "dataset"):
-    """Exports a Pandas DataFrame to geo-eas format"""
+    """Exports a Pandas DataFrame to geo-eas format
+    :param dataframe: Pandas DataFrame
+    :param filename: file name to write
+    """
     columns = list(dataframe.columns.values)
     name = os.path.basename(filename).split(".")[0]
     header = [name, str(len(columns))] + columns
@@ -138,12 +146,12 @@ class PointSet(Package):
         # Initiate from parent
         Package.__init__(self, project)
 
-        self.object_file_names = []
-        self.project_name = self.parent.project_name
-        self.file_path = pointset_path
-        self.res_dir = self.parent.res_dir
+        self.object_file_names = []  # List of object file names
+        self.project_name = self.parent.project_name  # Name of the project
+        self.file_path = pointset_path  # Path to the pointset file
+        self.res_dir = self.parent.res_dir  # Path to the results directory
 
-        self.dimension = 2
+        self.dimension = 2  # Dimension of the pointset
         # Load raw data
         self.raw_data, self.project_name, self.columns = self.loader()
         # Put into panda DataFrame

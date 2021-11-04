@@ -14,20 +14,32 @@ from pysgems.utils.sgutils import joinlist
 class Sgems:
     def __init__(
         self,
-        project_name: str = "sgems_test",
-        project_wd: str = "",
-        res_dir: str = "",
-        script_dir: str = "",
-        exe_name: str = "",
-        nodata: int = -9966699,  # sgems default value, do not change this
-        check_env: bool = True,
-        verbose: bool = True,
-        **kwargs,
+            project_name: str = "sgems_test",
+            project_wd: str = "",
+            res_dir: str = "",
+            script_dir: str = "",
+            exe_name: str = "",
+            nodata: int = -9966699,  # sgems default value, do not change this
+            check_env: bool = True,
+            verbose: bool = True,
+            **kwargs,
     ):
+        """
+        Initialize sgems object.
+        :param project_name: Name of the project.
+        :param project_wd: Working directory of the project.
+        :param res_dir: Directory where the results will be stored.
+        :param script_dir: Directory where the sgems script will be stored.
+        :param exe_name: Name of the sgems executable.
+        :param nodata: No data value.
+        :param check_env: Check if sgems is installed.
+        :param verbose: Print information.
+        :param kwargs:
+        """
 
         self.verbose = verbose
 
-        logger.add(jp(project_wd, f"{project_name}.log"), rotation="100 MB")
+        logger.add(jp(project_wd, f"{project_name}.log"), rotation="100 MB")  # loguru
 
         if self.verbose:
             logger.info(f"Project {project_name} initiated")
@@ -101,7 +113,7 @@ class Sgems:
         Write python script that sgems will run.
         """
 
-        self.command_name = jp(self.res_dir, f"{self.project_name}_commands.py")
+        self.command_name = jp(self.res_dir, f"{self.project_name}_commands.py")  # command file name
 
         # This empty str will replace the # in front of the commands meant to execute sgems
         run_algo_flag = ""
@@ -138,7 +150,7 @@ class Sgems:
         ]  # Grid information
         grid = joinlist("::", sgrid)  # Grid in sgems format
 
-        sgems_files = [f"{sf}.sgems" for sf in self.object_file_names]
+        sgems_files = [f"{sf}.sgems" for sf in self.object_file_names]  # List of sgems files
 
         # The list below is the list of flags that will be replaced in the sgems python script
         # TODO: add option to change output file name (now default 'results.grid')

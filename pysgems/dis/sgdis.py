@@ -36,9 +36,9 @@ def blocks_from_rc(
     delr = rows
     delc = columns
     dell = layers
-    r_sum = np.cumsum(delr) + yo
-    c_sum = np.cumsum(delc) + xo
-    l_sum = np.cumsum(delc) + zo
+    r_sum = np.cumsum(delr) + yo  # x-coordinates of cell centers
+    c_sum = np.cumsum(delc) + xo  # y-coordinates of cell centers
+    l_sum = np.cumsum(delc) + zo  # z-coordinates of cell centers
 
     def get_node(r: int, c: int, h: int) -> int:
         """
@@ -63,7 +63,7 @@ def blocks_from_rc(
                     [c_sum[j], r_sum[i] - delr[i], l_sum[k]],
                     [c_sum[j] - delc[j], r_sum[i], l_sum[k]],
                     [c_sum[j], r_sum[i], l_sum[k]],
-                ]
+                ]  # vertices of cell
                 yield get_node(i, j, k), np.array(b), np.mean(b, axis=0)
 
 
@@ -86,6 +86,16 @@ class Discretize(Package):
         but instead inputs the cell size in x and y dimensions.
         xo, yo, x_lim, y_lim, defining the bounding box of the grid, are None by default, and are computed
         based on the data points distribution.
+        :param project: sgems project
+        :param dx: cell size in x dimension
+        :param dy: cell size in y dimension
+        :param dz: cell size in z dimension
+        :param xo: x origin
+        :param yo: y origin
+        :param zo: z origin
+        :param x_lim: x limit
+        :param y_lim: y limit
+        :param z_lim: z limit
         """
 
         Package.__init__(self, project)
