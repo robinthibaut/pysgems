@@ -36,9 +36,9 @@ def blocks_from_rc(
     delr = rows
     delc = columns
     dell = layers
-    r_sum = np.cumsum(delr) + yo  # x-coordinates of cell centers
-    c_sum = np.cumsum(delc) + xo  # y-coordinates of cell centers
-    l_sum = np.cumsum(delc) + zo  # z-coordinates of cell centers
+    r_sum = np.cumsum(delr) + yo
+    c_sum = np.cumsum(delc) + xo
+    l_sum = np.cumsum(dell) + zo
 
     def get_node(r: int, c: int, h: int) -> int:
         """
@@ -63,7 +63,7 @@ def blocks_from_rc(
                     [c_sum[j], r_sum[i] - delr[i], l_sum[k]],
                     [c_sum[j] - delc[j], r_sum[i], l_sum[k]],
                     [c_sum[j], r_sum[i], l_sum[k]],
-                ]  # vertices of cell
+                ]
                 yield get_node(i, j, k), np.array(b), np.mean(b, axis=0)
 
 
@@ -73,7 +73,7 @@ class Discretize(Package):
         project,
         dx: float = 1,
         dy: float = 1,
-        dz: float = 0,
+        dz: float = 1,
         xo: float = None,
         yo: float = None,
         zo: float = None,
@@ -86,16 +86,6 @@ class Discretize(Package):
         but instead inputs the cell size in x and y dimensions.
         xo, yo, x_lim, y_lim, defining the bounding box of the grid, are None by default, and are computed
         based on the data points distribution.
-        :param project: sgems project
-        :param dx: cell size in x dimension
-        :param dy: cell size in y dimension
-        :param dz: cell size in z dimension
-        :param xo: x origin
-        :param yo: y origin
-        :param zo: z origin
-        :param x_lim: x limit
-        :param y_lim: y limit
-        :param z_lim: z limit
         """
 
         Package.__init__(self, project)
@@ -157,24 +147,24 @@ class Discretize(Package):
 
         # Cell dimensions
         if self.dy > 0:
-            nrow = int((y_lim - yo) // self.dy)  # Number of rows
+            nrow = abs(int((y_lim - yo) // self.dy))  # Number of rows
         else:
             nrow = 1
         if self.dx > 0:
-            ncol = int((x_lim - xo) // self.dx)  # Number of columns
+            ncol = abs(int((x_lim - xo) // self.dx))  # Number of columns
         else:
             ncol = 1
         if self.dz > 0:
-            nlay = int((z_lim - zo) // self.dz)  # Number of layers
+            nlay = abs(int((z_lim - zo) // self.dz))  # Number of layers
         else:
             nlay = 1
 
         # Size of each cell along y-dimension - rows
-        along_r = np.ones(ncol) * self.dx
+        along_r = np.ones(ncol) * self.dx * np.sign(x_lim)
         # Size of each cell along x-dimension - columns
-        along_c = np.ones(nrow) * self.dy
+        along_c = np.ones(nrow) * self.dy * np.sign(y_lim)
         # Size of each cell along x-dimension - columns
-        along_l = np.ones(nlay) * self.dz
+        along_l = np.ones(nlay) * self.dz * np.sign(z_lim)
 
         self.xo = xo
         self.yo = yo
@@ -196,7 +186,7 @@ class Discretize(Package):
 
     def my_cell(self, xyz: np.array):
         """
-        Given a point coordinate xy [x, y], computes its cell number by computing the euclidean distance of each cell
+        Given a point coordinate xyz [x, y, z], computes its cell number by computing the euclidean distance of each cell
         center.
         :param xyz:  x, y, z coordinate of data point
         :return:
@@ -205,12 +195,13 @@ class Discretize(Package):
         rn = np.array(xyz)
         # first check if point is within the grid
 
-        crit = 0
-        if np.all(rn >= np.array([self.xo, self.yo, self.zo])) and np.all(
-            rn <= np.array([self.x_lim, self.y_lim, self.z_lim])
-        ):
-            crit = 1
+        # crit = 0
+        # if np.all(rn >= np.array([self.xo, self.yo, self.zo])) and np.all(
+        #     rn <= np.array([self.x_lim, self.y_lim, self.z_lim])
+        # ):
+        #     crit = 1
 
+        crit = 1
         if crit:  # if point inside
             if self.parent.point_set.dimension == 3:  # if 3D
                 # minimum distance under which a point is in a cell

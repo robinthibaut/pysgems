@@ -162,12 +162,15 @@ class PointSet(Package):
             # If Z (depth) information exists, sets the dimensionality to 3
             self.xyz = self.dataframe[["x", "y", "z"]].to_numpy()
             self.dimension = 3
-            logger.info("3D dataset detected.")
+            if self.parent.verbose:
+                logger.info("3D dataset detected.")
             if force_2d:
-                logger.info("3D dataset detected, but 2D will be enforced.")
+                if self.parent.verbose:
+                    logger.info("3D dataset detected, but 2D will be enforced.")
                 self.dataframe["z"] = np.zeros(self.dataframe.shape[0])
         except KeyError:  # Assumes 2D dataset
-            logger.info("2D dataset detected.")
+            if self.parent.verbose:
+                logger.info("2D dataset detected.")
             # Replaces Z dimension by 0's
             self.dataframe.insert(2, "z", np.zeros(self.dataframe.shape[0]))
             self.columns = list(self.dataframe.columns.values)
@@ -188,7 +191,8 @@ class PointSet(Package):
         head = datread(self.file_path, start=2, end=2 + n_features)
         columns_name = [h[0].lower() for h in head]  # Column names (lowered)
         data = datread(self.file_path, start=2 + n_features)  # Raw data
-        logger.info("Data loaded.")
+        if self.parent.verbose:
+            logger.info("Data loaded.")
         return data, project_name, columns_name
 
     def export_01(self, features: list = None):
@@ -211,4 +215,5 @@ class PointSet(Package):
                 pp not in self.parent.object_file_names
             ):  # Adding features name to load them within sgems
                 self.parent.object_file_names.append(pp)
-            logger.info(f"Feature {pp} exported to binary file")
+            if self.parent.verbose:
+                logger.info(f"Feature {pp} exported to binary file")
