@@ -11,8 +11,13 @@ from pysgems.base.packbase import Package
 
 
 def datread(file: str = None, start: int = 0, end: int = None):
-    # end must be set to None and NOT -1
-    """Reads space separated dat file"""
+    """Reads space separated dat file
+
+    :param file: path to the file to be read
+    :param start: start index
+    :param end: end index
+    :return: numpy array of the data
+    """
     try:
         with open(file, "r") as fr:
             lines = np.copy(fr.readlines())[start:end]
