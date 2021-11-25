@@ -22,6 +22,7 @@ def blocks_from_rc(
 ):
     """
     Yields blocks defining grid cells
+
     :param rows: array of x-widths along a row
     :param columns: array of y-widths along a column
     :param layers: array of z-widths along a column
@@ -43,6 +44,7 @@ def blocks_from_rc(
     def get_node(r: int, c: int, h: int) -> int:
         """
         Get node index to fix hard data
+
         :param r: row number
         :param c: column number
         :param h: layer number
@@ -86,6 +88,17 @@ class Discretize(Package):
         but instead inputs the cell size in x and y dimensions.
         xo, yo, x_lim, y_lim, defining the bounding box of the grid, are None by default, and are computed
         based on the data points distribution.
+
+        :param project: sgems project
+        :param dx: cell size in x dimension
+        :param dy: cell size in y dimension
+        :param dz: cell size in z dimension
+        :param xo: x origin
+        :param yo: y origin
+        :param zo: z origin
+        :param x_lim: x limit
+        :param y_lim: y limit
+        :param z_lim: z limit
         """
 
         Package.__init__(self, project)
@@ -188,8 +201,9 @@ class Discretize(Package):
         """
         Given a point coordinate xyz [x, y, z], computes its cell number by computing the euclidean distance of each cell
         center.
+
         :param xyz:  x, y, z coordinate of data point
-        :return:
+        :return: cell number
         """
         start = time.time()
         rn = np.array(xyz)
@@ -236,6 +250,7 @@ class Discretize(Package):
         """
         Determines cell location for each data point.
         It is necessary to know the cell number to assign the hard data property to the sgems grid.
+
         :param xyz: Data points x, y, z coordinates
         """
 
@@ -256,8 +271,8 @@ class Discretize(Package):
         Export the list of shape (n features, m cells, 2) containing the node of each point data with the corresponding
         value, for each feature.
 
-        :param dis_file:
-        :param cell_file:
+        :param dis_file: path to the dis file
+        :param cell_file: path to the cell file
         :param subdata: Pandas dataframe whose columns are the values of features to save as hard data.
         :param output_dir: Directory where hard data lists will be saved
         :return: Filtered list of each attribute

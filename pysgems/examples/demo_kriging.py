@@ -60,7 +60,7 @@ def main():
 
     # Plot 2D results
     name_kriging = "results"
-    result_file_kriging = join_path(rdir,  f"{name_kriging}.grid")
+    result_file_kriging = join_path(rdir, f"{name_kriging}.grid")
     save = "kriging"
     pl.plot_2d(name_kriging, res_file=result_file_kriging, save=save)
 

@@ -22,8 +22,19 @@ class Sgems:
         nodata: int = -9966699,  # sgems default value, do not change this
         check_env: bool = True,
         verbose: bool = True,
-        **kwargs,
     ):
+        """
+        Initialize sgems object.
+
+        :param project_name: Name of the project.
+        :param project_wd: Project working directory.
+        :param res_dir: Results directory.
+        :param script_dir: Script directory.
+        :param exe_name: Name of the sgems executable.
+        :param nodata: No data value.
+        :param check_env: Check if sgems is installed.
+        :param verbose: Verbose mode.
+        """
 
         self.verbose = verbose
 

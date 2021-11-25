@@ -84,7 +84,12 @@ class XML(Package):
             logger.info("No loaded XML file")
 
     def xml_update(
-        self, path:str, attribute_name:str=None, value:str=None, new_attribute_dict:dict=None, show:bool=1
+        self,
+        path: str,
+        attribute_name: str = None,
+        value: str = None,
+        new_attribute_dict: dict = None,
+        show: bool = 1,
     ):
         """
         Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute

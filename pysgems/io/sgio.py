@@ -59,9 +59,8 @@ def write_point_set(file_name: str, sub_dataframe: pd.DataFrame, nodata: int = -
         values (nx,ny,nz are the number of cells in the x,y,z directions).
 
     :param nodata: nodata value, rows containing this value are omitted.
-    :param file_name:
+    :param file_name: name of the file to be written.
     :param sub_dataframe: Sub-frame of the feature to be exported [x, y, feature value]
-    :return:
     """
 
     # First, rows with no data occurrence are popped
@@ -121,7 +120,11 @@ def write_point_set(file_name: str, sub_dataframe: pd.DataFrame, nodata: int = -
 
 
 def export_eas(dataframe: pd.DataFrame, filename: str = "dataset"):
-    """Exports a Pandas DataFrame to geo-eas format"""
+    """Exports a Pandas DataFrame to geo-eas format
+
+    :param dataframe: Pandas DataFrame to be exported
+    :param filename: name of the file to be written
+    """
     columns = list(dataframe.columns.values)
     name = os.path.basename(filename).split(".")[0]
     header = [name, str(len(columns))] + columns
@@ -134,6 +137,13 @@ def export_eas(dataframe: pd.DataFrame, filename: str = "dataset"):
 
 class PointSet(Package):
     def __init__(self, project, pointset_path: str = None, force_2d: bool = False):
+        """
+        Handles the creation of a PointSet object.
+
+        :param project: Project instance
+        :param pointset_path: Path to the pointset file
+        :param force_2d: If True, the pointset is forced to be 2D
+        """
 
         # Initiate from parent
         Package.__init__(self, project)
@@ -190,6 +200,7 @@ class PointSet(Package):
     def export_01(self, features: list = None):
         """
         Gives a list of point set names to be saved in sgems binary format and saves them to the result directory
+
         :param features: Names of features to export
         """
 

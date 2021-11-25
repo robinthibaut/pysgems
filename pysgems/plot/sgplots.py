@@ -47,7 +47,13 @@ class Plots(Package):
         plt.show()
 
     def plot_2d(self, name, res_file=None, save=False):
-        """Rudimentary 2D plot"""
+        """Rudimentary 2D plot
+
+        :param name: name of the plot
+        :type name: str
+        :param res_file: name of the file to plot
+        :param save: save the plot
+        """
         if res_file is None:
             res_file = jp(self.parent.res_dir, "results.grid")
         matrix = datread(res_file, start=3)
@@ -72,7 +78,5 @@ class Plots(Package):
         )
         plt.colorbar()
         if save:
-            plt.savefig(
-                jp(self.parent.res_dir, name), bbox_inches="tight", dpi=300
-            )
+            plt.savefig(jp(self.parent.res_dir, name), bbox_inches="tight", dpi=300)
         plt.show()
