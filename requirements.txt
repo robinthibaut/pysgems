@@ -1,5 +1,5 @@
 numpy~=1.20.3
 pandas~=1.2.4
 matplotlib~=3.4.2
-loguru~=0.5.3
+loguru~=0.6.0
 setuptools~=56.2.0
