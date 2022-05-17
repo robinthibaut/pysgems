@@ -1,24 +1,23 @@
 #  Copyright (c) 2020. Robin Thibaut, Ghent University
 
+import numpy as np
 import os
+import pandas as pd
 import shutil
 import time
-from os.path import join as jp
-
-import numpy as np
-import pandas as pd
 from loguru import logger
+from os.path import join as jp
 
 from pysgems.base.packbase import Package
 
 
 def blocks_from_rc(
-    rows: np.array,
-    columns: np.array,
-    layers: np.array,
-    xo: float = 0,
-    yo: float = 0,
-    zo: float = 0,
+        rows: np.array,
+        columns: np.array,
+        layers: np.array,
+        xo: float = 0,
+        yo: float = 0,
+        zo: float = 0,
 ):
     """
     Yields blocks defining grid cells
@@ -71,17 +70,17 @@ def blocks_from_rc(
 
 class Discretize(Package):
     def __init__(
-        self,
-        project,
-        dx: float = 1,
-        dy: float = 1,
-        dz: float = 1,
-        xo: float = None,
-        yo: float = None,
-        zo: float = None,
-        x_lim: float = None,
-        y_lim: float = None,
-        z_lim: float = None,
+            self,
+            project,
+            dx: float = 1,
+            dy: float = 1,
+            dz: float = 1,
+            xo: float = None,
+            yo: float = None,
+            zo: float = None,
+            x_lim: float = None,
+            y_lim: float = None,
+            z_lim: float = None,
     ):
         """
         Constructs the grid geometry. The user can not control directly the number of rows and columns
@@ -260,11 +259,11 @@ class Discretize(Package):
         np.save(self.cell_file, nodes)
 
     def write_hard_data(
-        self,
-        subdata: pd.DataFrame,
-        dis_file: str = None,
-        cell_file: str = None,
-        output_dir: str = None,
+            self,
+            subdata: pd.DataFrame,
+            dis_file: str = None,
+            cell_file: str = None,
+            output_dir: str = None,
     ):
         """
         Removes no-data rows from data frame and compute the mean of data points sharing the same cell.

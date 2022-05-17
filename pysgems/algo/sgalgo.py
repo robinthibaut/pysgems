@@ -2,9 +2,8 @@
 import os
 import uuid
 import xml.etree.ElementTree as ET
-from os.path import join as jp
-
 from loguru import logger
+from os.path import join as jp
 
 from pysgems.base.packbase import Package
 
@@ -84,12 +83,12 @@ class XML(Package):
             logger.info("No loaded XML file")
 
     def xml_update(
-        self,
-        path: str,
-        attribute_name: str = None,
-        value: str = None,
-        new_attribute_dict: dict = None,
-        show: bool = 1,
+            self,
+            path: str,
+            attribute_name: str = None,
+            value: str = None,
+            new_attribute_dict: dict = None,
+            show: bool = 1,
     ):
         """
         Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
@@ -145,7 +144,7 @@ class XML(Package):
 
                 for i in range(len(trv)):
                     if (trv[i] in self.parent.point_set.columns) and (
-                        "Variable" or "Hard_Data" in element.tag
+                            "Variable" or "Hard_Data" in element.tag
                     ):
                         if trv[i] not in self.parent.object_file_names:
                             self.parent.object_file_names.append(trv[i])
