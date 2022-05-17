@@ -4,23 +4,24 @@ import subprocess
 import time
 import uuid
 import warnings
-from loguru import logger
 from os.path import join as jp
+
+from loguru import logger
 
 from pysgems.utils.sgutils import joinlist
 
 
 class Sgems:
     def __init__(
-            self,
-            project_name: str = "sgems_test",
-            project_wd: str = "",
-            res_dir: str = "",
-            script_dir: str = "",
-            exe_name: str = "",
-            nodata: int = -9966699,  # sgems default value, do not change this
-            check_env: bool = True,
-            verbose: bool = True,
+        self,
+        project_name: str = "sgems_test",
+        project_wd: str = "",
+        res_dir: str = "",
+        script_dir: str = "",
+        exe_name: str = "",
+        nodata: int = -9966699,  # sgems default value, do not change this
+        check_env: bool = True,
+        verbose: bool = True,
     ):
         """
         Initialize sgems object.
@@ -61,9 +62,9 @@ class Sgems:
                     # checks for sgems exe file in the GSTLAPPLIHOME path
                     for file in os.listdir(gstl_home):
                         if (
-                                file.endswith(".exe")
-                                and ("sgems" in file)
-                                and ("uninstall" not in file)
+                            file.endswith(".exe")
+                            and ("sgems" in file)
+                            and ("uninstall" not in file)
                         ):
                             exe_name = file
                 msg = f"sgems exe file : {exe_name} in {gstl_home}"

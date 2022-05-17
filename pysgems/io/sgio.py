@@ -1,10 +1,11 @@
 #  Copyright (c) 2020. Robin Thibaut, Ghent University
-import numpy as np
 import os
-import pandas as pd
 import struct
-from loguru import logger
 from os.path import join as jp
+
+import numpy as np
+import pandas as pd
+from loguru import logger
 
 from pysgems.base.packbase import Package
 
@@ -219,7 +220,7 @@ class PointSet(Package):
             ps_name = jp(self.res_dir, pp)  # Path of binary file
             write_point_set(ps_name, subframe)  # Write binary file
             if (
-                    pp not in self.parent.object_file_names
+                pp not in self.parent.object_file_names
             ):  # Adding features name to load them within sgems
                 self.parent.object_file_names.append(pp)
             if self.parent.verbose:

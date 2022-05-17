@@ -1,9 +1,10 @@
 #  Copyright (c) 2020. Robin Thibaut, Ghent University
+import warnings
+from os.path import join as jp
+
 import matplotlib.pyplot as plt
 import numpy as np
-import warnings
 from loguru import logger
-from os.path import join as jp
 
 from pysgems.base.packbase import Package
 from pysgems.io.sgio import datread
