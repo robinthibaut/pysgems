@@ -236,12 +236,12 @@ class Discretize(Package):
                 c = b[2]
                 dc = np.linalg.norm(rn - c)  # Euclidean distance
                 if dc <= dmin:  # If point is inside cell
-                    print("found 1 cell id in {} s".format(time.time() - start))
+                    logger.info("found 1 cell id in {} s".format(time.time() - start))
                     return b[0]
                 if dc < vmin:
                     vmin = dc
                     cell = b[0]
-            print("found 1 cell id in {} s".format(time.time() - start))
+            logger.info("found 1 cell id in {} s".format(time.time() - start))
             return cell
         else:
             return self.parent.nodata
@@ -279,18 +279,18 @@ class Discretize(Package):
         """
 
         if cell_file is not None:
-            self.cell_file = cell_file
+            self.cell_file = cell_file  # path to the cell file
 
         if self.cell_file is None:
-            self.cell_file = jp(self.parent.res_dir, "cells.npy")
+            self.cell_file = jp(self.parent.res_dir, "cells.npy")  # path to the cell file
 
         if output_dir is None:
-            output_dir = self.parent.res_dir
+            output_dir = self.parent.res_dir  # path to the parent directory
 
         if dis_file is None:
-            dis_file = jp(os.path.dirname(self.cell_file), "grid.dis")
+            dis_file = jp(os.path.dirname(self.cell_file), "grid.dis")  # path to the dis file
 
-        xyz = subdata[["x", "y", "z"]].to_numpy()
+        xyz = subdata[["x", "y", "z"]].to_numpy()  # coordinates of data points
 
         npar = np.array(
             [
@@ -307,10 +307,10 @@ class Discretize(Package):
                 self.ncol,
                 self.nlay,
             ]
-        )
+        )  # grid parameters
 
         if os.path.isfile(dis_file):  # Check previous grid info
-            pdis = np.loadtxt(dis_file)
+            pdis = np.loadtxt(dis_file)  # Load previous grid info
             # If different, recompute data points cell by deleting previous cell file
             if not np.array_equal(pdis, npar):
                 logger.info("New grid found")
@@ -320,28 +320,28 @@ class Discretize(Package):
                     pass
                 finally:
                     np.savetxt(dis_file, npar)
-                    self.compute_cells(xyz)
+                    self.compute_cells(xyz)  # Compute cell number for each data point
             else:
                 logger.info("Using previous grid")
                 if not os.path.exists(self.cell_file):
-                    self.compute_cells(xyz)
+                    self.compute_cells(xyz)  # Compute cell number for each data point
         else:
-            np.savetxt(dis_file, npar)
-            self.compute_cells(xyz)
+            np.savetxt(dis_file, npar)  # Save grid info
+            self.compute_cells(xyz)  # Compute cell number for each data point
 
-        data_nodes = np.load(self.cell_file)
-        unique_nodes = list(set(data_nodes))
+        data_nodes = np.load(self.cell_file)  # Load cell number for each data point
+        unique_nodes = list(set(data_nodes))  # List of unique cell numbers
 
-        h = subdata.columns.values[-1]
+        h = subdata.columns.values[-1]  # Name of the attribute to save as hard data
         hd = []
         # fixed nodes = [[node i, value i]....]
         fixed_nodes = np.array(
             [[data_nodes[dn], subdata[h][dn]] for dn in range(len(data_nodes))]
-        )
+        )  # List of cell number and corresponding value
         # Deletes points where val == nodata
         hard_data = np.delete(
             fixed_nodes, np.where(fixed_nodes == self.parent.nodata)[0], axis=0
-        )
+        )  # Delete no-data points
         # If data points share the same cell, compute their mean and assign the value to the cell
         for n in unique_nodes:
             where = np.where(hard_data[:, 0] == n)[0]
@@ -353,7 +353,7 @@ class Discretize(Package):
             # For each, feature X, saves a file X.hard
             cell_values_name = jp(os.path.dirname(self.cell_file), f"{h}.hard")
             with open(cell_values_name, "w") as nd:
-                nd.write(repr(fn))
+                nd.write(repr(fn))  # Save list of cell number and corresponding value
             try:
                 shutil.copyfile(
                     cell_values_name,
