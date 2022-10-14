@@ -57,9 +57,6 @@ class Plots(Package):
         if res_file is None:
             res_file = jp(self.parent.res_dir, "results.grid")
         matrix = datread(res_file, start=3)
-        if matrix.ndim > 2:
-            warnings.warn("Only 2D matrices supported, dimensionality exceeded")
-            return 0
         matrix = np.where(matrix == -9966699, np.nan, matrix)
         matrix = matrix.reshape((self.parent.dis.nrow, self.parent.dis.ncol))
         extent = (
