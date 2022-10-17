@@ -1,5 +1,4 @@
 #  Copyright (c) 2020. Robin Thibaut, Ghent University
-import warnings
 from os.path import join as jp
 
 import matplotlib.pyplot as plt

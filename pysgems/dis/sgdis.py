@@ -282,13 +282,17 @@ class Discretize(Package):
             self.cell_file = cell_file  # path to the cell file
 
         if self.cell_file is None:
-            self.cell_file = jp(self.parent.res_dir, "cells.npy")  # path to the cell file
+            self.cell_file = jp(
+                self.parent.res_dir, "cells.npy"
+            )  # path to the cell file
 
         if output_dir is None:
             output_dir = self.parent.res_dir  # path to the parent directory
 
         if dis_file is None:
-            dis_file = jp(os.path.dirname(self.cell_file), "grid.dis")  # path to the dis file
+            dis_file = jp(
+                os.path.dirname(self.cell_file), "grid.dis"
+            )  # path to the dis file
 
         xyz = subdata[["x", "y", "z"]].to_numpy()  # coordinates of data points
 
