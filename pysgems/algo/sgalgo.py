@@ -89,7 +89,7 @@ class XML(Package):
         attribute_name: str = None,
         value: str = None,
         new_attribute_dict: dict = None,
-        show: bool = 1,
+        show: bool = False,
     ):
         """
         Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute

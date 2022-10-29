@@ -5,7 +5,7 @@ my_pckg = find_packages(include=["pysgems"],
 
 setup(
     name="pysgems",
-    version="1.1.13",
+    version="1.1.15",
     packages=my_pckg,
     include_package_data=True,
     url="https://github.com/robinthibaut/pysgems",
