@@ -77,4 +77,4 @@ class Plots(Package):
             plt.savefig(jp(self.parent.res_dir, name), bbox_inches="tight", dpi=300)
         if show:
             plt.show()
-        plt.clf()
+        plt.close()
