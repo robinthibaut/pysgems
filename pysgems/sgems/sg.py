@@ -47,9 +47,8 @@ class Sgems:
         self.parameters = parameters
         self.kriging_type = kriging_type
 
-        logger.add(jp(project_wd, f"{project_name}.log"), rotation="100 MB")
-
         if self.verbose:
+            logger.add(jp(project_wd, f"{project_name}.log"), rotation="100 MB")
             logger.info(f"Project {project_name} initiated")
 
         if check_env:
@@ -58,15 +57,18 @@ class Sgems:
             if not gstl_home:
                 msg = "GSTLAPPLIHOME environment variable does not exist"
                 warnings.warn(msg)
-                logger.warning(msg)
+                if self.verbose:
+                    logger.warning(msg)
             else:
-                msg = "GSTLAPPLIHOME environment variable found"
-                logger.info(msg)
+                if self.verbose:
+                    msg = "GSTLAPPLIHOME environment variable found"
+                    logger.info(msg)
                 path = os.getenv("Path")
                 if gstl_home not in path:
                     msg = f"Variable {gstl_home} does not exist in Path environment variable"
                     warnings.warn(msg)
-                    logger.warning(msg)
+                    if self.verbose:
+                        logger.warning(msg)
                 if not exe_name:  # If no sgems exe file name is provided,
                     # checks for sgems exe file in the GSTLAPPLIHOME path
                     for file in os.listdir(gstl_home):
@@ -76,8 +78,9 @@ class Sgems:
                             and ("uninstall" not in file)
                         ):
                             exe_name = file
-                msg = f"sgems exe file : {exe_name} in {gstl_home}"
-                logger.info(msg)
+                if self.verbose:
+                    msg = f"sgems exe file : {exe_name} in {gstl_home}"
+                    logger.info(msg)
 
         # Project name
         self.project_name = project_name

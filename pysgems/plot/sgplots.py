@@ -1,5 +1,4 @@
 #  Copyright (c) 2020. Robin Thibaut, Ghent University
-import warnings
 from os.path import join as jp
 
 import matplotlib.pyplot as plt
@@ -46,7 +45,7 @@ class Plots(Package):
         plt.grid("blue")
         plt.show()
 
-    def plot_2d(self, name, res_file=None, save=False):
+    def plot_2d(self, name, res_file=None, save=False, show=True):
         """Rudimentary 2D plot
 
         :param name: name of the plot
@@ -57,9 +56,6 @@ class Plots(Package):
         if res_file is None:
             res_file = jp(self.parent.res_dir, "results.grid")
         matrix = datread(res_file, start=3)
-        if matrix.ndim > 2:
-            warnings.warn("Only 2D matrices supported, dimensionality exceeded")
-            return 0
         matrix = np.where(matrix == -9966699, np.nan, matrix)
         matrix = matrix.reshape((self.parent.dis.nrow, self.parent.dis.ncol))
         extent = (
@@ -79,4 +75,6 @@ class Plots(Package):
         plt.colorbar()
         if save:
             plt.savefig(jp(self.parent.res_dir, name), bbox_inches="tight", dpi=300)
-        plt.show()
+        if show:
+            plt.show()
+        plt.close()

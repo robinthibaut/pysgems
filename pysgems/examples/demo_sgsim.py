@@ -14,7 +14,7 @@ def main():
     # %% Initiate sgems pjt
     cwd = os.getcwd()  # Working directory
     rdir = join_path(cwd, "results", "demo_sgsim")  # Results directory
-    pjt = sg.Sgems(project_name="sgsim_test", project_wd=cwd, res_dir=rdir)
+    pjt = sg.Sgems(project_name="sgsim_test", project_wd=cwd, res_dir=rdir, verbose=True)
 
     # %% Load hard data point set
     data_dir = join_path(cwd, "datasets", "demo_sgsim")
@@ -57,7 +57,7 @@ def main():
     # Plot 2D results
     name_kriging = "results"
     result_file_kriging = join_path(rdir, f"{name_kriging}.grid")
-    save = "kriging"
+    save = "sgsim"
     pl.plot_2d(name_kriging, res_file=result_file_kriging, save=save)
 
 
