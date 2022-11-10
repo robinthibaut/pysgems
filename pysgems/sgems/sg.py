@@ -118,9 +118,13 @@ class Sgems:
             dir_path = os.path.abspath(__file__ + "/../../")
             # Python template file path
             if kriging_type == "FIK":
-                self.template_file = jp(dir_path, "script_templates", "script_template_FIK.py")
+                self.template_file = jp(
+                    dir_path, "script_templates", "script_template_FIK.py"
+                )
             else:
-                self.template_file = jp(dir_path, "script_templates", "script_template.py")
+                self.template_file = jp(
+                    dir_path, "script_templates", "script_template.py"
+                )
 
     def write_command(self):
         """
@@ -138,7 +142,7 @@ class Sgems:
                         with open(self.algo.op_file) as alx:  # Remove unwanted \n
                             algo_xml = alx.read().strip("\n")
                     else:
-                        algo_xml_name = f'{self.algo_XML_list[i]}.xml'
+                        algo_xml_name = f"{self.algo_XML_list[i]}.xml"
                         with open(algo_xml_name) as alx:  # Remove unwanted \n
                             algo_xml = alx.read().strip("\n")
 
@@ -189,7 +193,7 @@ class Sgems:
                 [self.project_name, "PROJECT_NAME"],
                 ["results", "FEATURE_OUTPUT"],  # results.grid = output file
                 [name, "ALGORITHM_NAME"],
-                ['', "OUTPUT_LIST"],
+                ["", "OUTPUT_LIST"],
                 [algo_XMLS[0], "ALGORITHM_XML1"],
                 [algo_XMLS[1], "ALGORITHM_XML2"],
                 [str(sgems_files), "OBJECT_FILES"],

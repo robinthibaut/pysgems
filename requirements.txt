@@ -3,3 +3,7 @@ pandas==1.5.0
 matplotlib==3.6.1
 loguru==0.6.0
 setuptools==65.5.0
+self==2020.12.3
+Fiona==1.8.22
+pyproj==3.2.1
+geopandas==0.10.2
