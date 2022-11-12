@@ -45,7 +45,7 @@ class Plots(Package):
         plt.grid("blue")
         plt.show()
 
-    def plot_2d(self, name, res_file=None, save=False):
+    def plot_2d(self, name, res_file=None, save=False, show=True):
         """Rudimentary 2D plot
 
         :param name: name of the plot
@@ -75,4 +75,6 @@ class Plots(Package):
         plt.colorbar()
         if save:
             plt.savefig(jp(self.parent.res_dir, name), bbox_inches="tight", dpi=300)
-        plt.show()
+        if show:
+            plt.show()
+        plt.close()
