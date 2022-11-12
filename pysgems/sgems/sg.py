@@ -22,6 +22,9 @@ class Sgems:
         nodata: int = -9966699,  # sgems default value, do not change this
         check_env: bool = True,
         verbose: bool = True,
+        parameters: list = [],
+        kriging_type: str = "",
+        algo_XML_list: list = [],
     ):
         """
         Initialize sgems object.
@@ -34,9 +37,15 @@ class Sgems:
         :param nodata: No data value.
         :param check_env: Check if sgems is installed.
         :param verbose: Verbose mode.
+        :param parameters: The column names from indicator data for Full Indicator Kriging.
+        :param kriging_type: The type of kriging in case of FIK (=FIK).
+        :param algo_XML_list: Paths to FIK XML file and post Kriging XML file.
         """
 
         self.verbose = verbose
+        self.algo_XML_list = algo_XML_list
+        self.parameters = parameters
+        self.kriging_type = kriging_type
 
         if self.verbose:
             logger.add(jp(project_wd, f"{project_name}.log"), rotation="100 MB")
@@ -108,19 +117,41 @@ class Sgems:
         if not script_dir:
             dir_path = os.path.abspath(__file__ + "/../../")
             # Python template file path
-            self.template_file = jp(dir_path, "script_templates", "script_template.py")
+            if kriging_type == "FIK":
+                self.template_file = jp(
+                    dir_path, "script_templates", "script_template_FIK.py"
+                )
+            else:
+                self.template_file = jp(
+                    dir_path, "script_templates", "script_template.py"
+                )
 
     def write_command(self):
         """
         Write python script that sgems will run.
         """
-
+        algo_XMLS = []
         self.command_name = jp(self.res_dir, f"{self.project_name}_commands.py")
-
         # This empty str will replace the # in front of the commands meant to execute sgems
         run_algo_flag = ""
         # within its python environment
         try:
+            if self.kriging_type == "FIK":
+                for i in range(len(self.algo_XML_list)):
+                    if i == 0:
+                        with open(self.algo.op_file) as alx:  # Remove unwanted \n
+                            algo_xml = alx.read().strip("\n")
+                    else:
+                        algo_xml_name = f"{self.algo_XML_list[i]}.xml"
+                        with open(algo_xml_name) as alx:  # Remove unwanted \n
+                            algo_xml = alx.read().strip("\n")
+
+                    algo_XMLS.append(algo_xml)
+
+            else:
+                with open(self.algo.op_file) as alx:  # Remove unwanted \n
+                    algo_xml = alx.read().strip("\n")
+
             name = self.algo.root.find("algorithm").attrib["name"]  # Algorithm name
             try:
                 # When performing simulations, sgems automatically add '__realn'
@@ -129,9 +160,6 @@ class Sgems:
                 name_op = "::".join([name + "__real" + str(i) for i in range(nr)])
             except AttributeError:
                 name_op = name
-
-            with open(self.algo.op_file) as alx:  # Remove unwanted \n
-                algo_xml = alx.read().strip("\n")
 
         except AttributeError or FileNotFoundError:
             name = "None"
@@ -156,18 +184,34 @@ class Sgems:
 
         # The list below is the list of flags that will be replaced in the sgems python script
         # TODO: add option to change output file name (now default 'results.grid')
-        params = [
-            [run_algo_flag, "#~"],
-            # for sgems convention...
-            [self.res_dir.replace("\\", "//"), "RES_DIR"],
-            [grid, "GRID"],
-            [self.project_name, "PROJECT_NAME"],
-            ["results", "FEATURE_OUTPUT"],  # results.grid = output file
-            [name, "ALGORITHM_NAME"],
-            [name_op, "OUTPUT_LIST"],
-            [algo_xml, "ALGORITHM_XML"],
-            [str(sgems_files), "OBJECT_FILES"],
-        ]
+        if self.kriging_type == "FIK":
+            params = [
+                [run_algo_flag, "#~"],
+                # for sgems convention...
+                [self.res_dir.replace("\\", "//"), "RES_DIR"],
+                [grid, "GRID"],
+                [self.project_name, "PROJECT_NAME"],
+                ["results", "FEATURE_OUTPUT"],  # results.grid = output file
+                [name, "ALGORITHM_NAME"],
+                ["", "OUTPUT_LIST"],
+                [algo_XMLS[0], "ALGORITHM_XML1"],
+                [algo_XMLS[1], "ALGORITHM_XML2"],
+                [str(sgems_files), "OBJECT_FILES"],
+                [str(self.parameters), "PARAMETERS"],
+            ]
+        else:
+            params = [
+                [run_algo_flag, "#~"],
+                # for sgems convention...
+                [self.res_dir.replace("\\", "//"), "RES_DIR"],
+                [grid, "GRID"],
+                [self.project_name, "PROJECT_NAME"],
+                ["results", "FEATURE_OUTPUT"],  # results.grid = output file
+                [name, "ALGORITHM_NAME"],
+                [name_op, "OUTPUT_LIST"],
+                [algo_xml, "ALGORITHM_XML"],
+                [str(sgems_files), "OBJECT_FILES"],
+            ]
 
         with open(self.template_file) as sst:
             template = sst.read()
@@ -204,7 +248,7 @@ class Sgems:
 
         try:
             os.remove(self.algo.op_file)
-        except FileNotFoundError:
+        except Exception:
             pass
 
         subprocess.call([batch])  # Opens the BAT file
