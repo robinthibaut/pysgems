@@ -246,6 +246,8 @@ class Sgems:
             # delete previous batch file
             os.remove(batch)
             self.bat_file()
+        else:
+            self.bat_file()
         start = time.time()
 
         try:
