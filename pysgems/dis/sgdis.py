@@ -160,15 +160,15 @@ class Discretize(Package):
 
         # Cell dimensions
         if self.dy > 0:
-            nrow = abs(int((y_lim - yo) // self.dy))  # Number of rows
+            nrow = abs(int((y_lim - yo) / self.dy))  # Number of rows
         else:
             nrow = 1
         if self.dx > 0:
-            ncol = abs(int((x_lim - xo) // self.dx))  # Number of columns
+            ncol = abs(int((x_lim - xo) / self.dx))  # Number of columns
         else:
             ncol = 1
         if self.dz > 0:
-            nlay = abs(int((z_lim - zo) // self.dz))  # Number of layers
+            nlay = abs(int((z_lim - zo) / self.dz))  # Number of layers
         else:
             nlay = 1
 
