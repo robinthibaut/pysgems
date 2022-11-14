@@ -2,7 +2,6 @@
 
 import os
 from os.path import join as join_path
-import self as self
 from pysgems.algo.sgalgo import XML
 from pysgems.dis.sgdis import Discretize
 from pysgems.io.sgio import PointSet
