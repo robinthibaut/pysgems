@@ -198,7 +198,9 @@ class Sgems:
     def run(self):
         """Call bat file, run sgems"""
         batch = jp(self.res_dir, "RunSgems.bat")
-        if not os.path.isfile(batch):
+        if os.path.isfile(batch):
+            # delete previous batch file
+            os.remove(batch)
             self.bat_file()
         start = time.time()
 
