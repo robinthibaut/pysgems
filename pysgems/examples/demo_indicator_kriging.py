@@ -2,12 +2,13 @@
 
 import os
 from os.path import join as join_path
+
 from pysgems.algo.sgalgo import XML
 from pysgems.dis.sgdis import Discretize
+from pysgems.examples.demo_indicator_kriging_mapping import PlotInterpolationMaps
 from pysgems.io.sgio import PointSet
 from pysgems.plot.sgplots import Plots
 from pysgems.sgems import sg
-from pysgems.examples.demo_indicator_kriging_mapping import PlotInterpolationMaps
 
 
 def main():
@@ -126,8 +127,8 @@ def main():
     result_file_kriging = join_path(rdir, "results.grid")
     outputfolder = join_path(rdir, "plots")
     names = ["ConditionalMean", "ConditionalVariance"] + parameter_list + threshold_list
-    PlotInterpolationMaps.main(
-        self,
+    pim = PlotInterpolationMaps()
+    pim.main(
         result_file_kriging,
         outputfolder,
         dx_input,

@@ -1,18 +1,19 @@
+import math
 import os
 import time
+from os.path import join as join_path
+
 import fiona
 import numpy as np
-import rasterio  # https://rasterio.readthedocs.io/en/latest/installation.html
 import pandas as pd
+import rasterio  # https://rasterio.readthedocs.io/en/latest/installation.html
+from geocube.api.core import make_geocube
+from geocube.rasterize import rasterize_points_griddata
+from geopandas import GeoDataFrame
+from geopandas import points_from_xy
 from loguru import logger
 from matplotlib import pyplot as plt
 from pyproj import Transformer
-from geopandas import GeoDataFrame
-from geopandas import points_from_xy
-from geocube.api.core import make_geocube
-from geocube.rasterize import rasterize_points_griddata
-from os.path import join as join_path
-import math
 
 
 class PlotInterpolationMaps:
@@ -68,7 +69,6 @@ class PlotInterpolationMaps:
         # create the dimensions
         nx = (x_lim_input - x0_input) / dx_input  # number of cells in x direction
         ny = (y_lim_input - y0_input) / dy_input  # number of cells in y direction
-        nz = 1  # number of cells in the z direction
         dx = dx_input  # the dimension of a cell in the x direction
         dy = dy_input  # the dimension of a cell in the y direction
         dz = 0  # the dimension of a cell in the z direction
@@ -77,23 +77,6 @@ class PlotInterpolationMaps:
         z0 = 0  # the z coordinate of the origin cell
 
         values = []
-        """
-        # read the data of the input file
-        with open(inputfile, "r") as f:
-            rows = f.readlines()[1:]
-
-
-        # creating a new file, without a header, only the data
-        new_file = open(inputfile + "withouthead.txt", "w")
-        for line in rows:
-            for i in line:
-                if i != ' ':
-                    None
-                else:
-                    new_file.write(line)
-                    break
-        new_file.close()
-        inputfile = new_file.name"""
 
         # get the kriging values
         file = open(inputfile, "r")
@@ -181,10 +164,15 @@ class PlotInterpolationMaps:
         parameter=str,
         data_loc=str,
     ):
-        """Create the interpolation raster and clip it to the Flanders region. Add the locations of some cities in Flanders.
-         Add the locations of the datapoint to the map and in case of a value prediction map the datapoints can be plotted in the same color range as the map.
-        It is possible to adjust the color range for the map. The maps for exceeding a threshold have a range between 0 and 1. This function also transforms the data back to non log values if necessary.
+        """Create the interpolation raster and clip it to the Flanders region.
+        Add the locations of some cities in Flanders.
+        Add the locations of the datapoint to the map and in case of a value prediction map the datapoints can be
+        plotted in the same color range as the map.
+        It is possible to adjust the color range for the map.
+        The maps for exceeding a threshold have a range between 0 and 1.
+        This function also transforms the data back to non log values if necessary.
         The data from the variance result are also transformed to get the standard deviation values.
+
         :param inputdata: Path to the result data of kriging.
         :param log_values: If the values are log transformed.
         :param name: The name of the data column.
@@ -310,7 +298,8 @@ class PlotInterpolationMaps:
                     edgecolor="black",
                     vmin=0,
                     vmax=7,
-                )  # add vmin and vmax with the same range as chosen above to plot the datapoint values within the same range as the value prediction.
+                )  # add vmin and vmax with the same range as chosen above to plot the datapoint values within the
+                # same range as the value prediction.
         if name2 == "kriging_krig_var":
             img = ax.imshow(image[0, :, :], extent=[20000, 260000, 150000, 250000])
             plt.title(f"Standard deviation prediction (ng/l)")
