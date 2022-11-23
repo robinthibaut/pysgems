@@ -8,8 +8,9 @@ include pysgems/utils/*
 
 include pysgems/examples/*.py
 
-include pysgems/algorithms/kriging.xml
-include pysgems/algorithms/sgsim.xml
+include pysgems/algorithms/*.xml
 include pysgems/examples/datasets/demo_kriging/*.eas
 include pysgems/examples/datasets/demo_sgsim/*.eas
+include pysgems/examples/datasets/demo_sgsim3D/*.eas
+include pysgems/examples/datasets/demo_indicator_kriging/*
 include pysgems/script_templates/*.py

@@ -1,4 +1,4 @@
-#  Copyright (c) 2020. Robin Thibaut, Ghent University
+#  Copyright (c) 2022. Robin Thibaut, Ghent University
 
 import os
 import shutil
@@ -20,8 +20,7 @@ def blocks_from_rc(
     yo: float = 0,
     zo: float = 0,
 ):
-    """
-    Yields blocks defining grid cells
+    """Yields blocks defining grid cells
 
     :param rows: array of x-widths along a row
     :param columns: array of y-widths along a column
@@ -42,8 +41,7 @@ def blocks_from_rc(
     l_sum = np.cumsum(dell) + zo
 
     def get_node(r: int, c: int, h: int) -> int:
-        """
-        Get node index to fix hard data
+        """Get node index to fix hard data
 
         :param r: row number
         :param c: column number
@@ -83,8 +81,7 @@ class Discretize(Package):
         y_lim: float = None,
         z_lim: float = None,
     ):
-        """
-        Constructs the grid geometry. The user can not control directly the number of rows and columns
+        """Constructs the grid geometry. The user can not control directly the number of rows and columns
         but instead inputs the cell size in x and y dimensions.
         xo, yo, x_lim, y_lim, defining the bounding box of the grid, are None by default, and are computed
         based on the data points distribution.
@@ -198,9 +195,8 @@ class Discretize(Package):
         setattr(self.parent, "dis", self)
 
     def my_cell(self, xyz: np.array):
-        """
-        Given a point coordinate xyz [x, y, z], computes its cell number by computing the euclidean distance of each cell
-        center.
+        """Given a point coordinate xyz [x, y, z], computes its cell number by computing the euclidean distance of each
+         cell center.
 
         :param xyz:  x, y, z coordinate of data point
         :return: cell number
@@ -247,8 +243,7 @@ class Discretize(Package):
             return self.parent.nodata
 
     def compute_cells(self, xyz: np.array):
-        """
-        Determines cell location for each data point.
+        """Determines cell location for each data point.
         It is necessary to know the cell number to assign the hard data property to the sgems grid.
 
         :param xyz: Data points x, y, z coordinates
@@ -266,8 +261,7 @@ class Discretize(Package):
         cell_file: str = None,
         output_dir: str = None,
     ):
-        """
-        Removes no-data rows from data frame and compute the mean of data points sharing the same cell.
+        """Removes no-data rows from data frame and compute the mean of data points sharing the same cell.
         Export the list of shape (n features, m cells, 2) containing the node of each point data with the corresponding
         value, for each feature.
 

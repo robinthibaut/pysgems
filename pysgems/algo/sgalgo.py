@@ -1,4 +1,5 @@
-#  Copyright (c) 2020. Robin Thibaut, Ghent University
+#  Copyright (c) 2022. Robin Thibaut, Ghent University
+
 import os
 import uuid
 import xml.etree.ElementTree as ET
@@ -32,8 +33,7 @@ class XML(Package):
         setattr(self.parent, "algo", self)
 
     def xml_reader(self, algo_name):
-        """
-        Reads and parse XML file. It assumes the algorithm XML file is located in the algo_dir folder.
+        """Reads and parse XML file. It assumes the algorithm XML file is located in the algo_dir folder.
         :param algo_name: Name of the algorithm, without any extension, e.g. 'kriging', 'cokriging'...
         """
         try:
@@ -62,8 +62,7 @@ class XML(Package):
         setattr(self.parent.algo, "root", self.root)
 
     def show_tree(self):
-        """
-        Displays the structure of the XML file, in order to get the path of updatable variables.
+        """Displays the structure of the XML file, in order to get the path of updatable variables.
         """
         try:
             for element in self.root:
@@ -91,8 +90,8 @@ class XML(Package):
         new_attribute_dict: dict = None,
         show: bool = False,
     ):
-        """
-        Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
+        """Given a path in the algorithm XML file, changes the corresponding attribute to the new attribute
+
         :param path: object path
         :param attribute_name: name of the attribute to modify
         :param value: new value for attribute
@@ -125,8 +124,7 @@ class XML(Package):
         setattr(self.parent.algo, "root", self.root)
 
     def auto_fill(self):
-        """
-        Ensures binary file of point set are properly generated.
+        """Ensures binary file of point set are properly generated.
         In case of kriging, cokriging... ensures proper xml attribute names for feature and feature grid.
         This is still quite specific and lots of nested loops, ideally parse all Sgems default XML
         and build proper 'auto_fill' method.

@@ -20,9 +20,7 @@ class PackageInterface(object):
 
 
 class Package(PackageInterface):
-    """
-    Base package class from which most other packages are derived.
-
+    """Base package class from which most other packages are derived.
     """
 
     def __init__(self, parent):

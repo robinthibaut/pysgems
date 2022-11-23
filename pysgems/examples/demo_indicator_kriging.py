@@ -1,4 +1,4 @@
-#  Copyright (c) 2020. Robin Thibaut, Ghent University
+#  Copyright (c) 2022. Robin Thibaut, Ghent University
 
 import os
 from os.path import join as join_path

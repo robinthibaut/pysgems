@@ -18,6 +18,7 @@ from pyproj import Transformer
 
 class PlotInterpolationMaps:
     """Class to plot the kriging results."""
+
     def __init__(self):
         ...
 

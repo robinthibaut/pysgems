@@ -1,4 +1,4 @@
-#  Copyright (c) 2020. Robin Thibaut, Ghent University
+#  Copyright (c) 2022. Robin Thibaut, Ghent University
 import os
 import struct
 from os.path import join as jp
@@ -34,8 +34,7 @@ def datread(file: str = None, start: int = 0, end: int = None):
 
 def write_point_set(file_name: str, sub_dataframe: pd.DataFrame, nodata: int = -999):
     # TODO: build similar method to save grid files.
-    """
-    Function to write sgems binary point set files.
+    """Function to write sgems binary point set files.
 
     The Simulacre_input_filter class is a filter that can read the default file
     format of GsTLAppli. The format is a binary format, with big endian byte

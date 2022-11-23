@@ -1,4 +1,4 @@
-#  Copyright (c) 2020. Robin Thibaut, Ghent University
+#  Copyright (c) 2022. Robin Thibaut, Ghent University
 import os
 import subprocess
 import time
@@ -26,8 +26,7 @@ class Sgems:
         kriging_type: str = "",
         algo_XML_list: list = [],
     ):
-        """
-        Initialize sgems object.
+        """Initialize sgems object.
 
         :param project_name: Name of the project.
         :param project_wd: Project working directory.
@@ -127,8 +126,7 @@ class Sgems:
                 )
 
     def write_command(self):
-        """
-        Write python script that sgems will run.
+        """Write python script that sgems will run.
         """
         algo_XMLS = []
         self.command_name = jp(self.res_dir, f"{self.project_name}_commands.py")
