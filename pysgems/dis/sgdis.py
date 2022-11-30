@@ -170,9 +170,9 @@ class Discretize(Package):
             nlay = 1
 
         # Size of each cell along y-dimension - rows
-        along_r = np.ones(ncol) * self.dx * np.sign(x_lim)
+        along_c = np.ones(ncol) * self.dx * np.sign(x_lim)
         # Size of each cell along x-dimension - columns
-        along_c = np.ones(nrow) * self.dy * np.sign(y_lim)
+        along_r = np.ones(nrow) * self.dy * np.sign(y_lim)
         # Size of each cell along x-dimension - columns
         along_l = np.ones(nlay) * self.dz * np.sign(z_lim)
 
