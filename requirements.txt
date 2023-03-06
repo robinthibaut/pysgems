@@ -6,4 +6,4 @@ Fiona==1.8.22
 pyproj~=3.4.0
 geopandas==0.10.2
 rasterio~=1.3.3
-geocube~=0.3.3
+geocube~=0.4.0
