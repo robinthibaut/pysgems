@@ -15,6 +15,7 @@ class Plots(Package):
         self.name = self.parent.project_name
 
     def plot_coordinates(self):
+        """plot the coordinates"""
         try:
             # Scatter plot (2D)
             plt.plot(
